@@ -1,0 +1,39 @@
+<section class="auth-page">
+  <article class="auth-card">
+    <header class="auth-header">
+      <h1>Welcome back</h1>
+      <p>Sign in to leave reviews and contact trusted local providers.</p>
+    </header>
+
+    <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" class="input" type="email" formControlName="email" autocomplete="email" />
+        @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+          <p class="error">Please enter a valid email address.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" class="input" type="password" formControlName="password" autocomplete="current-password" />
+        @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+          <p class="error">Password is required.</p>
+        }
+      </div>
+
+      @if (formError()) {
+        <p class="error">{{ formError() }}</p>
+      }
+
+      <button class="auth-submit" type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <div class="auth-links">
+      <a routerLink="/forgot-password">Forgot password?</a>
+      <p>New here? <a routerLink="/register">Create a resident account</a></p>
+    </div>
+  </article>
+</section>
