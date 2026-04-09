@@ -1,0 +1,8 @@
+<section class="testimonials">
+  <article *ngFor="let item of testimonials">
+    <p class="stars">{{ starsFor(item.rating) }}</p>
+    <blockquote>“{{ item.quote }}”</blockquote>
+    <p class="resident">{{ item.name }}</p>
+    <p class="neighborhood">{{ item.neighborhood }}</p>
+  </article>
+</section>
