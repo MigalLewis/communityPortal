@@ -1,0 +1,16 @@
+<div class="sidebar">
+  <div class="brand">The Parks Contractor</div>
+
+  <nav class="nav" aria-label="Primary">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</div>
