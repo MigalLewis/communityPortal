@@ -89,7 +89,7 @@
           @if (contractor.verified) {
             <span class="verified">Verified</span>
           }
-          <button type="button" class="btn secondary">View Profile</button>
+          <a class="btn secondary" [routerLink]="['/contractor-directory', contractor.id]">View Profile</a>
           <button type="button" class="btn primary">Call {{ contractor.phone }}</button>
         </div>
       </article>

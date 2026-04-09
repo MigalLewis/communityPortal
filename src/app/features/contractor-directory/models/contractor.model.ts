@@ -12,6 +12,28 @@ export interface Contractor {
   tags: string[];
 }
 
+export interface ContractorReview {
+  author: string;
+  rating: number;
+  date: string;
+  comment: string;
+}
+
+export interface ContractorProfile {
+  id: string;
+  yearsInBusiness: number;
+  about: string;
+  licenses: string[];
+  insurance: string;
+  responseTime: string;
+  completionRate: string;
+  verificationBadges: string[];
+  services: string[];
+  areasServed: string[];
+  gallery: string[];
+  reviews: ContractorReview[];
+}
+
 export interface ContractorFilters {
   search: string;
   category: string;
