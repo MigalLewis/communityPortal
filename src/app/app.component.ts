@@ -1,13 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { AppShellComponent } from './core/layout/app-shell/app-shell.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  imports: [AppShellComponent],
+  template: '<app-shell />'
 })
-export class AppComponent {
-  title = 'communityPortal';
-}
+export class AppComponent {}

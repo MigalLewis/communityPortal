@@ -1,0 +1,24 @@
+@if (isOpen) {
+  <button class="backdrop" type="button" aria-label="Close navigation" (click)="close()"></button>
+
+  <aside class="drawer" aria-label="Mobile navigation">
+    <div class="drawer-header">
+      <span>The Parks Contractor</span>
+      <button type="button" class="close-btn" (click)="close()">Close</button>
+    </div>
+
+    <nav class="drawer-nav">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          class="nav-link"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="close()"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+  </aside>
+}

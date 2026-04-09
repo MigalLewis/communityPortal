@@ -1,0 +1,10 @@
+.stats,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.actions {
+  margin-top: var(--space-4);
+}
