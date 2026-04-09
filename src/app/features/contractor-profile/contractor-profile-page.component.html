@@ -1,0 +1,116 @@
+<section class="profile-page">
+  <a class="back-link" routerLink="/contractor-directory">← Back to directory</a>
+
+  @if (profileVm$ | async; as vm) {
+    @if (vm.state === 'loading') {
+      <section class="state-card" aria-live="polite">
+        <h1>Loading contractor profile…</h1>
+        <p>Please wait while we fetch profile details.</p>
+      </section>
+    }
+
+    @if (vm.state === 'not-found') {
+      <section class="state-card" aria-live="polite">
+        <h1>Contractor not found</h1>
+        <p>We couldn’t find the contractor profile you requested.</p>
+        <a class="btn primary" routerLink="/contractor-directory">Browse Contractors</a>
+      </section>
+    }
+
+    @if (vm.state === 'ready' && vm.contractor && vm.profile) {
+      <article class="profile-content">
+        <header class="profile-header">
+          <div>
+            <p class="eyebrow">{{ vm.contractor.category }} Specialist</p>
+            <h1>{{ vm.contractor.name }}</h1>
+            <p class="company">{{ vm.contractor.company }}</p>
+          </div>
+          <div class="rating-block">
+            <p class="rating">★ {{ vm.contractor.rating | number: '1.1-1' }}</p>
+            <p>{{ vm.contractor.reviewCount }} verified reviews</p>
+          </div>
+        </header>
+
+        <section class="panel business-info">
+          <h2>Business info</h2>
+          <p>{{ vm.profile.about }}</p>
+          <div class="stats-grid">
+            <p><strong>Years in business:</strong> {{ vm.profile.yearsInBusiness }}</p>
+            <p><strong>Insurance:</strong> {{ vm.profile.insurance }}</p>
+            <p><strong>Response time:</strong> {{ vm.profile.responseTime }}</p>
+            <p><strong>Completion rate:</strong> {{ vm.profile.completionRate }}</p>
+          </div>
+          <ul class="license-list">
+            @for (license of vm.profile.licenses; track trackByValue($index, license)) {
+              <li>{{ license }}</li>
+            }
+          </ul>
+        </section>
+
+        <section class="panel badges-panel">
+          <h2>Verification badges</h2>
+          <div class="badge-row">
+            @for (badge of vm.profile.verificationBadges; track trackByValue($index, badge)) {
+              <span class="badge">{{ badge }}</span>
+            }
+          </div>
+        </section>
+
+        <section class="panel services-panel">
+          <h2>Services</h2>
+          <div class="pill-list">
+            @for (service of vm.profile.services; track trackByValue($index, service)) {
+              <span class="pill">{{ service }}</span>
+            }
+          </div>
+        </section>
+
+        <section class="panel areas-panel">
+          <h2>Areas served</h2>
+          <div class="pill-list">
+            @for (area of vm.profile.areasServed; track trackByValue($index, area)) {
+              <span class="pill muted">{{ area }}</span>
+            }
+          </div>
+        </section>
+
+        <section class="panel gallery-panel">
+          <h2>Gallery</h2>
+          <div class="gallery-grid">
+            @for (item of vm.profile.gallery; track trackByValue($index, item)) {
+              <div class="gallery-item">
+                <span class="label">Project snapshot {{ $index + 1 }}</span>
+                <p>{{ item }}</p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="panel reviews-panel">
+          <h2>Rating & reviews</h2>
+          <div class="reviews-grid">
+            @for (review of vm.profile.reviews; track trackByReview($index, review)) {
+              <article class="review-card">
+                <p class="review-top">
+                  <strong>{{ review.author }}</strong>
+                  <span>★ {{ review.rating | number: '1.1-1' }}</span>
+                </p>
+                <p class="review-date">{{ review.date | date: 'mediumDate' }}</p>
+                <p>{{ review.comment }}</p>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="panel cta-panel">
+          <h2>Contact</h2>
+          <p>Ready to book {{ vm.contractor.name }} for your project?</p>
+          <div class="cta-row">
+            <button type="button" class="btn primary">Call {{ vm.contractor.phone }}</button>
+            <button type="button" class="btn secondary">Request Quote</button>
+          </div>
+        </section>
+      </article>
+    }
+  }
+</section>

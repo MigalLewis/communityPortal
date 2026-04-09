@@ -19,6 +19,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/contractor-directory/contractor-directory-page.component').then((m) => m.ContractorDirectoryPageComponent)
   },
   {
+    path: 'contractor-directory/:id',
+    loadComponent: () => import('./features/contractor-profile/contractor-profile-page.component').then((m) => m.ContractorProfilePageComponent)
+  },
+  {
     path: 'projects',
     loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent)
   },

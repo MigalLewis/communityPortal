@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ContractorFilters } from './models/contractor.model';
 import { MOCK_CONTRACTORS } from './data/mock-contractors';
@@ -8,7 +9,7 @@ import { filterContractors } from './services/contractor-filter.util';
 @Component({
   selector: 'app-contractor-directory-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './contractor-directory-page.component.html',
   styleUrl: './contractor-directory-page.component.scss'
 })
