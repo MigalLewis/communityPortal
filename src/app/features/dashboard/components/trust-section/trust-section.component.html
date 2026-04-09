@@ -1,0 +1,12 @@
+<section class="trust">
+  <h2>{{ title }}</h2>
+  <p>{{ copy }}</p>
+
+  <div class="points">
+    <article *ngFor="let point of points">
+      <span aria-hidden="true">{{ point.icon }}</span>
+      <h3>{{ point.title }}</h3>
+      <p>{{ point.description }}</p>
+    </article>
+  </div>
+</section>

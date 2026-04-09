@@ -1,0 +1,59 @@
+.trust {
+  display: grid;
+  gap: 0.8rem;
+
+  h2 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  > p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    max-width: 45rem;
+    line-height: 1.6;
+  }
+}
+
+.points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.4rem;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+
+  article {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: grid;
+    gap: 0.45rem;
+
+    span {
+      width: 2rem;
+      height: 2rem;
+      display: grid;
+      place-items: center;
+      border-radius: 0.65rem;
+      background: var(--color-success-100);
+      color: #15803d;
+      font-size: 1rem;
+    }
+
+    h3 {
+      margin: 0.15rem 0 0;
+      font-size: 1.04rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+  }
+}

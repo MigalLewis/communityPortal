@@ -1,11 +1,20 @@
-<app-card-container title="Dashboard" subtitle="Operations snapshot for park contractor work.">
-  <div class="stats">
-    <app-badge tone="success">12 Active Projects</app-badge>
-    <app-badge tone="warning">5 Inspections Due</app-badge>
-  </div>
+<div class="resident-dashboard">
+  <app-welcome-hero
+    heading="Good morning, Guardian."
+    copy="Your home is your sanctuary. Let’s find the right professional to keep it in perfect condition today."
+  />
 
-  <div class="actions">
-    <app-button>New Work Order</app-button>
-    <app-button variant="secondary">View Calendar</app-button>
-  </div>
-</app-card-container>
+  <section class="hero-grid">
+    <app-featured-action />
+    <app-category-shortcuts [tiles]="shortcutTiles" />
+  </section>
+
+  <app-browse-specialists [specialists]="specialists" />
+
+  <app-trust-section [points]="trustPoints" />
+
+  <section class="testimonials-block">
+    <h2>What neighbors are saying</h2>
+    <app-testimonials [testimonials]="testimonials" />
+  </section>
+</div>

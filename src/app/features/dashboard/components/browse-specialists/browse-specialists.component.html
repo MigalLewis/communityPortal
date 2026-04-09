@@ -1,0 +1,24 @@
+<section class="specialists">
+  <header>
+    <h2>Browse specialists</h2>
+    <p>From HVAC experts to electricians, we’ve vetted trusted professionals in your neighborhood.</p>
+  </header>
+
+  <div class="specialist-list">
+    <article class="specialist-card" *ngFor="let specialist of specialists">
+      <img [src]="specialist.image" [alt]="specialist.name" />
+      <div class="specialist-info">
+        <div class="title-row">
+          <h3>{{ specialist.name }}</h3>
+          <span class="rating">★ {{ specialist.rating }}</span>
+        </div>
+        <p class="role">{{ specialist.role }}</p>
+        <div class="tags">
+          <span *ngFor="let tag of specialist.tags">{{ tag }}</span>
+        </div>
+        <p class="availability">● {{ specialist.availability }}</p>
+      </div>
+      <button type="button">View profile</button>
+    </article>
+  </div>
+</section>
