@@ -1,0 +1,15 @@
+<div class="shell">
+  <aside class="desktop-nav">
+    <app-sidebar />
+  </aside>
+
+  <app-mobile-drawer [isOpen]="isDrawerOpen()" (closed)="closeDrawer()" />
+
+  <div class="main-pane">
+    <app-top-bar (menuClicked)="openDrawer()" />
+
+    <main class="content" role="main">
+      <router-outlet />
+    </main>
+  </div>
+</div>
