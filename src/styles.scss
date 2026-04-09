@@ -1,16 +1,33 @@
-/* Global design tokens */
 :root {
-  --color-bg: #f3f5f9;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8f9fc;
-  --color-text: #1f2937;
-  --color-text-muted: #64748b;
-  --color-border: #e5e7eb;
-  --color-primary: #1652f0;
-  --color-primary-hover: #0f3fbd;
-  --color-success: #15803d;
-  --color-warning: #b45309;
-  --color-danger: #b91c1c;
+  /* Primary (Deep Blue) */
+  --color-primary-900: #123a63;
+  --color-primary-800: #1c4f80;
+  --color-primary-700: #2f6fa3;
+  --color-primary-600: #3b82b6;
+
+  /* Accent (Green - trust / availability) */
+  --color-success-600: #22c55e;
+  --color-success-500: #4ade80;
+  --color-success-100: #dcfce7;
+
+  /* Backgrounds */
+  --color-bg-main: #f6f8fb;
+  --color-bg-card: #ffffff;
+  --color-bg-muted: #eef2f7;
+
+  /* Text */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+
+  /* Borders */
+  --color-border-light: #e2e8f0;
+  --color-border-soft: #f1f5f9;
+
+  /* States */
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
 
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
   --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.12);
@@ -25,38 +42,62 @@
   --space-4: 1rem;
   --space-5: 1.25rem;
   --space-6: 1.5rem;
+  --space-7: 1.75rem;
 
   --topbar-height: 4rem;
   --sidebar-width: 16rem;
   --mobile-nav-width: min(82vw, 20rem);
 
   --font-family-base: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
 body {
-  margin: 0;
-  min-height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg-main);
+  color: var(--color-text-primary);
 }
 
-body {
-  font-family: var(--font-family-base);
-  background: var(--color-bg);
-  color: var(--color-text);
+/* Headings */
+.h1 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin: 0;
+.h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Body */
+.text-body {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* Small labels */
+.text-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 button,
@@ -69,4 +110,39 @@ select {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-light);
+  font-size: 14px;
+  outline: none;
+  background: white;
+
+  &:focus {
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 0 3px rgba(59, 130, 182, 0.15);
+  }
+}
+
+.section {
+  margin-bottom: var(--space-3xl);
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-border-soft);
+  margin: var(--space-xl) 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .page {
+    padding: var(--space-lg);
+  }
 }
