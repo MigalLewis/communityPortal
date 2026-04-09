@@ -24,11 +24,3 @@
   padding: var(--space-7);
   flex: 1;
 }
-
-.content {
-  padding: var(--space-4);
-
-  @media (min-width: 992px) {
-    padding: var(--space-6);
-  }
-}
