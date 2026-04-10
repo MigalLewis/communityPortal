@@ -6,7 +6,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "dist/communityPortal/browser",
+    "public": "dist/community-portal/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
