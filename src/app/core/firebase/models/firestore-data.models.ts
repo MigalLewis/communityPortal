@@ -27,6 +27,34 @@ export interface ContractorDocument extends FirestoreEntity {
   bio?: string;
 }
 
+export interface ServiceProviderDocument extends FirestoreEntity {
+  fullName: string;
+  businessName: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  whatsappNumber?: string;
+  area: string;
+  suburb?: string;
+  address?: string;
+  categoryIds: string[];
+  categoryNames?: string[];
+  bio: string;
+  tags: string[];
+  notes?: string;
+  website?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  rating: number;
+  reviewCount: number;
+  isVerified: boolean;
+  isFeatured: boolean;
+  availabilityStatus: 'available_today' | 'busy' | 'unavailable';
+  profileImageUrl?: string;
+  galleryUrls: string[];
+  createdBy: string;
+}
+
 export interface CategoryDocument extends FirestoreEntity {
   name: string;
   slug: string;
@@ -86,6 +114,7 @@ export interface VerificationDocument extends FirestoreEntity {
 export interface CollectionModelMap {
   users: UserDocument;
   contractors: ContractorDocument;
+  serviceProviders: ServiceProviderDocument;
   categories: CategoryDocument;
   reviews: ReviewDocument;
   jobs: JobDocument;
