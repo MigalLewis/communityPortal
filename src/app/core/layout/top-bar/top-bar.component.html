@@ -1,5 +1,18 @@
 <header class="topbar">
-  <button type="button" class="menu-btn" (click)="openMenu()" aria-label="Open navigation menu">
-    ☰
-  </button>
+  <a class="brand" routerLink="/dashboard">The Parks Contractor Portal</a>
+
+  <nav class="top-nav" aria-label="Primary">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <a class="login-link" routerLink="/login">Login</a>
 </header>
