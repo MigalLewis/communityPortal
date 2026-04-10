@@ -1,17 +1,21 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { BadgeComponent } from '../../../shared/ui/badge/badge.component';
+import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+
+interface NavItem {
+  label: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-top-bar',
   standalone: true,
-  imports: [BadgeComponent],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './top-bar.component.html',
   styleUrl: './top-bar.component.scss'
 })
 export class TopBarComponent {
-  @Output() menuClicked = new EventEmitter<void>();
-
-  protected openMenu(): void {
-    this.menuClicked.emit();
-  }
+  protected readonly navItems: NavItem[] = [
+    { label: 'Dashboard', route: '/dashboard' },
+    { label: 'Directory', route: '/directory' }
+  ];
 }
