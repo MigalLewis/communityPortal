@@ -37,6 +37,7 @@ export class FirestoreDataService {
   private readonly mockStore: { [K in CollectionName]: Map<string, CollectionModelMap[K]> } = {
     users: new Map(),
     contractors: new Map(),
+    serviceProviders: new Map(),
     categories: new Map(),
     reviews: new Map(),
     jobs: new Map(),
@@ -46,6 +47,7 @@ export class FirestoreDataService {
 
   readonly users = new FirestoreEntityService<CollectionModelMap['users']>('users', this);
   readonly contractors = new FirestoreEntityService<CollectionModelMap['contractors']>('contractors', this);
+  readonly serviceProviders = new FirestoreEntityService<CollectionModelMap['serviceProviders']>('serviceProviders', this);
   readonly categories = new FirestoreEntityService<CollectionModelMap['categories']>('categories', this);
   readonly reviews = new FirestoreEntityService<CollectionModelMap['reviews']>('reviews', this);
   readonly jobs = new FirestoreEntityService<CollectionModelMap['jobs']>('jobs', this);

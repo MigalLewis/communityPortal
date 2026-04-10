@@ -62,6 +62,16 @@ export const routes: Routes = [
   },
   {
     path: 'admin/providers',
+    pathMatch: 'full',
+    redirectTo: 'admin/providers/import'
+  },
+  {
+    path: 'admin/providers/import',
+    canActivate: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent)
+  },
+  {
+    path: 'admin/providers/new',
     canActivate: [adminRoleGuard],
     loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent)
   },

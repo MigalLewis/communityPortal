@@ -1,0 +1,188 @@
+<section class="providers-admin-page">
+  <header class="page-header card">
+    <div>
+      <h1 class="h2">Admin Provider Import & Capture</h1>
+      <p class="text-body">Download the template and complete one row per provider. Use commas to separate multiple categories or tags. Only valid rows will be imported.</p>
+      <p class="hint"><strong>Required:</strong> fullName, phone, area, categories, isVerified, isFeatured, availabilityStatus.</p>
+      <p class="hint"><strong>Optional:</strong> businessName, email, alternatePhone, whatsappNumber, suburb, address, bio, tags, notes, website, facebookUrl, instagramUrl.</p>
+    </div>
+    <button type="button" class="btn" (click)="downloadTemplate()">Download Template (CSV)</button>
+  </header>
+
+  <article class="card">
+    <h2>Upload provider file</h2>
+    <div class="dropzone" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+      <p>Drag and drop a .csv or .xlsx file here.</p>
+      <input type="file" accept=".csv,.xlsx" (change)="onFileSelected($event)" />
+      @if (selectedFile()) {
+        <p class="selected-file">Selected file: {{ selectedFile()?.name }}</p>
+      }
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="parseUpload()" [disabled]="!selectedFile() || isParsing()">
+        {{ isParsing() ? 'Parsing…' : 'Parse and Validate' }}
+      </button>
+      <button type="button" class="btn btn-ghost" (click)="clearImport()">Clear</button>
+    </div>
+
+    @if (parseError()) {
+      <p class="error">{{ parseError() }}</p>
+    }
+  </article>
+
+  <article class="card">
+    <h2>Validation summary</h2>
+    <div class="summary-grid">
+      <p>Total rows: <strong>{{ summary().totalRows }}</strong></p>
+      <p>Valid rows: <strong>{{ summary().validRows }}</strong></p>
+      <p>Invalid rows: <strong>{{ summary().invalidRows }}</strong></p>
+      <p>Warnings: <strong>{{ summary().warningCount }}</strong></p>
+      <p>Errors: <strong>{{ summary().errorCount }}</strong></p>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Preview rows</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Row</th>
+            <th>Full Name</th>
+            <th>Phone</th>
+            <th>Area</th>
+            <th>Categories</th>
+            <th>Status</th>
+            <th>Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of importRows(); track row.rowNumber) {
+            <tr [class.invalid-row]="!row.isValid">
+              <td>{{ row.rowNumber }}</td>
+              <td>{{ row.normalized.fullName }}</td>
+              <td>{{ row.normalized.phone }}</td>
+              <td>{{ row.normalized.area }}</td>
+              <td>{{ row.normalized.categoryNames.join(', ') }}</td>
+              <td>{{ row.normalized.availabilityStatus }}</td>
+              <td>
+                @if (row.errors.length === 0 && row.warnings.length === 0) {
+                  <span>None</span>
+                }
+                @for (error of row.errors; track $index) {
+                  <p class="error">{{ error.message }}</p>
+                }
+                @for (warning of row.warnings; track $index) {
+                  <p class="warning">{{ warning.message }}</p>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="importValidRows()" [disabled]="summary().validRows === 0 || isImporting()">
+        {{ isImporting() ? 'Importing…' : 'Import Valid Rows Only' }}
+      </button>
+      <button type="button" class="btn btn-ghost" (click)="clearImport()">Cancel / Re-upload</button>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Manual single-provider capture</h2>
+    <form [formGroup]="manualProviderForm" (ngSubmit)="saveSingleProvider()" novalidate>
+      <div class="form-grid">
+        <label>Full Name*
+          <input type="text" formControlName="fullName" />
+        </label>
+        <label>Business Name
+          <input type="text" formControlName="businessName" />
+        </label>
+        <label>Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>Phone*
+          <input type="text" formControlName="phone" />
+        </label>
+        <label>Area*
+          <input type="text" formControlName="area" />
+        </label>
+        <label>Categories* (comma separated)
+          <input type="text" formControlName="categories" />
+        </label>
+        <label>Tags (comma separated)
+          <input type="text" formControlName="tags" />
+        </label>
+        <label>Availability Status
+          <select formControlName="availabilityStatus">
+            @for (option of availabilityOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+        <label>Alternate Phone
+          <input type="text" formControlName="alternatePhone" />
+        </label>
+        <label>WhatsApp Number
+          <input type="text" formControlName="whatsappNumber" />
+        </label>
+        <label>Suburb
+          <input type="text" formControlName="suburb" />
+        </label>
+        <label>Address
+          <input type="text" formControlName="address" />
+        </label>
+        <label>Website
+          <input type="text" formControlName="website" />
+        </label>
+        <label>Facebook URL
+          <input type="text" formControlName="facebookUrl" />
+        </label>
+        <label>Instagram URL
+          <input type="text" formControlName="instagramUrl" />
+        </label>
+      </div>
+
+      <label>Bio
+        <textarea rows="3" formControlName="bio"></textarea>
+      </label>
+
+      <label>Notes
+        <textarea rows="3" formControlName="notes"></textarea>
+      </label>
+
+      <div class="checkboxes">
+        <label><input type="checkbox" formControlName="isVerified" /> Is Verified</label>
+        <label><input type="checkbox" formControlName="isFeatured" /> Is Featured</label>
+      </div>
+
+      @if (manualProviderForm.controls.fullName.touched && manualProviderForm.controls.fullName.invalid) {
+        <p class="error">Full name is required.</p>
+      }
+      @if (manualProviderForm.controls.phone.touched && manualProviderForm.controls.phone.invalid) {
+        <p class="error">Phone is required.</p>
+      }
+      @if (manualProviderForm.controls.area.touched && manualProviderForm.controls.area.invalid) {
+        <p class="error">Area is required.</p>
+      }
+      @if (manualProviderForm.controls.categories.touched && manualProviderForm.controls.categories.invalid) {
+        <p class="error">At least one category is required.</p>
+      }
+      @if (manualProviderForm.controls.email.touched && manualProviderForm.controls.email.invalid) {
+        <p class="error">Email must be valid if provided.</p>
+      }
+
+      <div class="actions">
+        <button type="submit" class="btn">Save Provider</button>
+        <button type="button" class="btn btn-ghost" (click)="resetManualForm()">Reset</button>
+      </div>
+    </form>
+  </article>
+
+  @if (importMessage()) {
+    <p class="status">{{ importMessage() }}</p>
+  }
+</section>
