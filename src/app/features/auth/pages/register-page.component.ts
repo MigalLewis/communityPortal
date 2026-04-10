@@ -26,21 +26,25 @@ export class RegisterPageComponent {
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly registerForm = this.formBuilder.nonNullable.group(
-    {
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    },
-    { validators: [passwordMatchValidator] }
-  );
+  protected readonly registerForm = this.createRegisterForm();
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router
   ) {}
+
+  private createRegisterForm() {
+    return this.formBuilder.nonNullable.group(
+      {
+        fullName: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]]
+      },
+      { validators: [passwordMatchValidator] }
+    );
+  }
 
   protected async submit(): Promise<void> {
     if (this.registerForm.invalid || this.isSubmitting()) {

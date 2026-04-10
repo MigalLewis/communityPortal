@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   private readStoredAuthUser(): AuthUser | null {
-    const raw = localStorage.getItem(this.storageKey);
+    const raw =  localStorage.getItem(this.storageKey);
     if (!raw) {
       return null;
     }

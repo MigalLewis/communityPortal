@@ -15,16 +15,18 @@ export class LoginPageComponent {
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly loginForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]]
-  });
+  protected loginForm;
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {}
+  ) {
+    this.loginForm = this.formBuilder.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]]
+  });
+  }
 
   protected async submit(): Promise<void> {
     if (this.loginForm.invalid || this.isSubmitting()) {

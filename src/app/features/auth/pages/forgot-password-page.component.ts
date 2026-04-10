@@ -16,11 +16,13 @@ export class ForgotPasswordPageComponent {
   protected readonly formError = signal<string | null>(null);
   protected readonly successMessage = signal<string | null>(null);
 
-  protected readonly forgotPasswordForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]]
-  });
+  protected forgotPasswordForm;
 
-  constructor(private readonly formBuilder: FormBuilder, private readonly authService: AuthService) {}
+  constructor(private readonly formBuilder: FormBuilder, private readonly authService: AuthService) {
+    this.forgotPasswordForm = this.formBuilder.nonNullable.group({
+      email: ['', [Validators.required, Validators.email]]
+    });
+  }
 
   protected async submit(): Promise<void> {
     if (this.forgotPasswordForm.invalid || this.isSubmitting()) {
