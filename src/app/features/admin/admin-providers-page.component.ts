@@ -32,27 +32,7 @@ export class AdminProvidersPageComponent {
     errorCount: this.importRows().reduce((total, row) => total + row.errors.length, 0)
   }));
 
-  protected readonly manualProviderForm = this.formBuilder.nonNullable.group({
-    fullName: ['', [Validators.required]],
-    businessName: [''],
-    email: ['', [Validators.email]],
-    phone: ['', [Validators.required]],
-    alternatePhone: [''],
-    whatsappNumber: [''],
-    area: ['', [Validators.required]],
-    suburb: [''],
-    address: [''],
-    categories: ['', [Validators.required]],
-    bio: [''],
-    tags: [''],
-    isVerified: [false],
-    isFeatured: [false],
-    availabilityStatus: ['available_today', [Validators.required]],
-    notes: [''],
-    website: [''],
-    facebookUrl: [''],
-    instagramUrl: ['']
-  });
+  protected readonly manualProviderForm;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -61,6 +41,27 @@ export class AdminProvidersPageComponent {
     private readonly authService: AuthService,
     private readonly userProfileService: UserProfileService
   ) {
+    this.manualProviderForm = this.formBuilder.nonNullable.group({
+      fullName: ['', [Validators.required]],
+      businessName: [''],
+      email: ['', [Validators.email]],
+      phone: ['', [Validators.required]],
+      alternatePhone: [''],
+      whatsappNumber: [''],
+      area: ['', [Validators.required]],
+      suburb: [''],
+      address: [''],
+      categories: ['', [Validators.required]],
+      bio: [''],
+      tags: [''],
+      isVerified: [false],
+      isFeatured: [false],
+      availabilityStatus: ['available_today', [Validators.required]],
+      notes: [''],
+      website: [''],
+      facebookUrl: [''],
+      instagramUrl: ['']
+    });
     this.loadCategoryMap();
   }
 

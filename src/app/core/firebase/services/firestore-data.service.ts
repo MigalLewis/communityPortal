@@ -8,21 +8,21 @@ interface FirestoreListResponse {
   documents?: FirestoreDocumentResponse[];
 }
 
-class FirestoreEntityService<T extends FirestoreEntity> {
+class FirestoreEntityService<K extends CollectionName> {
   constructor(
-    private readonly collection: CollectionName,
+    private readonly collection: K,
     private readonly parent: FirestoreDataService
   ) {}
 
-  list(idToken?: string): Promise<T[]> {
+  list(idToken?: string): Promise<CollectionModelMap[K][]> {
     return this.parent.list(this.collection, idToken);
   }
 
-  getById(id: string, idToken?: string): Promise<T | null> {
+  getById(id: string, idToken?: string): Promise<CollectionModelMap[K] | null> {
     return this.parent.getById(this.collection, id, idToken);
   }
 
-  upsert(document: T, idToken?: string): Promise<T> {
+  upsert(document: CollectionModelMap[K], idToken?: string): Promise<CollectionModelMap[K]> {
     return this.parent.upsert(this.collection, document, idToken);
   }
 
@@ -45,14 +45,14 @@ export class FirestoreDataService {
     verifications: new Map()
   };
 
-  readonly users = new FirestoreEntityService<CollectionModelMap['users']>('users', this);
-  readonly contractors = new FirestoreEntityService<CollectionModelMap['contractors']>('contractors', this);
-  readonly serviceProviders = new FirestoreEntityService<CollectionModelMap['serviceProviders']>('serviceProviders', this);
-  readonly categories = new FirestoreEntityService<CollectionModelMap['categories']>('categories', this);
-  readonly reviews = new FirestoreEntityService<CollectionModelMap['reviews']>('reviews', this);
-  readonly jobs = new FirestoreEntityService<CollectionModelMap['jobs']>('jobs', this);
-  readonly messageThreads = new FirestoreEntityService<CollectionModelMap['messageThreads']>('messageThreads', this);
-  readonly verifications = new FirestoreEntityService<CollectionModelMap['verifications']>('verifications', this);
+  readonly users = new FirestoreEntityService<'users'>('users', this);
+  readonly contractors = new FirestoreEntityService<'contractors'>('contractors', this);
+  readonly serviceProviders = new FirestoreEntityService<'serviceProviders'>('serviceProviders', this);
+  readonly categories = new FirestoreEntityService<'categories'>('categories', this);
+  readonly reviews = new FirestoreEntityService<'reviews'>('reviews', this);
+  readonly jobs = new FirestoreEntityService<'jobs'>('jobs', this);
+  readonly messageThreads = new FirestoreEntityService<'messageThreads'>('messageThreads', this);
+  readonly verifications = new FirestoreEntityService<'verifications'>('verifications', this);
 
   async list<K extends CollectionName>(collection: K, idToken?: string): Promise<CollectionModelMap[K][]> {
     if (this.mockMode) {
