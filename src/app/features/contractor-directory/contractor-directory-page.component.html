@@ -42,16 +42,6 @@
         </label>
 
         <label>
-          Area
-          <select class="input" [(ngModel)]="filters.area">
-            <option value="">All areas</option>
-            @for (area of areas; track area) {
-              <option [value]="area">{{ area }}</option>
-            }
-          </select>
-        </label>
-
-        <label>
           Min rating: {{ filters.minRating | number: '1.1-1' }}
           <input [(ngModel)]="filters.minRating" class="range" type="range" min="0" max="5" step="0.1" />
         </label>

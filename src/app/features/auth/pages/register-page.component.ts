@@ -26,13 +26,15 @@ export class RegisterPageComponent {
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly registerForm = this.createRegisterForm();
+  protected readonly registerForm;
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {}
+  ) {
+    this.registerForm = this.createRegisterForm();
+  }
 
   private createRegisterForm() {
     return this.formBuilder.nonNullable.group(

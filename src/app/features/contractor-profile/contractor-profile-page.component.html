@@ -65,15 +65,6 @@
           </div>
         </section>
 
-        <section class="panel areas-panel">
-          <h2>Areas served</h2>
-          <div class="pill-list">
-            @for (area of vm.profile.areasServed; track trackByValue($index, area)) {
-              <span class="pill muted">{{ area }}</span>
-            }
-          </div>
-        </section>
-
         <section class="panel gallery-panel">
           <h2>Gallery</h2>
           <div class="gallery-grid">
