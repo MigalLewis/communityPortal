@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:firestore-rules": "npm --prefix firestore-rules-tests test",
+    "deploy:firestore": "npm run test:firestore-rules && firebase deploy --only firestore"
   },
   "private": true,
   "dependencies": {
