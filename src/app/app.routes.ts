@@ -103,6 +103,21 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin-reviews-page.component').then((m) => m.AdminReviewsPageComponent)
   },
   {
+    path: 'admin/adverts',
+    canActivate: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent)
+  },
+  {
+    path: 'admin/adverts/new',
+    canActivate: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent)
+  },
+  {
+    path: 'admin/adverts/:id/edit',
+    canActivate: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent)
+  },
+  {
     path: 'projects',
     canActivate: [residentOrPaidResidentGuard],
     loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent)

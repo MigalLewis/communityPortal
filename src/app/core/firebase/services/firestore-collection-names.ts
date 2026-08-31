@@ -9,5 +9,6 @@ export const FIRESTORE_COLLECTIONS: Record<CollectionName, CollectionName> = {
   jobs: 'jobs',
   messageThreads: 'messageThreads',
   verifications: 'verifications',
-  userTransitionAudits: 'userTransitionAudits'
+  userTransitionAudits: 'userTransitionAudits',
+  adverts: 'adverts'
 };

@@ -1,0 +1,17 @@
+<section class="adverts-admin">
+  <header><div><h1>Adverts</h1><p>Create, schedule, and control public advertising.</p></div><a routerLink="/admin/adverts/new">Create advert</a></header>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  <div class="table-wrap"><table>
+    <thead><tr><th>Advert</th><th>Placement</th><th>Schedule</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead>
+    <tbody>
+      @for (advert of adverts(); track advert.id) {
+        <tr><td><strong>{{ advert.title }}</strong><br><small>{{ advert.advertiserName }}</small></td><td>{{ advert.placement }}</td>
+          <td>{{ advert.startAt | date:'medium' }} – {{ advert.endAt | date:'medium' }}</td><td>{{ advert.status }}</td><td>{{ advert.sortPriority }}</td>
+          <td class="actions"><a [routerLink]="['/admin/adverts', advert.id, 'edit']">Edit</a>
+            <button type="button" (click)="changeStatus(advert, 'scheduled')" [disabled]="busyId() === advert.id">Schedule</button>
+            <button type="button" (click)="changeStatus(advert, 'active')" [disabled]="busyId() === advert.id">Activate</button>
+            <button type="button" (click)="changeStatus(advert, 'inactive')" [disabled]="busyId() === advert.id">Deactivate</button></td></tr>
+      } @empty { <tr><td colspan="6">No adverts have been created.</td></tr> }
+    </tbody>
+  </table></div>
+</section>
