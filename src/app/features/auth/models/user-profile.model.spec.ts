@@ -28,6 +28,7 @@ describe('authenticated user models', () => {
       email: 'resident@example.com',
       role: 'paid_resident',
       status: 'deactivated',
+      membershipStatus: 'active',
       createdAt: '2026-01-01T00:00:00.000Z',
       approvedAt: '2026-01-02T00:00:00.000Z',
       approvedBy: 'admin-1',

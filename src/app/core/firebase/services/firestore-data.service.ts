@@ -42,7 +42,8 @@ export class FirestoreDataService {
     reviews: new Map(),
     jobs: new Map(),
     messageThreads: new Map(),
-    verifications: new Map()
+    verifications: new Map(),
+    userTransitionAudits: new Map()
   };
 
   readonly users = new FirestoreEntityService<'users'>('users', this);
@@ -53,6 +54,7 @@ export class FirestoreDataService {
   readonly jobs = new FirestoreEntityService<'jobs'>('jobs', this);
   readonly messageThreads = new FirestoreEntityService<'messageThreads'>('messageThreads', this);
   readonly verifications = new FirestoreEntityService<'verifications'>('verifications', this);
+  readonly userTransitionAudits = new FirestoreEntityService<'userTransitionAudits'>('userTransitionAudits', this);
 
   async list<K extends CollectionName>(collection: K, idToken?: string): Promise<CollectionModelMap[K][]> {
     if (this.mockMode) {

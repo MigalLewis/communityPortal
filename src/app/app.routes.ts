@@ -67,6 +67,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin-page.component').then((m) => m.AdminPageComponent)
   },
   {
+    path: 'admin/users',
+    canActivate: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/admin-users-page.component').then((m) => m.AdminUsersPageComponent)
+  },
+  {
     path: 'admin/providers',
     pathMatch: 'full',
     redirectTo: 'admin/providers/import'
