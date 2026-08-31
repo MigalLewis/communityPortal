@@ -1,7 +1,19 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { firebaseClient } from '../../../core/firebase/firebase.client';
 import { AuthUser } from '../models/auth-user.model';
-import { UserProfileService } from './user-profile.service';
+import { PublicProfileRegistration, UserProfileService } from './user-profile.service';
+
+export interface PublicRegistration extends PublicProfileRegistration {
+  email: string;
+  password: string;
+}
+
+export class ProfileOnboardingRequiredError extends Error {
+  constructor() {
+    super('Your account was created, but profile setup could not be completed. Please retry onboarding.');
+    this.name = 'ProfileOnboardingRequiredError';
+  }
+}
 
 interface FirebaseAuthResponse {
   localId: string;
@@ -36,15 +48,29 @@ export class AuthService {
     return this.setAuthUser(response);
   }
 
-  async registerResident(fullName: string, email: string, password: string): Promise<AuthUser> {
+  async register(registration: PublicRegistration): Promise<AuthUser> {
     const response = await this.callIdentityToolkit<FirebaseAuthResponse>('accounts:signUp', {
-      email,
-      password,
+      email: registration.email,
+      password: registration.password,
       returnSecureToken: true
     });
 
     const authUser = this.setAuthUser(response);
-    await this.userProfileService.createResidentProfile(authUser, fullName);
+    const { email: _email, password: _password, ...profileRegistration } = registration;
+    try {
+      await this.userProfileService.createPublicProfile(authUser, profileRegistration);
+    } catch {
+      // Keep the authenticated user so the UI can route to a recoverable onboarding state.
+      throw new ProfileOnboardingRequiredError();
+    }
+    return authUser;
+  }
+
+  async retryProfileCreation(registration: PublicRegistration): Promise<AuthUser> {
+    const authUser = this.authUserSignal();
+    if (!authUser) throw new Error('Please sign in to resume profile setup.');
+    const { email: _email, password: _password, ...profileRegistration } = registration;
+    await this.userProfileService.createPublicProfile(authUser, profileRegistration);
     return authUser;
   }
 

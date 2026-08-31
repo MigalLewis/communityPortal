@@ -11,6 +11,18 @@ export interface UserProfile {
   role: UserRole;
   status: UserAccountStatus;
   createdAt: string;
+  phone?: string;
+  acceptedTermsAt?: string;
+  businessName?: string;
+  serviceCategories?: string[];
+  serviceAreas?: string[];
+  businessDescription?: string;
+  businessContactEmail?: string;
+  businessContactPhone?: string;
+  businessWebsite?: string;
+  verificationDocumentName?: string;
+  verificationDocumentType?: string;
+  verificationDocumentReference?: string;
   approvedAt?: string;
   approvedBy?: string;
   deactivatedAt?: string;

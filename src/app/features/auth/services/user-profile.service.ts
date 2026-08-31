@@ -19,6 +19,25 @@ interface FirestoreDocumentResponse {
   };
 }
 
+export type PublicRegistrationRole = 'resident' | 'paid_resident' | 'contractor';
+
+export interface PublicProfileRegistration {
+  role: PublicRegistrationRole;
+  fullName: string;
+  phone: string;
+  acceptedTermsAt: string;
+  businessName?: string;
+  serviceCategories?: string[];
+  serviceAreas?: string[];
+  businessDescription?: string;
+  businessContactEmail?: string;
+  businessContactPhone?: string;
+  businessWebsite?: string;
+  verificationDocumentName?: string;
+  verificationDocumentType?: string;
+  verificationDocumentReference?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
   private readonly appUserSignal = signal<UserProfile | null>(null);
@@ -27,35 +46,47 @@ export class UserProfileService {
   readonly isResident = computed(() => this.currentProfile()?.role === 'resident');
   readonly isAdmin = computed(() => this.currentProfile()?.role === 'admin');
 
-  async createResidentProfile(authUser: AuthUser, fullName: string): Promise<void> {
+  async createPublicProfile(authUser: AuthUser, registration: PublicProfileRegistration): Promise<void> {
     const profile: UserProfile = {
+      ...registration,
       id: authUser.id,
-      fullName,
+      fullName: registration.fullName,
       email: authUser.email,
-      role: 'resident',
-      status: 'pending',
+      role: registration.role,
+      status: registration.role === 'resident' ? 'active' : 'pending',
       createdAt: new Date().toISOString()
     };
 
-    await fetch(`${firebaseClient.firestoreBaseUrl}/users/${authUser.id}?key=${firebaseClient.apiKey}`, {
+    const fields = this.toFirestoreFields(profile);
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}/users/${authUser.id}?key=${firebaseClient.apiKey}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authUser.idToken}`
       },
-      body: JSON.stringify({
-        fields: {
-          id: { stringValue: profile.id },
-          fullName: { stringValue: profile.fullName },
-          email: { stringValue: profile.email },
-          role: { stringValue: profile.role },
-          status: { stringValue: profile.status },
-          createdAt: { timestampValue: profile.createdAt }
-        }
-      })
+      body: JSON.stringify({ fields })
     });
 
+    if (!response.ok) {
+      throw new Error('Your sign-in was created, but profile setup is incomplete. Please retry onboarding.');
+    }
+
     this.appUserSignal.set(profile);
+  }
+
+  private toFirestoreFields(profile: UserProfile): Record<string, unknown> {
+    const fields: Record<string, unknown> = {
+      id: { stringValue: profile.id }, fullName: { stringValue: profile.fullName },
+      email: { stringValue: profile.email }, role: { stringValue: profile.role },
+      status: { stringValue: profile.status }, createdAt: { timestampValue: profile.createdAt }
+    };
+    for (const [key, value] of Object.entries(profile)) {
+      if (fields[key] || value === undefined || ['id', 'fullName', 'email', 'role', 'status', 'createdAt'].includes(key)) continue;
+      fields[key] = Array.isArray(value)
+        ? { arrayValue: { values: value.map((item) => ({ stringValue: item })) } }
+        : { stringValue: value };
+    }
+    return fields;
   }
 
   async syncCurrentProfile(authUser: AuthUser | null): Promise<void> {
