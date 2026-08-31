@@ -1,55 +1,247 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
-    function active() { return signedIn() && profile().data.status == 'active'; }
-    // Privileged capabilities come from Admin SDK custom claims. Profile roles are
-    // presentation data and are never an authorization source for these powers.
-    function admin() { return active() && request.auth.token.admin == true; }
-    function paidResident() { return active() && request.auth.token.paidResident == true; }
-    function residentCapability() {
-      return active() && (profile().data.role == 'resident' || paidResident());
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Administrative authority is granted by the authentication service. A user
+    // document (which begins life as client input) is never an authority source.
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function ownUser(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function userDocument() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return signedIn() && userDocument().data.status == 'active';
+    }
+
+    function resident() {
+      return activeUser()
+        && userDocument().data.role in ['resident', 'paid_resident'];
+    }
+
+    function contractor() {
+      return activeUser() && userDocument().data.role == 'contractor';
+    }
+
+    function participant(participantIds) {
+      return activeUser() && request.auth.uid in participantIds;
     }
 
     match /users/{userId} {
-      allow create: if signedIn() && request.auth.uid == userId
+      // Registration is deliberately a create, not an upsert. The fixed id and
+      // email bind this document to the newly authenticated identity.
+      allow create: if ownUser(userId)
+        && request.resource.data.keys().hasAll([
+          'id', 'email', 'fullName', 'role', 'status', 'membershipStatus', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id', 'email', 'fullName', 'phone', 'avatarUrl', 'role', 'status',
+          'membershipStatus', 'createdAt', 'acceptedTermsAt', 'businessName',
+          'serviceCategories', 'serviceAreas', 'businessDescription',
+          'businessContactEmail', 'businessContactPhone', 'businessWebsite',
+          'verificationDocumentName', 'verificationDocumentType',
+          'verificationDocumentReference'
+        ])
+        && request.resource.data.id == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
         && request.resource.data.role in ['resident', 'paid_resident', 'contractor']
-        && request.resource.data.status == (request.resource.data.role == 'resident' ? 'active' : 'pending')
-        && request.resource.data.membershipStatus == (request.resource.data.role == 'paid_resident' ? 'pending' : 'none')
-        && !request.resource.data.keys().hasAny(['membershipStartedAt', 'membershipExpiresAt', 'externalPaymentReference']);
-      allow read: if admin() || (signedIn() && request.auth.uid == userId);
-      allow update: if active() && request.auth.uid == userId
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName', 'phone', 'avatarUrl', 'businessName', 'serviceCategories', 'serviceAreas',
-          'businessDescription', 'businessContactEmail', 'businessContactPhone', 'businessWebsite', 'updatedAt'
-        ]);
+        && request.resource.data.status ==
+          (request.resource.data.role == 'resident' ? 'active' : 'pending')
+        && request.resource.data.membershipStatus ==
+          (request.resource.data.role == 'paid_resident' ? 'pending' : 'none');
+
+      allow read: if isAdmin() || ownUser(userId);
+
+      // Profile role, account state, approval, and membership/payment fields are
+      // absent from both lists and therefore immutable to account holders.
+      allow update: if ownUser(userId) && activeUser()
+        && ((resource.data.role in ['resident', 'paid_resident']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'fullName', 'phone', 'avatarUrl', 'updatedAt'
+          ]))
+        || (resource.data.role == 'contractor'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'fullName', 'phone', 'avatarUrl', 'businessName',
+            'serviceCategories', 'serviceAreas', 'businessDescription',
+            'businessContactEmail', 'businessContactPhone', 'businessWebsite',
+            'updatedAt'
+          ])));
+
+      // Trusted-claim administrators may transition account state. Backend code
+      // remains responsible for state-machine and billing workflow validation.
+      allow update: if isAdmin();
       allow delete: if false;
     }
 
     match /contractors/{contractorId} {
-      allow read: if resource.data.status == 'active' && resource.data.hireable == true
-        || admin() || (signedIn() && resource.data.userId == request.auth.uid);
-      allow create: if signedIn() && request.auth.uid == contractorId
+      allow read: if (resource.data.isPublic == true
+          && resource.data.status == 'active'
+          && resource.data.approved == true
+          && resource.data.hireable == true)
+        || isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if ownUser(contractorId)
+        && userDocument().data.role == 'contractor'
         && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'pending' && request.resource.data.hireable == false;
-      allow update: if active() && resource.data.userId == request.auth.uid
+        && request.resource.data.id == contractorId
+        && request.resource.data.status == 'pending'
+        && request.resource.data.approved == false
+        && request.resource.data.verified == false
+        && request.resource.data.hireable == false
+        && request.resource.data.isPublic == false
+        && request.resource.data.rating == 0
+        && request.resource.data.reviewCount == 0;
+
+      allow update: if contractor()
+        && resource.data.userId == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'businessName', 'categoryIds', 'serviceAreas', 'bio', 'updatedAt'
+          'businessName', 'categoryIds', 'serviceAreas', 'bio', 'profileImageUrl',
+          'galleryUrls', 'availabilityStatus', 'businessContactEmail',
+          'businessContactPhone', 'businessWebsite', 'updatedAt'
         ]);
-      allow delete: if false;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
-    match /userTransitionAudits/{auditId} {
-      allow read: if admin();
+    match /serviceProviders/{providerId} {
+      allow read: if (resource.data.isPublic == true
+          && resource.data.status == 'active'
+          && resource.data.approved == true)
+        || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /adverts/{advertId} {
+      allow read: if (resource.data.isPublic == true
+          && resource.data.status == 'active') || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /jobs/{jobId} {
+      allow read: if isAdmin()
+        || (activeUser() && (resource.data.residentId == request.auth.uid
+          || resource.data.contractorId == request.auth.uid));
+      allow create: if resident()
+        && request.resource.data.residentId == request.auth.uid
+        && request.resource.data.id == jobId
+        && request.resource.data.status in ['draft', 'open'];
+      allow update: if isAdmin()
+        || (activeUser()
+          && (resource.data.residentId == request.auth.uid
+            || resource.data.contractorId == request.auth.uid)
+          && request.resource.data.residentId == resource.data.residentId
+          && request.resource.data.contractorId == resource.data.contractorId
+          && request.resource.data.id == resource.data.id
+          && request.resource.data.createdAt == resource.data.createdAt);
+      allow delete: if isAdmin()
+        || (resident() && resource.data.residentId == request.auth.uid);
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if isAdmin() || (activeUser()
+        && (resource.data.residentId == request.auth.uid
+          || resource.data.contractorId == request.auth.uid));
+      allow create: if resident()
+        && request.resource.data.id == reviewId
+        && request.resource.data.residentId == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.residentId == request.auth.uid
+        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.contractorId == request.resource.data.contractorId
+        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.status == 'completed';
+      allow update: if resident() && resource.data.residentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'rating', 'title', 'comment', 'updatedAt'
+        ])
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow delete: if isAdmin();
+    }
+
+    match /messageThreads/{threadId} {
+      allow read: if isAdmin() || participant(resource.data.participantIds);
+      allow create: if activeUser()
+        && request.resource.data.id == threadId
+        && request.resource.data.participantIds is list
+        && request.resource.data.participantIds.size() >= 2
+        && request.resource.data.participantIds.size() <= 10
+        && request.auth.uid in request.resource.data.participantIds
+        && !request.resource.data.keys().hasAny(['lastMessage']);
+      allow update: if isAdmin() || (participant(resource.data.participantIds)
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastMessage'])
+          || request.resource.data.lastMessage.senderId == request.auth.uid));
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        function thread() {
+          return get(/databases/$(database)/documents/messageThreads/$(threadId));
+        }
+        allow read: if isAdmin() || participant(thread().data.participantIds);
+        allow create: if participant(thread().data.participantIds)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.id == messageId;
+        allow update, delete: if false;
+      }
+    }
+
+    match /applications/{applicationId} {
+      allow read: if isAdmin() || (activeUser()
+        && (resource.data.applicantId == request.auth.uid
+          || resource.data.contractorId == request.auth.uid));
+      allow create: if activeUser()
+        && request.resource.data.id == applicationId
+        && request.resource.data.applicantId == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin() || (activeUser()
+        && (resource.data.applicantId == request.auth.uid
+          || resource.data.contractorId == request.auth.uid)
+        && request.resource.data.applicantId == resource.data.applicantId
+        && request.resource.data.contractorId == resource.data.contractorId
+        && request.resource.data.jobId == resource.data.jobId
+        && request.resource.data.id == resource.data.id);
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAdmin()
+        || (activeUser() && resource.data.userId == request.auth.uid);
       allow write: if false;
     }
 
-    match /serviceProviders/{id} { allow read: if true; allow write: if admin(); }
-    match /categories/{id} { allow read: if true; allow write: if admin(); }
-    match /reviews/{id} { allow read: if true; allow write: if residentCapability(); }
-    match /jobs/{id} { allow read, write: if residentCapability(); }
-    match /messageThreads/{id} { allow read, write: if active(); }
-    match /verifications/{id} { allow read, write: if admin(); }
+    match /verifications/{verificationId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /userTransitionAudits/{auditId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Collections must be explicitly added above; unknown and administrative
+    // data is private by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
