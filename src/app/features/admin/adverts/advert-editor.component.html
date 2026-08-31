@@ -1,0 +1,13 @@
+<section class="editor"><h1>{{ existing ? 'Edit' : 'Create' }} advert</h1><p>Advertising is managed independently from community marketplace listings.</p>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>Advertiser name<input formControlName="advertiserName"></label><label>Title<input formControlName="title"></label>
+    <label class="wide">Body<textarea rows="5" formControlName="body"></textarea></label>
+    <label>Placement<select formControlName="placement"><option value="dashboard_hero">Dashboard hero</option><option value="dashboard_sidebar">Dashboard sidebar</option><option value="directory">Directory</option><option value="sitewide_banner">Sitewide banner</option></select></label>
+    <label>Status<select formControlName="status"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+    <label>Starts<input type="datetime-local" formControlName="startAt"></label><label>Ends<input type="datetime-local" formControlName="endAt"></label><label>Sort priority<input type="number" min="0" step="1" formControlName="sortPriority"></label>
+    <fieldset class="wide"><legend>Media (optional)</legend><label>URL<input type="url" formControlName="mediaUrl"></label><label>Type<select formControlName="mediaType"><option value="image">Image</option><option value="video">Video</option></select></label><label>Alternative text<input formControlName="mediaAltText"></label></fieldset>
+    <fieldset class="wide"><legend>Link (optional)</legend><label>URL<input type="url" formControlName="linkUrl"></label><label>Label<input formControlName="linkLabel"></label><label>Open in<select formControlName="linkTarget"><option value="new_window">New window</option><option value="same_window">Same window</option></select></label></fieldset>
+    <div class="buttons wide"><button type="submit" [disabled]="saving()">Save advert</button><a routerLink="/admin/adverts">Cancel</a></div>
+  </form>
+</section>

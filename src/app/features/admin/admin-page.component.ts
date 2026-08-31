@@ -10,6 +10,7 @@ import { RouterLink } from '@angular/router';
       <h1 class="h2">Admin</h1>
       <p class="text-body">Admin tools are available to authorized users only.</p>
       <p><a routerLink="/admin/users">Manage users and applications</a></p>
+      <p><a routerLink="/admin/adverts">Manage adverts</a></p>
     </section>
   `
 })

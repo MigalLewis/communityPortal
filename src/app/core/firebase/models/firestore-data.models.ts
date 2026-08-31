@@ -145,6 +145,38 @@ export interface VerificationDocument extends FirestoreEntity {
   notes?: string;
 }
 
+export type AdvertStatus = 'draft' | 'scheduled' | 'active' | 'inactive';
+export type AdvertPlacement = 'dashboard_hero' | 'dashboard_sidebar' | 'directory' | 'sitewide_banner';
+
+/** Administrative advertising is intentionally independent of marketplace listings. */
+export interface AdvertDocument extends FirestoreEntity {
+  advertiserName: string;
+  title: string;
+  body: string;
+  media?: {
+    url: string;
+    type: 'image' | 'video';
+    altText: string;
+  };
+  link?: {
+    url: string;
+    label: string;
+    target: 'same_window' | 'new_window';
+  };
+  placement: AdvertPlacement;
+  status: AdvertStatus;
+  startAt: ISODateString;
+  endAt: ISODateString;
+  sortPriority: number;
+  ownerAdminId: string;
+  createdByAdminId: string;
+  updatedByAdminId: string;
+  activatedAt?: ISODateString;
+  activatedByAdminId?: string;
+  deactivatedAt?: ISODateString;
+  deactivatedByAdminId?: string;
+}
+
 export interface CollectionModelMap {
   users: UserDocument;
   contractors: ContractorDocument;
@@ -155,6 +187,7 @@ export interface CollectionModelMap {
   messageThreads: MessageThreadDocument;
   verifications: VerificationDocument;
   userTransitionAudits: UserTransitionAuditDocument;
+  adverts: AdvertDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;
