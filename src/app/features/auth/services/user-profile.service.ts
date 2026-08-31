@@ -1,8 +1,8 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { firebaseClient } from '../../../core/firebase/firebase.client';
 import { AuthUser } from '../models/auth-user.model';
-import { UserProfile } from '../models/user-profile.model';
-import { UserRole } from '../models/user-role.model';
+import { USER_ACCOUNT_STATUSES, UserAccountStatus, UserProfile } from '../models/user-profile.model';
+import { USER_ROLES, UserRole } from '../models/user-role.model';
 
 interface FirestoreDocumentResponse {
   fields?: {
@@ -10,7 +10,12 @@ interface FirestoreDocumentResponse {
     fullName?: { stringValue: string };
     email?: { stringValue: string };
     role?: { stringValue: UserRole };
+    status?: { stringValue: UserAccountStatus };
     createdAt?: { timestampValue: string };
+    approvedAt?: { timestampValue: string };
+    approvedBy?: { stringValue: string };
+    deactivatedAt?: { timestampValue: string };
+    deactivatedBy?: { stringValue: string };
   };
 }
 
@@ -28,6 +33,7 @@ export class UserProfileService {
       fullName,
       email: authUser.email,
       role: 'resident',
+      status: 'pending',
       createdAt: new Date().toISOString()
     };
 
@@ -43,6 +49,7 @@ export class UserProfileService {
           fullName: { stringValue: profile.fullName },
           email: { stringValue: profile.email },
           role: { stringValue: profile.role },
+          status: { stringValue: profile.status },
           createdAt: { timestampValue: profile.createdAt }
         }
       })
@@ -70,7 +77,10 @@ export class UserProfileService {
 
     const doc = (await response.json()) as FirestoreDocumentResponse;
 
-    if (!doc.fields) {
+    const role = doc.fields?.role?.stringValue;
+    const status = doc.fields?.status?.stringValue;
+
+    if (!doc.fields || !this.isUserRole(role) || !this.isUserAccountStatus(status)) {
       this.appUserSignal.set(null);
       return;
     }
@@ -79,8 +89,13 @@ export class UserProfileService {
       id: doc.fields.id?.stringValue ?? authUser.id,
       fullName: doc.fields.fullName?.stringValue ?? '',
       email: doc.fields.email?.stringValue ?? authUser.email,
-      role: (doc.fields.role?.stringValue as UserRole) ?? 'resident',
-      createdAt: doc.fields.createdAt?.timestampValue ?? new Date().toISOString()
+      role,
+      status,
+      createdAt: doc.fields.createdAt?.timestampValue ?? new Date().toISOString(),
+      approvedAt: doc.fields.approvedAt?.timestampValue,
+      approvedBy: doc.fields.approvedBy?.stringValue,
+      deactivatedAt: doc.fields.deactivatedAt?.timestampValue,
+      deactivatedBy: doc.fields.deactivatedBy?.stringValue
     });
   }
 
@@ -94,5 +109,13 @@ export class UserProfileService {
 
   getCurrentUserRole(): UserRole | null {
     return this.currentProfile()?.role ?? null;
+  }
+
+  private isUserRole(value: string | undefined): value is UserRole {
+    return USER_ROLES.some((role) => role === value);
+  }
+
+  private isUserAccountStatus(value: string | undefined): value is UserAccountStatus {
+    return USER_ACCOUNT_STATUSES.some((status) => status === value);
   }
 }

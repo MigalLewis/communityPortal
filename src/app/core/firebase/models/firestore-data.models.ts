@@ -1,3 +1,6 @@
+import { UserRole } from '../../../features/auth/models/user-role.model';
+import { UserAccountStatus } from '../../../features/auth/models/user-profile.model';
+
 export type ISODateString = string;
 
 export interface FirestoreEntity {
@@ -6,12 +9,15 @@ export interface FirestoreEntity {
   updatedAt: ISODateString;
 }
 
-export type UserRole = 'resident' | 'contractor' | 'admin';
-
 export interface UserDocument extends FirestoreEntity {
   fullName: string;
   email: string;
   role: UserRole;
+  status: UserAccountStatus;
+  approvedAt?: ISODateString;
+  approvedBy?: string;
+  deactivatedAt?: ISODateString;
+  deactivatedBy?: string;
   phone?: string;
   avatarUrl?: string;
 }
