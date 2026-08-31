@@ -1,0 +1,8 @@
+<section class="profile-page"><article class="panel"><h1>Edit contractor profile</h1><p>Approval, verification, ratings and review totals are managed by moderators and cannot be edited.</p>
+<form [formGroup]="form" (ngSubmit)="save()"><label>Business name<input formControlName="businessName"></label><label>About<textarea formControlName="bio"></textarea></label>
+<label>Services (comma separated)<input formControlName="services"></label><label>Service areas (comma separated)<input formControlName="serviceAreas"></label>
+<label>Profile visibility<select formControlName="profileVisibility"><option value="public">Visible</option><option value="hidden">Hidden</option></select></label>
+<label>Job availability<select formControlName="jobAvailability"><option value="available">Available for jobs</option><option value="unavailable">Not accepting jobs</option></select></label>
+<label>Preferred contact<select formControlName="preferredMethod"><option value="platform">Platform</option><option value="email">Email</option><option value="phone">Phone</option></select></label>
+<label>Email<input type="email" formControlName="email"></label><label>Phone<input formControlName="phone"></label><label>Website<input formControlName="website"></label><label>Portfolio image URLs (one per line)<textarea formControlName="portfolioUrls"></textarea></label>
+<button class="btn primary" type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save profile' }}</button><p aria-live="polite">{{ message }}</p></form></article></section>

@@ -28,15 +28,26 @@ export interface UserDocument extends FirestoreEntity {
 
 export interface ContractorDocument extends FirestoreEntity {
   userId: string;
+  fullName: string;
   businessName: string;
   categoryIds: string[];
+  services: string[];
   serviceAreas: string[];
   rating: number;
   reviewCount: number;
   verified: boolean;
   bio?: string;
   status: UserAccountStatus;
-  hireable: boolean;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  profileVisibility: 'public' | 'hidden';
+  jobAvailability: 'available' | 'unavailable';
+  contactPreferences: {
+    email?: string;
+    phone?: string;
+    website?: string;
+    preferredMethod: 'email' | 'phone' | 'platform';
+  };
+  portfolioMedia: Array<{ url: string; caption: string; type: 'image' | 'video' }>;
 }
 
 export interface UserTransitionAuditDocument extends FirestoreEntity {

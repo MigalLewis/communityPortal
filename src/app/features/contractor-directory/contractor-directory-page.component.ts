@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ContractorFilters } from './models/contractor.model';
-import { MOCK_CONTRACTORS } from './data/mock-contractors';
+import { Contractor, ContractorFilters } from './models/contractor.model';
 import { filterContractors } from './services/contractor-filter.util';
+import { ContractorRepository } from './services/contractor.repository';
 
 @Component({
   selector: 'app-contractor-directory-page',
@@ -13,11 +13,23 @@ import { filterContractors } from './services/contractor-filter.util';
   templateUrl: './contractor-directory-page.component.html',
   styleUrl: './contractor-directory-page.component.scss'
 })
-export class ContractorDirectoryPageComponent {
-  readonly contractors = MOCK_CONTRACTORS;
-  readonly categories = [...new Set(MOCK_CONTRACTORS.map((contractor) => contractor.category))];
-  readonly areas = [...new Set(MOCK_CONTRACTORS.map((contractor) => contractor.area))];
-  readonly tags = [...new Set(MOCK_CONTRACTORS.flatMap((contractor) => contractor.tags))].sort();
+export class ContractorDirectoryPageComponent implements OnInit {
+  contractors: Contractor[] = [];
+  categories: string[] = [];
+  areas: string[] = [];
+  tags: string[] = [];
+  loading = true;
+  loadError = '';
+  constructor(private readonly repository: ContractorRepository) {}
+  async ngOnInit(): Promise<void> {
+    try {
+      this.contractors = await this.repository.listPublic();
+      this.categories = [...new Set(this.contractors.flatMap((item) => item.categoryIds))].sort();
+      this.areas = [...new Set(this.contractors.flatMap((item) => item.serviceAreas))].sort();
+      this.tags = [...new Set(this.contractors.flatMap((item) => item.services))].sort();
+    } catch { this.loadError = 'The contractor directory is temporarily unavailable.'; }
+    finally { this.loading = false; }
+  }
 
   showFilters = true;
 

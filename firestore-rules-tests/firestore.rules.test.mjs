@@ -27,8 +27,9 @@ const user = (id, role, status = 'active', extra = {}) => ({
   membershipStatus: role === 'paid_resident' ? 'active' : 'none', createdAt: '2026-01-01', ...extra
 });
 const contractorProfile = (id, extra = {}) => ({
-  id, userId: id, businessName: `${id} Services`, categoryIds: ['repairs'], serviceAreas: ['Central'],
-  status: 'active', approved: true, verified: true, hireable: true, isPublic: true,
+  id, userId: id, fullName: id, businessName: `${id} Services`, categoryIds: ['repairs'], services: ['Repair'], serviceAreas: ['Central'],
+  status: 'active', approvalStatus: 'approved', verified: true, jobAvailability: 'available', profileVisibility: 'public',
+  contactPreferences: { preferredMethod: 'platform' }, portfolioMedia: [],
   rating: 4, reviewCount: 2, createdAt: '2026-01-01', ...extra
 });
 const authed = (id, claims = {}) => env.authenticatedContext(id, { email: `${id}@example.test`, ...claims }).firestore();
@@ -44,7 +45,7 @@ async function seed() {
       setDoc(doc(db, 'users/outsider'), user('outsider', 'resident')),
       setDoc(doc(db, 'users/admin'), user('admin', 'admin')),
       setDoc(doc(db, 'contractors/contractor'), contractorProfile('contractor')),
-      setDoc(doc(db, 'contractors/private'), contractorProfile('private', { isPublic: false })),
+      setDoc(doc(db, 'contractors/private'), contractorProfile('private', { profileVisibility: 'hidden' })),
       setDoc(doc(db, 'serviceProviders/public'), { id: 'public', status: 'active', approved: true, isPublic: true }),
       setDoc(doc(db, 'serviceProviders/unapproved'), { id: 'unapproved', status: 'active', approved: false, isPublic: true }),
       setDoc(doc(db, 'categories/active'), { id: 'active', isActive: true }),
@@ -81,6 +82,8 @@ describe('public visibility is explicitly scoped', () => {
   });
   test('requires public predicates in list queries', async () => {
     await assertSucceeds(getDocs(query(collection(anon(), 'categories'), where('isActive', '==', true))));
+    await assertSucceeds(getDocs(query(collection(anon(), 'contractors'), where('status', '==', 'active'), where('approvalStatus', '==', 'approved'), where('profileVisibility', '==', 'public'))));
+    await assertFails(getDocs(query(collection(anon(), 'contractors'), where('status', '==', 'active'))));
     await assertFails(getDocs(collection(anon(), 'categories')));
   });
 });
@@ -110,10 +113,13 @@ describe('registration and profile escalation defenses', () => {
   });
   test('contractors can edit presentation fields but not trust, rating, or ownership', async () => {
     await assertSucceeds(updateDoc(doc(authed('contractor'), 'contractors/contractor'), { bio: 'New bio' }));
-    for (const patch of [{ verified: false }, { approved: false }, { rating: 5 }, { reviewCount: 99 },
-      { userId: 'outsider' }, { status: 'active' }, { isPublic: false }]) {
+    for (const patch of [{ verified: false }, { approvalStatus: 'rejected' }, { rating: 5 }, { reviewCount: 99 },
+      { userId: 'outsider' }, { status: 'active' }]) {
       await assertFails(updateDoc(doc(authed('contractor'), 'contractors/contractor'), patch));
     }
+    await assertSucceeds(updateDoc(doc(authed('contractor'), 'contractors/contractor'), { jobAvailability: 'unavailable', profileVisibility: 'hidden', services: ['Repair', 'Install'] }));
+    await env.withSecurityRulesDisabled(async (context) => updateDoc(doc(context.firestore(), 'contractors/contractor'), { approvalStatus: 'rejected' }));
+    await assertFails(updateDoc(doc(authed('contractor'), 'contractors/contractor'), { bio: 'Rejected cannot edit' }));
   });
 });
 

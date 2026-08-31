@@ -11,15 +11,15 @@ export const filterContractors = (contractors: Contractor[], filters: Contractor
   return contractors.filter((contractor) => {
     const matchesSearch =
       !search ||
-      normalize(contractor.name).includes(search) ||
-      normalize(contractor.company).includes(search) ||
-      contractor.tags.some((contractorTag) => normalize(contractorTag).includes(search));
+      normalize(contractor.fullName).includes(search) ||
+      normalize(contractor.businessName).includes(search) ||
+      [...contractor.services, ...contractor.serviceAreas].some((value) => normalize(value).includes(search));
 
-    const matchesCategory = !category || normalize(contractor.category) === category;
-    const matchesTag = !tag || contractor.tags.some((contractorTag) => normalize(contractorTag).includes(tag));
-    const matchesArea = !area || normalize(contractor.area) === area;
+    const matchesCategory = !category || contractor.categoryIds.some((value) => normalize(value) === category);
+    const matchesTag = !tag || contractor.services.some((value) => normalize(value).includes(tag));
+    const matchesArea = !area || contractor.serviceAreas.some((value) => normalize(value) === area);
     const matchesVerified = !filters.verifiedOnly || contractor.verified;
-    const matchesAvailability = !filters.availableToday || contractor.availableToday;
+    const matchesAvailability = !filters.availableToday || contractor.jobAvailability === 'available';
     const matchesMinRating = contractor.rating >= filters.minRating;
 
     return (

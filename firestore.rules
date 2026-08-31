@@ -84,10 +84,9 @@ service cloud.firestore {
     }
 
     match /contractors/{contractorId} {
-      allow read: if (resource.data.isPublic == true
+      allow read: if (resource.data.profileVisibility == 'public'
           && resource.data.status == 'active'
-          && resource.data.approved == true
-          && resource.data.hireable == true)
+          && resource.data.approvalStatus == 'approved')
         || isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
 
@@ -96,19 +95,20 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.id == contractorId
         && request.resource.data.status == 'pending'
-        && request.resource.data.approved == false
+        && request.resource.data.approvalStatus == 'pending'
         && request.resource.data.verified == false
-        && request.resource.data.hireable == false
-        && request.resource.data.isPublic == false
+        && request.resource.data.jobAvailability == 'unavailable'
+        && request.resource.data.profileVisibility == 'hidden'
         && request.resource.data.rating == 0
         && request.resource.data.reviewCount == 0;
 
       allow update: if contractor()
         && resource.data.userId == request.auth.uid
+        && resource.data.approvalStatus == 'approved'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'businessName', 'categoryIds', 'serviceAreas', 'bio', 'profileImageUrl',
-          'galleryUrls', 'availabilityStatus', 'businessContactEmail',
-          'businessContactPhone', 'businessWebsite', 'updatedAt'
+          'businessName', 'categoryIds', 'services', 'serviceAreas', 'bio',
+          'profileVisibility', 'jobAvailability', 'contactPreferences',
+          'portfolioMedia', 'updatedAt'
         ]);
       allow update: if isAdmin();
       allow delete: if isAdmin();

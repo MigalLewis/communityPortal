@@ -3,6 +3,7 @@ import { adminRoleGuard } from './features/auth/guards/admin-role.guard';
 import { authGuard } from './features/auth/guards/auth.guard';
 import { guestGuard } from './features/auth/guards/guest.guard';
 import { activeUserGuard, contractorGuard, residentOrPaidResidentGuard } from './features/auth/guards/access.guards';
+import { approvedContractorGuard } from './features/auth/guards/approved-contractor.guard';
 
 export const routes: Routes = [
   {
@@ -105,6 +106,11 @@ export const routes: Routes = [
     path: 'projects',
     canActivate: [residentOrPaidResidentGuard],
     loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent)
+  },
+  {
+    path: 'contractor/profile/edit',
+    canActivate: [contractorGuard, approvedContractorGuard],
+    loadComponent: () => import('./features/contractor-profile/contractor-profile-edit.component').then((m) => m.ContractorProfileEditComponent)
   },
   {
     path: 'work-orders',

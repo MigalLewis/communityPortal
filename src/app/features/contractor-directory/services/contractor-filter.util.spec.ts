@@ -1,41 +1,9 @@
-import { MOCK_CONTRACTORS } from '../data/mock-contractors';
+import { ContractorDocument } from '../../../core/firebase/models/firestore-data.models';
 import { ContractorFilters } from '../models/contractor.model';
 import { filterContractors } from './contractor-filter.util';
-
-const baseFilters: ContractorFilters = {
-  search: '',
-  category: '',
-  tag: '',
-  verifiedOnly: false,
-  availableToday: false,
-  minRating: 0,
-  area: ''
-};
-
+const contractor = (id: string, extra: Partial<ContractorDocument> = {}): ContractorDocument => ({ id, userId: id, fullName: id, businessName: `${id} Co`, categoryIds: ['Electrical'], services: ['Smart Home'], serviceAreas: ['Central'], rating: 4.8, reviewCount: 2, verified: true, bio: '', status: 'active', approvalStatus: 'approved', profileVisibility: 'public', jobAvailability: 'available', contactPreferences: { preferredMethod: 'platform' }, portfolioMedia: [], createdAt: '2026-01-01', updatedAt: '2026-01-01', ...extra });
+const filters: ContractorFilters = { search: '', category: '', tag: '', verifiedOnly: false, availableToday: false, minRating: 0, area: '' };
 describe('filterContractors', () => {
-  it('filters by search across name, company, and tags', () => {
-    const result = filterContractors(MOCK_CONTRACTORS, { ...baseFilters, search: 'smart home' });
-
-    expect(result.map((contractor) => contractor.name)).toEqual(['Marcus Sterling', 'Lila Morgan']);
-  });
-
-  it('filters by verified and available today together', () => {
-    const result = filterContractors(MOCK_CONTRACTORS, {
-      ...baseFilters,
-      verifiedOnly: true,
-      availableToday: true
-    });
-
-    expect(result.every((contractor) => contractor.verified && contractor.availableToday)).toBeTrue();
-  });
-
-  it('applies area and minimum rating constraints', () => {
-    const result = filterContractors(MOCK_CONTRACTORS, {
-      ...baseFilters,
-      area: 'Downtown',
-      minRating: 4.7
-    });
-
-    expect(result.map((contractor) => contractor.name)).toEqual(['Marcus Sterling']);
-  });
+ it('searches presentation and service fields', () => expect(filterContractors([contractor('one')], { ...filters, search: 'smart home' }).length).toBe(1));
+ it('filters availability, verification, area and rating', () => expect(filterContractors([contractor('one'), contractor('two', { jobAvailability: 'unavailable' })], { ...filters, availableToday: true, verifiedOnly: true, area: 'Central', minRating: 4.5 }).map(x => x.id)).toEqual(['one']));
 });
