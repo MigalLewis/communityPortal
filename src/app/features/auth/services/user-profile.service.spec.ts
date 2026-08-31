@@ -4,7 +4,7 @@ import { UserProfileService } from './user-profile.service';
 
 describe('UserProfileService public registration', () => {
   let service: UserProfileService;
-  const authUser: AuthUser = { id: 'uid-1', email: 'user@example.com', idToken: 'token', refreshToken: 'refresh', expiresAt: Date.now() + 10000 };
+  const authUser: AuthUser = { id: 'uid-1', email: 'user@example.com', idToken: 'token', refreshToken: 'refresh', expiresAt: Date.now() + 10000, claims: { admin: false, paidResident: false } };
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

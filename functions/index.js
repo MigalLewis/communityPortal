@@ -10,7 +10,7 @@ exports.manageUser = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in is required.');
   const db = getFirestore();
   const actor = await db.doc(`users/${request.auth.uid}`).get();
-  if (!actor.exists || actor.get('role') !== 'admin' || actor.get('status') !== 'active') {
+  if (request.auth.token.admin !== true || !actor.exists || actor.get('status') !== 'active') {
     throw new HttpsError('permission-denied', 'Administrator access is required.');
   }
   const { userId, action, reason } = request.data || {};
@@ -48,5 +48,27 @@ exports.manageUser = onCall(async (request) => {
   // live user status on every protected request, blocking already-issued tokens.
   await getAuth().updateUser(userId, { disabled: action !== 'approve' });
   if (action !== 'approve') await getAuth().revokeRefreshTokens(userId);
+  return { ok: true };
+});
+
+// Billing/admin integrations call this endpoint after independently verifying the
+// payment. Browser-written profile fields can never grant paid or admin access.
+exports.setUserPrivileges = onCall(async (request) => {
+  if (!request.auth || request.auth.token.admin !== true) {
+    throw new HttpsError('permission-denied', 'Administrator access is required.');
+  }
+  const { userId, admin, paidResident } = request.data || {};
+  if (typeof userId !== 'string' || typeof admin !== 'boolean' || typeof paidResident !== 'boolean') {
+    throw new HttpsError('invalid-argument', 'User and boolean privilege values are required.');
+  }
+  const db = getFirestore();
+  const [actor, target] = await Promise.all([db.doc(`users/${request.auth.uid}`).get(), db.doc(`users/${userId}`).get()]);
+  if (!actor.exists || actor.get('status') !== 'active') throw new HttpsError('permission-denied', 'Active administrator access is required.');
+  if (!target.exists || target.get('status') !== 'active') throw new HttpsError('failed-precondition', 'Privileges require an active account.');
+  if (admin && target.get('role') !== 'admin') throw new HttpsError('failed-precondition', 'Administrator claims require a backend-managed admin profile.');
+  if (paidResident && target.get('role') !== 'paid_resident') throw new HttpsError('failed-precondition', 'Paid membership requires a paid-resident profile.');
+  const identity = await getAuth().getUser(userId);
+  await getAuth().setCustomUserClaims(userId, { ...identity.customClaims, admin, paidResident });
+  await getAuth().revokeRefreshTokens(userId);
   return { ok: true };
 });

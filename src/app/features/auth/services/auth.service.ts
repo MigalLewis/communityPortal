@@ -27,16 +27,27 @@ interface FirebaseAuthResponse {
 export class AuthService {
   private readonly storageKey = 'community-portal-auth-user';
   private readonly authUserSignal = signal<AuthUser | null>(this.readStoredAuthUser());
+  private readonly stateSignal = signal<'loading' | 'ready'>('loading');
+  private readyPromise: Promise<void>;
 
   readonly authUser = computed(() => this.authUserSignal());
+  readonly initializationState = computed(() => this.stateSignal());
   readonly isAuthenticated = computed(() => {
     const user = this.authUserSignal();
     return !!user && user.expiresAt > Date.now();
   });
 
   constructor(private readonly userProfileService: UserProfileService) {
-    this.userProfileService.syncCurrentProfile(this.authUserSignal());
+    this.readyPromise = this.initialize(this.authUserSignal());
   }
+
+  private async initialize(user: AuthUser | null): Promise<void> {
+    this.stateSignal.set('loading');
+    try { await this.userProfileService.syncCurrentProfile(user); }
+    finally { this.stateSignal.set('ready'); }
+  }
+
+  async waitUntilReady(): Promise<void> { await this.readyPromise; }
 
   async login(email: string, password: string): Promise<AuthUser> {
     const response = await this.callIdentityToolkit<FirebaseAuthResponse>('accounts:signInWithPassword', {
@@ -55,7 +66,7 @@ export class AuthService {
       returnSecureToken: true
     });
 
-    const authUser = this.setAuthUser(response);
+    const authUser = this.setAuthUser(response, false);
     const { email: _email, password: _password, ...profileRegistration } = registration;
     try {
       await this.userProfileService.createPublicProfile(authUser, profileRegistration);
@@ -78,6 +89,8 @@ export class AuthService {
     this.authUserSignal.set(null);
     localStorage.removeItem(this.storageKey);
     this.userProfileService.clearCurrentProfile();
+    this.stateSignal.set('ready');
+    this.readyPromise = Promise.resolve();
   }
 
   async forgotPassword(email: string): Promise<void> {
@@ -104,20 +117,30 @@ export class AuthService {
     return responseBody;
   }
 
-  private setAuthUser(response: FirebaseAuthResponse): AuthUser {
+  private setAuthUser(response: FirebaseAuthResponse, syncProfile = true): AuthUser {
     const authUser: AuthUser = {
       id: response.localId,
       email: response.email,
       idToken: response.idToken,
       refreshToken: response.refreshToken,
-      expiresAt: Date.now() + Number(response.expiresIn) * 1000
+      expiresAt: Date.now() + Number(response.expiresIn) * 1000,
+      claims: this.readTrustedClaims(response.idToken)
     };
 
     this.authUserSignal.set(authUser);
     localStorage.setItem(this.storageKey, JSON.stringify(authUser));
-    this.userProfileService.syncCurrentProfile(authUser);
+    if (syncProfile) this.readyPromise = this.initialize(authUser);
 
     return authUser;
+  }
+
+  private readTrustedClaims(idToken: string): AuthUser['claims'] {
+    try {
+      const payload = JSON.parse(atob(idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>;
+      return { admin: payload['admin'] === true, paidResident: payload['paidResident'] === true };
+    } catch {
+      return { admin: false, paidResident: false };
+    }
   }
 
   private readStoredAuthUser(): AuthUser | null {
@@ -128,6 +151,7 @@ export class AuthService {
 
     try {
       const parsed = JSON.parse(raw) as AuthUser;
+      parsed.claims = this.readTrustedClaims(parsed.idToken);
       return parsed.expiresAt > Date.now() ? parsed : null;
     } catch {
       return null;
