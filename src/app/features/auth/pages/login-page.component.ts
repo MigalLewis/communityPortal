@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -20,7 +20,8 @@ export class LoginPageComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    protected readonly route: ActivatedRoute
   ) {
     this.loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -40,11 +41,16 @@ export class LoginPageComponent {
     try {
       const { email, password } = this.loginForm.getRawValue();
       await this.authService.login(email, password);
-      await this.router.navigate(['/dashboard']);
+      await this.router.navigateByUrl(this.safeDestination());
     } catch (error: unknown) {
       this.formError.set(error instanceof Error ? error.message : 'Unable to sign in right now.');
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private safeDestination(): string {
+    const destination = this.route.snapshot.queryParamMap.get('redirectTo');
+    return destination?.startsWith('/') && !destination.startsWith('//') ? destination : '/dashboard';
   }
 }

@@ -137,10 +137,9 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (activeUser() && (resource.data.residentId == request.auth.uid
           || resource.data.contractorId == request.auth.uid));
-      allow create: if resident()
-        && request.resource.data.residentId == request.auth.uid
-        && request.resource.data.id == jobId
-        && request.resource.data.status in ['draft', 'open'];
+      // Creation goes through createJobRequest so contractor approval and
+      // availability are checked by a trusted backend.
+      allow create: if false;
       allow update: if isAdmin()
         || (activeUser()
           && (resource.data.residentId == request.auth.uid
@@ -157,22 +156,8 @@ service cloud.firestore {
       allow read: if isAdmin() || (activeUser()
         && (resource.data.residentId == request.auth.uid
           || resource.data.contractorId == request.auth.uid));
-      allow create: if resident()
-        && request.resource.data.id == reviewId
-        && request.resource.data.residentId == request.auth.uid
-        && request.resource.data.rating is int
-        && request.resource.data.rating >= 1
-        && request.resource.data.rating <= 5
-        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.residentId == request.auth.uid
-        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.contractorId == request.resource.data.contractorId
-        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.status == 'completed';
-      allow update: if resident() && resource.data.residentId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'rating', 'title', 'comment', 'updatedAt'
-        ])
-        && request.resource.data.rating is int
-        && request.resource.data.rating >= 1
-        && request.resource.data.rating <= 5;
+      // Review creation and aggregate updates are one backend transaction.
+      allow create, update: if false;
       allow delete: if isAdmin();
     }
 

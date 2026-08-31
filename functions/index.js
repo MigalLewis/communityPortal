@@ -72,3 +72,72 @@ exports.setUserPrivileges = onCall(async (request) => {
   await getAuth().revokeRefreshTokens(userId);
   return { ok: true };
 });
+
+async function requireResident(db, auth) {
+  if (!auth) throw new HttpsError('unauthenticated', 'Sign in is required.');
+  const resident = await db.doc(`users/${auth.uid}`).get();
+  if (!resident.exists || resident.get('status') !== 'active' || !['resident', 'paid_resident'].includes(resident.get('role'))) {
+    throw new HttpsError('permission-denied', 'An active resident account is required.');
+  }
+  return resident;
+}
+
+exports.createJobRequest = onCall(async (request) => {
+  const db = getFirestore();
+  await requireResident(db, request.auth);
+  const { contractorId, categoryId, title, description, budget, scheduledDate } = request.data || {};
+  if (![contractorId, categoryId, title, description].every((value) => typeof value === 'string' && value.trim())) {
+    throw new HttpsError('invalid-argument', 'Contractor, category, title, and description are required.');
+  }
+  if (budget != null && (typeof budget !== 'number' || !Number.isFinite(budget) || budget < 0)) {
+    throw new HttpsError('invalid-argument', 'Budget must be a non-negative number.');
+  }
+  const contractor = await db.doc(`contractors/${contractorId}`).get();
+  if (!contractor.exists || contractor.get('status') !== 'active' || contractor.get('approvalStatus') !== 'approved'
+      || contractor.get('jobAvailability') !== 'available' || contractor.get('profileVisibility') !== 'public') {
+    throw new HttpsError('failed-precondition', 'This contractor is not approved and available for hiring.');
+  }
+  if (contractor.get('userId') === request.auth.uid) throw new HttpsError('permission-denied', 'You cannot hire yourself.');
+  const now = Timestamp.now().toDate().toISOString();
+  const ref = db.collection('jobs').doc();
+  const job = { id: ref.id, residentId: request.auth.uid, contractorId, categoryId, title: title.trim(),
+    description: description.trim(), status: 'open', createdAt: now, updatedAt: now,
+    ...(budget == null ? {} : { budget }), ...(scheduledDate == null ? {} : { scheduledDate }) };
+  await ref.create(job);
+  return job;
+});
+
+exports.createReview = onCall(async (request) => {
+  const db = getFirestore();
+  await requireResident(db, request.auth);
+  const { jobId, rating, title, comment } = request.data || {};
+  if (typeof jobId !== 'string' || !jobId || !Number.isInteger(rating) || rating < 1 || rating > 5
+      || typeof comment !== 'string' || !comment.trim() || comment.length > 2000
+      || (title != null && (typeof title !== 'string' || title.length > 120))) {
+    throw new HttpsError('invalid-argument', 'A job, 1–5 rating, and comment are required.');
+  }
+  return db.runTransaction(async (transaction) => {
+    const jobRef = db.doc(`jobs/${jobId}`);
+    // A deterministic per-job id makes the one-review invariant transaction-safe.
+    const reviewRef = db.doc(`reviews/${jobId}`);
+    const [job, existing] = await Promise.all([transaction.get(jobRef), transaction.get(reviewRef)]);
+    if (!job.exists || job.get('status') !== 'completed') throw new HttpsError('failed-precondition', 'Only completed jobs can be reviewed.');
+    if (job.get('residentId') !== request.auth.uid) throw new HttpsError('permission-denied', 'Only the resident who owns this job can review it.');
+    const contractorId = job.get('contractorId');
+    if (!contractorId || contractorId === request.auth.uid) throw new HttpsError('permission-denied', 'Contractors cannot review themselves.');
+    if (existing.exists) throw new HttpsError('already-exists', 'This job has already been reviewed.');
+    const contractorRef = db.doc(`contractors/${contractorId}`);
+    const contractor = await transaction.get(contractorRef);
+    if (!contractor.exists) throw new HttpsError('not-found', 'Contractor was not found.');
+    const previousCount = contractor.get('reviewCount') || 0;
+    const previousRating = contractor.get('rating') || 0;
+    const reviewCount = previousCount + 1;
+    const aggregateRating = ((previousRating * previousCount) + rating) / reviewCount;
+    const now = Timestamp.now().toDate().toISOString();
+    const review = { id: jobId, jobId, contractorId, residentId: request.auth.uid, rating,
+      comment: comment.trim(), ...(title ? { title: title.trim() } : {}), createdAt: now, updatedAt: now };
+    transaction.create(reviewRef, review);
+    transaction.update(contractorRef, { rating: aggregateRating, reviewCount, updatedAt: now });
+    return review;
+  });
+});
