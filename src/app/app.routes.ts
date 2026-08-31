@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { adminRoleGuard } from './features/auth/guards/admin-role.guard';
 import { authGuard } from './features/auth/guards/auth.guard';
 import { guestGuard } from './features/auth/guards/guest.guard';
+import { activeUserGuard, contractorGuard, residentOrPaidResidentGuard } from './features/auth/guards/access.guards';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,10 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/pages/forgot-password-page.component').then((m) => m.ForgotPasswordPageComponent)
   },
+  ...(['pending', 'rejected', 'deactivated'] as const).map((status) => ({
+    path: `account/${status}`,
+    loadComponent: () => import('./features/auth/pages/account-status-page.component').then((m) => m.AccountStatusPageComponent)
+  })),
   {
     path: 'messages',
     canActivate: [authGuard],
@@ -98,14 +103,17 @@ export const routes: Routes = [
   },
   {
     path: 'projects',
+    canActivate: [residentOrPaidResidentGuard],
     loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent)
   },
   {
     path: 'work-orders',
+    canActivate: [contractorGuard],
     loadComponent: () => import('./features/work-orders/work-orders-page.component').then((m) => m.WorkOrdersPageComponent)
   },
   {
     path: 'settings',
+    canActivate: [activeUserGuard],
     loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent)
   },
   {

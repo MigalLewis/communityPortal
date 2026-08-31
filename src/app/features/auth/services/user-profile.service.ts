@@ -45,8 +45,12 @@ export interface PublicProfileRegistration {
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
   private readonly appUserSignal = signal<UserProfile | null>(null);
+  private readonly stateSignal = signal<'loading' | 'ready'>('ready');
+  private readyPromise: Promise<void> = Promise.resolve();
+  private requestId = 0;
 
   readonly currentProfile = computed(() => this.appUserSignal());
+  readonly initializationState = computed(() => this.stateSignal());
   readonly isResident = computed(() => this.currentProfile()?.role === 'resident');
   readonly isAdmin = computed(() => this.currentProfile()?.role === 'admin' && this.currentProfile()?.status === 'active');
 
@@ -77,6 +81,7 @@ export class UserProfileService {
     }
 
     this.appUserSignal.set(profile);
+    this.stateSignal.set('ready');
   }
 
   private toFirestoreFields(profile: UserProfile): Record<string, unknown> {
@@ -95,33 +100,38 @@ export class UserProfileService {
   }
 
   async syncCurrentProfile(authUser: AuthUser | null): Promise<void> {
+    const requestId = ++this.requestId;
+    this.stateSignal.set('loading');
+    this.readyPromise = this.loadCurrentProfile(authUser, requestId);
+    await this.readyPromise;
+  }
+
+  private async loadCurrentProfile(authUser: AuthUser | null, requestId: number): Promise<void> {
     if (!authUser) {
       this.appUserSignal.set(null);
+      this.stateSignal.set('ready');
       return;
     }
-
-    const response = await fetch(`${firebaseClient.firestoreBaseUrl}/users/${authUser.id}?key=${firebaseClient.apiKey}`, {
-      headers: {
-        Authorization: `Bearer ${authUser.idToken}`
+    try {
+      const response = await fetch(`${firebaseClient.firestoreBaseUrl}/users/${authUser.id}?key=${firebaseClient.apiKey}`, {
+        headers: { Authorization: `Bearer ${authUser.idToken}` }
+      });
+      if (requestId !== this.requestId) return;
+      if (!response.ok) {
+        this.appUserSignal.set(null);
+        return;
       }
-    });
+      const doc = (await response.json()) as FirestoreDocumentResponse;
 
-    if (!response.ok) {
-      this.appUserSignal.set(null);
-      return;
-    }
+      const role = doc.fields?.role?.stringValue;
+      const status = doc.fields?.status?.stringValue;
 
-    const doc = (await response.json()) as FirestoreDocumentResponse;
+      if (!doc.fields || !this.isUserRole(role) || !this.isUserAccountStatus(status)) {
+        this.appUserSignal.set(null);
+        return;
+      }
 
-    const role = doc.fields?.role?.stringValue;
-    const status = doc.fields?.status?.stringValue;
-
-    if (!doc.fields || !this.isUserRole(role) || !this.isUserAccountStatus(status)) {
-      this.appUserSignal.set(null);
-      return;
-    }
-
-    this.appUserSignal.set({
+      this.appUserSignal.set({
       id: doc.fields.id?.stringValue ?? authUser.id,
       fullName: doc.fields.fullName?.stringValue ?? '',
       email: doc.fields.email?.stringValue ?? authUser.email,
@@ -138,11 +148,19 @@ export class UserProfileService {
       membershipStartedAt: doc.fields.membershipStartedAt?.timestampValue,
       membershipExpiresAt: doc.fields.membershipExpiresAt?.timestampValue,
       externalPaymentReference: doc.fields.externalPaymentReference?.stringValue
-    });
+      });
+    } finally {
+      if (requestId === this.requestId) this.stateSignal.set('ready');
+    }
   }
 
+  async waitUntilReady(): Promise<void> { await this.readyPromise; }
+
   clearCurrentProfile(): void {
+    this.requestId++;
     this.appUserSignal.set(null);
+    this.stateSignal.set('ready');
+    this.readyPromise = Promise.resolve();
   }
 
   getCurrentUserProfile(): UserProfile | null {

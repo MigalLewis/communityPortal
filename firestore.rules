@@ -4,7 +4,13 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function active() { return signedIn() && profile().data.status == 'active'; }
-    function admin() { return active() && profile().data.role == 'admin'; }
+    // Privileged capabilities come from Admin SDK custom claims. Profile roles are
+    // presentation data and are never an authorization source for these powers.
+    function admin() { return active() && request.auth.token.admin == true; }
+    function paidResident() { return active() && request.auth.token.paidResident == true; }
+    function residentCapability() {
+      return active() && (profile().data.role == 'resident' || paidResident());
+    }
 
     match /users/{userId} {
       allow create: if signedIn() && request.auth.uid == userId
@@ -41,8 +47,8 @@ service cloud.firestore {
 
     match /serviceProviders/{id} { allow read: if true; allow write: if admin(); }
     match /categories/{id} { allow read: if true; allow write: if admin(); }
-    match /reviews/{id} { allow read: if true; allow write: if active(); }
-    match /jobs/{id} { allow read, write: if active(); }
+    match /reviews/{id} { allow read: if true; allow write: if residentCapability(); }
+    match /jobs/{id} { allow read, write: if residentCapability(); }
     match /messageThreads/{id} { allow read, write: if active(); }
     match /verifications/{id} { allow read, write: if admin(); }
   }
