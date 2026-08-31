@@ -22,10 +22,13 @@ export class RegisterPageComponent {
   protected readonly needsProfileRetry = signal(false);
   protected readonly accountType: PublicRegistrationRole | null;
   protected readonly registerForm;
+  private readonly redirectTo: string;
 
   constructor(formBuilder: FormBuilder, private readonly authService: AuthService,
               private readonly router: Router, route: ActivatedRoute) {
     const routeType = route.snapshot.data['accountType'] as string | undefined;
+    const requestedDestination = route.snapshot.queryParamMap.get('redirectTo');
+    this.redirectTo = requestedDestination?.startsWith('/') && !requestedDestination.startsWith('//') ? requestedDestination : '/dashboard';
     this.accountType = routeType === 'paid-resident' ? 'paid_resident'
       : routeType === 'resident' || routeType === 'contractor' ? routeType : null;
     this.registerForm = formBuilder.nonNullable.group({
@@ -54,7 +57,7 @@ export class RegisterPageComponent {
     try {
       if (this.needsProfileRetry()) await this.authService.retryProfileCreation(registration);
       else await this.authService.register(registration);
-      await this.router.navigate(['/dashboard']);
+      await this.router.navigateByUrl(this.redirectTo);
     } catch (error: unknown) {
       if (error instanceof ProfileOnboardingRequiredError) this.needsProfileRetry.set(true);
       this.formError.set(error instanceof Error ? error.message : 'Unable to create account right now.');

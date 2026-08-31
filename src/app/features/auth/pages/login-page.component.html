@@ -33,7 +33,7 @@
 
     <div class="auth-links">
       <a routerLink="/forgot-password">Forgot password?</a>
-      <p>New here? <a routerLink="/register">Create a resident account</a></p>
+      <p>New here? <a routerLink="/register" [queryParams]="{ redirectTo: route.snapshot.queryParamMap.get('redirectTo') }">Create a resident account</a></p>
     </div>
   </article>
 </section>
