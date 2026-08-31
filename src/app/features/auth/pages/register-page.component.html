@@ -1,58 +1,43 @@
-<section class="auth-page">
-  <article class="auth-card">
-    <header class="auth-header">
-      <h1>Create resident account</h1>
-      <p>Join the community to review and message trusted local providers.</p>
-    </header>
-
+<section class="auth-page"><article class="auth-card" [class.auth-card-wide]="accountType === 'contractor'">
+  @if (!accountType) {
+    <header class="auth-header"><h1>Create an account</h1><p>Choose the account that fits how you use the community.</p></header>
+    <nav class="account-types" aria-label="Registration account types">
+      <a routerLink="/register/resident"><strong>Resident</strong><span>Browse and connect with local providers.</span></a>
+      <a routerLink="/register/paid-resident"><strong>Paid resident</strong><span>Request premium access, activated after payment confirmation.</span></a>
+      <a routerLink="/register/contractor"><strong>Contractor</strong><span>Apply to offer services in the directory.</span></a>
+    </nav>
+  } @else {
+    <header class="auth-header"><h1>Create {{ accountType === 'paid_resident' ? 'paid resident' : accountType }} account</h1>
+      <p>{{ accountType === 'resident' ? 'Your account will be active immediately.' : 'Your profile will remain pending until approval or payment confirmation.' }}</p></header>
     <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
-      <div class="field">
-        <label for="fullName">Full name</label>
-        <input id="fullName" class="input" type="text" formControlName="fullName" autocomplete="name" />
-        @if (registerForm.controls.fullName.touched && registerForm.controls.fullName.invalid) {
-          <p class="error">Please enter your full name.</p>
-        }
-      </div>
-
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" class="input" type="email" formControlName="email" autocomplete="email" />
-        @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
-          <p class="error">Please enter a valid email address.</p>
-        }
-      </div>
-
-      <div class="field">
-        <label for="password">Password</label>
-        <input id="password" class="input" type="password" formControlName="password" autocomplete="new-password" />
-        @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-          <p class="error">Password must be at least 6 characters.</p>
-        }
-      </div>
-
-      <div class="field">
-        <label for="confirmPassword">Confirm password</label>
-        <input id="confirmPassword" class="input" type="password" formControlName="confirmPassword" autocomplete="new-password" />
-        @if (registerForm.controls.confirmPassword.touched && registerForm.controls.confirmPassword.invalid) {
-          <p class="error">Please confirm your password.</p>
-        }
-      </div>
-
-      @if (registerForm.errors?.['passwordsDoNotMatch'] && registerForm.controls.confirmPassword.touched) {
-        <p class="error">Passwords do not match.</p>
+      <div class="field"><label for="fullName">Full name</label><input id="fullName" class="input" formControlName="fullName" autocomplete="name" />
+        @if (registerForm.controls.fullName.touched && registerForm.controls.fullName.invalid) { <p class="error">Please enter your full name.</p> }</div>
+      <div class="field"><label for="email">Email</label><input id="email" class="input" type="email" formControlName="email" autocomplete="email" />
+        @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) { <p class="error">Please enter a valid email address.</p> }</div>
+      <div class="field"><label for="phone">Phone</label><input id="phone" class="input" type="tel" formControlName="phone" autocomplete="tel" />
+        @if (registerForm.controls.phone.touched && registerForm.controls.phone.invalid) { <p class="error">Please enter a phone number.</p> }</div>
+      <div class="field"><label for="password">Password</label><input id="password" class="input" type="password" formControlName="password" autocomplete="new-password" /></div>
+      <div class="field"><label for="confirmPassword">Confirm password</label><input id="confirmPassword" class="input" type="password" formControlName="confirmPassword" autocomplete="new-password" /></div>
+      @if (registerForm.errors?.['passwordsDoNotMatch'] && registerForm.controls.confirmPassword.touched) { <p class="error">Passwords do not match.</p> }
+      @if (accountType === 'contractor') {
+        <fieldset><legend>Business details</legend>
+          <div class="field"><label for="businessName">Business name</label><input id="businessName" class="input" formControlName="businessName" /></div>
+          <div class="field"><label for="serviceCategories">Service categories (comma separated)</label><input id="serviceCategories" class="input" formControlName="serviceCategories" /></div>
+          <div class="field"><label for="serviceAreas">Service areas (comma separated)</label><input id="serviceAreas" class="input" formControlName="serviceAreas" /></div>
+          <div class="field"><label for="businessDescription">Business description</label><textarea id="businessDescription" class="input" formControlName="businessDescription"></textarea></div>
+          <div class="field"><label for="businessContactEmail">Business contact email</label><input id="businessContactEmail" class="input" type="email" formControlName="businessContactEmail" /></div>
+          <div class="field"><label for="businessContactPhone">Business contact phone</label><input id="businessContactPhone" class="input" type="tel" formControlName="businessContactPhone" /></div>
+          <div class="field"><label for="businessWebsite">Business website (optional)</label><input id="businessWebsite" class="input" type="url" formControlName="businessWebsite" /></div>
+          <div class="field"><label for="verificationDocumentName">Verification document name</label><input id="verificationDocumentName" class="input" formControlName="verificationDocumentName" /></div>
+          <div class="field"><label for="verificationDocumentType">Document type</label><input id="verificationDocumentType" class="input" formControlName="verificationDocumentType" /></div>
+          <div class="field"><label for="verificationDocumentReference">Document reference</label><input id="verificationDocumentReference" class="input" formControlName="verificationDocumentReference" /></div>
+        </fieldset>
       }
-
-      @if (formError()) {
-        <p class="error">{{ formError() }}</p>
-      }
-
-      <button class="auth-submit" type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Creating account…' : 'Create account' }}
-      </button>
+      <label class="terms"><input type="checkbox" formControlName="acceptedTerms" /> I accept the terms and privacy policy.</label>
+      @if (registerForm.controls.acceptedTerms.touched && registerForm.controls.acceptedTerms.invalid) { <p class="error">You must accept the terms.</p> }
+      @if (formError()) { <p class="error" role="alert">{{ formError() }}</p> }
+      <button class="auth-submit" type="submit" [disabled]="isSubmitting()">{{ isSubmitting() ? 'Saving…' : needsProfileRetry() ? 'Retry profile setup' : 'Create account' }}</button>
     </form>
-
-    <div class="auth-links">
-      <p>Already have an account? <a routerLink="/login">Sign in</a></p>
-    </div>
-  </article>
-</section>
+  }
+  <div class="auth-links"><p>Already have an account? <a routerLink="/login">Sign in</a></p></div>
+</article></section>

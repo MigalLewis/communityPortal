@@ -45,6 +45,12 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/pages/register-page.component').then((m) => m.RegisterPageComponent)
   },
+  ...(['resident', 'paid-resident', 'contractor'] as const).map((accountType) => ({
+    path: `register/${accountType}`,
+    canActivate: [guestGuard],
+    data: { accountType },
+    loadComponent: () => import('./features/auth/pages/register-page.component').then((m) => m.RegisterPageComponent)
+  })),
   {
     path: 'forgot-password',
     canActivate: [guestGuard],
