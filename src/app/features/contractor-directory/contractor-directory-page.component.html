@@ -55,32 +55,34 @@
     </section>
   }
 
-  <section class="cards" aria-label="Contractor listing">
+  <section class="cards" aria-label="Contractor listing" aria-live="polite">
+    @if (loading) { <p class="empty">Loading contractors…</p> }
+    @if (loadError) { <p class="empty">{{ loadError }}</p> }
     @for (contractor of filteredContractors; track contractor.id) {
-      <article class="contractor-card" [class.available]="contractor.availableToday">
+      <article class="contractor-card" [class.available]="contractor.jobAvailability === 'available'">
         <div class="card-top">
           <div>
-            <h2>{{ contractor.name }}</h2>
-            <p class="meta">{{ contractor.category }} • {{ contractor.company }} • {{ contractor.area }}</p>
+            <h2>{{ contractor.fullName }}</h2>
+            <p class="meta">{{ contractor.categoryIds.join(', ') }} • {{ contractor.businessName }} • {{ contractor.serviceAreas.join(', ') }}</p>
           </div>
           <div class="rating-pill">★ {{ contractor.rating | number: '1.1-1' }} ({{ contractor.reviewCount }} reviews)</div>
         </div>
 
         <div class="tag-row">
-          @for (tag of contractor.tags; track tag) {
+          @for (tag of contractor.services; track tag) {
             <span class="service-tag">{{ tag }}</span>
           }
         </div>
 
         <div class="card-actions">
-          <span class="availability" [class.off]="!contractor.availableToday">
-            {{ contractor.availableToday ? 'Available Today' : 'Next availability: Tomorrow' }}
+          <span class="availability" [class.off]="contractor.jobAvailability !== 'available'">
+            {{ contractor.jobAvailability === 'available' ? 'Available for jobs' : 'Not currently available' }}
           </span>
           @if (contractor.verified) {
             <span class="verified">Verified</span>
           }
           <a class="btn secondary" [routerLink]="['/contractor-directory', contractor.id]">View Profile</a>
-          <button type="button" class="btn primary">Call {{ contractor.phone }}</button>
+          @if (contractor.contactPreferences.phone; as phone) { <a class="btn primary" [href]="'tel:' + phone">Call {{ phone }}</a> }
         </div>
       </article>
     } @empty {
