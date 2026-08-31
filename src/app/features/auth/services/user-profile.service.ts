@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { firebaseClient } from '../../../core/firebase/firebase.client';
 import { AuthUser } from '../models/auth-user.model';
-import { USER_ACCOUNT_STATUSES, UserAccountStatus, UserProfile } from '../models/user-profile.model';
+import { MEMBERSHIP_STATUSES, MembershipStatus, USER_ACCOUNT_STATUSES, UserAccountStatus, UserProfile } from '../models/user-profile.model';
 import { USER_ROLES, UserRole } from '../models/user-role.model';
 
 interface FirestoreDocumentResponse {
@@ -16,6 +16,10 @@ interface FirestoreDocumentResponse {
     approvedBy?: { stringValue: string };
     deactivatedAt?: { timestampValue: string };
     deactivatedBy?: { stringValue: string };
+    membershipStatus?: { stringValue: MembershipStatus };
+    membershipStartedAt?: { timestampValue: string };
+    membershipExpiresAt?: { timestampValue: string };
+    externalPaymentReference?: { stringValue: string };
   };
 }
 
@@ -44,7 +48,7 @@ export class UserProfileService {
 
   readonly currentProfile = computed(() => this.appUserSignal());
   readonly isResident = computed(() => this.currentProfile()?.role === 'resident');
-  readonly isAdmin = computed(() => this.currentProfile()?.role === 'admin');
+  readonly isAdmin = computed(() => this.currentProfile()?.role === 'admin' && this.currentProfile()?.status === 'active');
 
   async createPublicProfile(authUser: AuthUser, registration: PublicProfileRegistration): Promise<void> {
     const profile: UserProfile = {
@@ -54,6 +58,7 @@ export class UserProfileService {
       email: authUser.email,
       role: registration.role,
       status: registration.role === 'resident' ? 'active' : 'pending',
+      membershipStatus: registration.role === 'paid_resident' ? 'pending' : 'none',
       createdAt: new Date().toISOString()
     };
 
@@ -127,6 +132,12 @@ export class UserProfileService {
       approvedBy: doc.fields.approvedBy?.stringValue,
       deactivatedAt: doc.fields.deactivatedAt?.timestampValue,
       deactivatedBy: doc.fields.deactivatedBy?.stringValue
+      , membershipStatus: MEMBERSHIP_STATUSES.includes(doc.fields.membershipStatus?.stringValue as MembershipStatus)
+        ? doc.fields.membershipStatus!.stringValue
+        : 'none',
+      membershipStartedAt: doc.fields.membershipStartedAt?.timestampValue,
+      membershipExpiresAt: doc.fields.membershipExpiresAt?.timestampValue,
+      externalPaymentReference: doc.fields.externalPaymentReference?.stringValue
     });
   }
 

@@ -1,5 +1,5 @@
 import { UserRole } from '../../../features/auth/models/user-role.model';
-import { UserAccountStatus } from '../../../features/auth/models/user-profile.model';
+import { MembershipStatus, UserAccountStatus } from '../../../features/auth/models/user-profile.model';
 
 export type ISODateString = string;
 
@@ -18,6 +18,10 @@ export interface UserDocument extends FirestoreEntity {
   approvedBy?: string;
   deactivatedAt?: ISODateString;
   deactivatedBy?: string;
+  membershipStatus: MembershipStatus;
+  membershipStartedAt?: ISODateString;
+  membershipExpiresAt?: ISODateString;
+  externalPaymentReference?: string;
   phone?: string;
   avatarUrl?: string;
 }
@@ -31,6 +35,19 @@ export interface ContractorDocument extends FirestoreEntity {
   reviewCount: number;
   verified: boolean;
   bio?: string;
+  status: UserAccountStatus;
+  hireable: boolean;
+}
+
+export interface UserTransitionAuditDocument extends FirestoreEntity {
+  userId: string;
+  contractorId?: string;
+  action: 'approved' | 'rejected' | 'deactivated';
+  fromStatus: UserAccountStatus;
+  toStatus: UserAccountStatus;
+  actorId: string;
+  occurredAt: ISODateString;
+  reason?: string;
 }
 
 export interface ServiceProviderDocument extends FirestoreEntity {
@@ -126,6 +143,7 @@ export interface CollectionModelMap {
   jobs: JobDocument;
   messageThreads: MessageThreadDocument;
   verifications: VerificationDocument;
+  userTransitionAudits: UserTransitionAuditDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;
