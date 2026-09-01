@@ -4,7 +4,7 @@
     <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="Toggle navigation">☰</button>
     <nav class="main-nav" [class.main-nav--open]="menuOpen" aria-label="Main navigation">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-      <a routerLink="/" fragment="community">Our Community</a>
+      <a routerLink="/our-community" routerLinkActive="active">Our Community</a>
       <a routerLink="/" fragment="services">Resident Services</a>
       <a routerLink="/" fragment="security">Security</a>
       <a routerLink="/" fragment="projects">Projects</a>
