@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SiteFooterComponent } from '../../components/site-footer/site-footer.component';
+import { SiteHeaderComponent } from '../../components/site-header/site-header.component';
 
 interface CommunityPortfolio {
   icon: string;
@@ -17,13 +19,11 @@ interface ResidentService {
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, SiteHeaderComponent, SiteFooterComponent],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
 export class LandingPageComponent {
-  protected menuOpen = false;
-
   protected readonly portfolios: CommunityPortfolio[] = [
     {
       icon: '⌂',
@@ -49,7 +49,4 @@ export class LandingPageComponent {
     { icon: '□', title: 'Upcoming Events', description: 'Community gatherings', tone: 'gold' }
   ];
 
-  protected toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
-  }
 }

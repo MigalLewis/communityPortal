@@ -1,23 +1,5 @@
 <div class="landing-page">
-  <header class="site-header">
-    <div class="nav-wrap">
-      <a class="brand" routerLink="/" aria-label="PNRA home">PNRA</a>
-      <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="Toggle navigation">☰</button>
-      <nav class="main-nav" [class.main-nav--open]="menuOpen" aria-label="Main navigation">
-        <a class="active" routerLink="/">Home</a>
-        <a href="#community">Our Community</a>
-        <a href="#services">Resident Services</a>
-        <a href="#security">Security</a>
-        <a href="#projects">Projects</a>
-        <a href="#events">Events</a>
-        <a routerLink="/directory">Resources</a>
-      </nav>
-      <div class="nav-actions">
-        <a class="contact-link" href="mailto:parktownnorthra@gmail.com">Contact</a>
-        <a class="join-button" routerLink="/register">Join <span>PNRA</span></a>
-      </div>
-    </div>
-  </header>
+  <app-site-header />
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
@@ -83,8 +65,5 @@
     </section>
   </main>
 
-  <footer class="site-footer" id="security">
-    <div><h2>PNRA</h2><p>Parktown North Ratepayers' and Residents'<br />Association</p><p>Email: parktownnorthra&#64;gmail.com<br />Tel: 073 633 4560</p><small>© 2026 Parktown North Residents Association (PNRA). All rights reserved.</small></div>
-    <div class="footer-links"><strong>Legal & Resources</strong><a href="tel:112">Emergency Contacts</a><a href="#">Privacy Policy</a><a href="#">PAIA Manual</a><a href="#">Terms & Conditions</a></div>
-  </footer>
+  <app-site-footer />
 </div>

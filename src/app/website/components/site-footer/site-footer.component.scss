@@ -1,0 +1,8 @@
+:host { display: block; }
+.site-footer { max-width:1180px; margin:30px auto 0; padding:50px 55px; background:#e7e5e1; display:flex; justify-content:space-between; font-size:12px; line-height:1.55 }
+.site-footer h2 { font-family:Georgia,'Times New Roman',serif; font-size:21px;margin:0 0 20px }
+.site-footer small { display:block;margin-top:28px }
+.footer-links { display:flex; flex-direction:column; gap:7px; min-width:160px }
+.footer-links strong { margin-bottom:8px;letter-spacing:.08em }
+
+@media(max-width:560px){.site-footer{margin:0;padding:40px 24px;flex-direction:column;gap:35px}}
