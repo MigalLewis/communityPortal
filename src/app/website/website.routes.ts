@@ -9,6 +9,13 @@ export const WEBSITE_ROUTES: Routes = [
       import('./features/landing/landing-page.component').then((m) => m.LandingPageComponent)
   },
   {
+    path: 'our-community',
+    loadComponent: () =>
+      import('./features/our-community/our-community-page.component').then(
+        (m) => m.OurCommunityPageComponent
+      )
+  },
+  {
     path: 'help',
     loadComponent: () =>
       import('./features/help/help-page.component').then((m) => m.HelpPageComponent)
