@@ -1,0 +1,66 @@
+<main class="faq-page website-page">
+  <section class="faq-hero" aria-labelledby="faq-title">
+    <div class="dot-pattern" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <p class="eyebrow">PNRA Help Centre</p>
+      <h1 id="faq-title">How can we help?</h1>
+      <p>Quick answers to common questions from Parktown North residents and businesses.</p>
+      <label class="faq-search">
+        <span aria-hidden="true">⌕</span>
+        <span class="sr-only">Search frequently asked questions</span>
+        <input type="search" placeholder="Search frequently asked questions..." [value]="query" (input)="updateSearch($event)" />
+      </label>
+    </div>
+  </section>
+
+  <section class="faq-layout" aria-label="Frequently asked questions">
+    <aside class="category-card">
+      <h2>Categories</h2>
+      <nav aria-label="FAQ categories">
+        @for (category of categories; track category) {
+          <button type="button" [class.active]="!query && activeCategory === category" [attr.aria-pressed]="!query && activeCategory === category" (click)="selectCategory(category)">{{ category }}</button>
+        }
+      </nav>
+    </aside>
+
+    <section class="questions-card" aria-live="polite">
+      <header><p>{{ visibleFaqs.length }} {{ visibleFaqs.length === 1 ? 'answer' : 'answers' }}</p><h2>{{ heading }}</h2></header>
+      <div class="accordion">
+        @for (faq of visibleFaqs; track faq.question) {
+          <article [class.open]="openQuestion === faq.question">
+            <h3>
+              <button type="button" (click)="toggle(faq)" [attr.aria-expanded]="openQuestion === faq.question">
+                <span>{{ faq.question }}</span><span class="chevron" aria-hidden="true">⌄</span>
+              </button>
+            </h3>
+            @if (openQuestion === faq.question) {
+              <div class="answer">
+                <p>{{ faq.answer }}</p>
+                @if (faq.link) { <a [routerLink]="faq.link.route">{{ faq.link.label }} <span aria-hidden="true">→</span></a> }
+              </div>
+            }
+          </article>
+        } @empty {
+          <div class="no-results"><span aria-hidden="true">?</span><h3>No answers found</h3><p>Try a different keyword or browse one of the categories.</p><button type="button" (click)="selectCategory('Membership')">Clear search</button></div>
+        }
+      </div>
+    </section>
+  </section>
+
+  <section class="popular" aria-labelledby="popular-title">
+    <div class="popular-inner">
+      <div class="section-heading"><p>Useful shortcuts</p><h2 id="popular-title">Popular links</h2></div>
+      <div class="link-grid">
+        <a class="featured" routerLink="/membership"><span class="icon" aria-hidden="true">✓</span><div><h3>Join PNRA</h3><p>Help us preserve the character, safety and community of Parktown North.</p></div><span class="arrow" aria-hidden="true">→</span></a>
+        <a routerLink="/resident-services"><span class="icon" aria-hidden="true">!</span><div><h3>Report an issue</h3><p>Find help with municipal faults.</p></div></a>
+        <a routerLink="/security"><span class="icon" aria-hidden="true">◆</span><div><h3>Security contacts</h3><p>Emergency and neighbourhood information.</p></div></a>
+        <a routerLink="/resources"><span class="icon" aria-hidden="true">⌂</span><div><h3>Town planning</h3><p>Heritage and building guidance.</p></div></a>
+        <a routerLink="/resources"><span class="icon" aria-hidden="true">▤</span><div><h3>Resources</h3><p>Forms, minutes and policies.</p></div></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-cta">
+    <p>We're here to help</p><h2>Still have a question?</h2><span>Our committee will make sure your enquiry reaches the right person.</span><a href="mailto:parktownnorthra@gmail.com?subject=PNRA%20website%20enquiry">Contact PNRA</a>
+  </section>
+</main>
