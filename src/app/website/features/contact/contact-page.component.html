@@ -19,7 +19,7 @@
         </div>
         <label class="message"><span>Message</span><textarea name="message" ngModel required maxlength="5000" rows="6"></textarea></label>
         <label class="website-field" aria-hidden="true"><span>Website</span><input name="website" ngModel tabindex="-1" autocomplete="off" /></label>
-        <label class="privacy"><input name="privacy" ngModel required type="checkbox" /><span>I acknowledge the PNRA privacy policy.</span></label>
+        <label class="privacy"><input name="privacy" ngModel required type="checkbox" /><span>I acknowledge the PNRA <a routerLink="/privacy" target="_blank" rel="noopener">privacy policy</a>.</span></label>
         @if (contactForm.submitted && contactForm.invalid) { <p class="form-error" role="alert">Please complete all required fields and enter a valid email address.</p> }
         @if (state === 'failure') { <p class="form-error" role="alert">We could not send your message. Your details have been kept so you can try again.</p> }
         <button type="submit" [disabled]="state === 'sending'">{{ state === 'sending' ? 'Sending…' : 'Send message' }} <span aria-hidden="true">→</span></button>
