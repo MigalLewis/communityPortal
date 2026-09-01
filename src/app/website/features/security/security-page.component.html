@@ -1,0 +1,59 @@
+<div class="security-page website-page">
+  <main>
+    <header class="hero" aria-labelledby="security-title">
+      <div class="hero-pattern" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">Community security</p>
+        <h1 id="security-title">Keeping Parktown North safer, together.</h1>
+        <p>The PNRA coordinates a multi-layered, community-based approach to security, working closely with residents, private security partners, and SAPS to protect our neighbourhood.</p>
+      </div>
+    </header>
+
+    <section class="emergency-wrap" aria-labelledby="emergency-title">
+      <div class="emergency-panel">
+        <div class="emergency-heading">
+          <div><span class="warning" aria-hidden="true">!</span><h2 id="emergency-title">Emergency Contacts</h2></div>
+          <p>For emergencies, contact first responders directly.</p>
+        </div>
+        <div class="contact-grid">
+          @for (contact of emergencyContacts; track contact.label) {
+            <a class="contact-card" [href]="'tel:' + contact.telephone">
+              <span>{{ contact.label }}</span>
+              <strong>{{ contact.number }}</strong>
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="services website-page-section" aria-label="Security services">
+      <article class="service-card">
+        <div class="service-title"><span class="service-icon" aria-hidden="true">●</span><h2>Stay Informed: Security WhatsApp Groups</h2></div>
+        <div class="service-content">
+          <h3>Alert Group</h3>
+          <p>A broadcast-only group limited to security and crime-related alerts. Closely monitored by the Admin Team for verified information.</p>
+          <h3>Community Group</h3>
+          <p>A chat group for security-related issues, open to PNRA Security Scheme members in good standing.</p>
+        </div>
+        <a class="primary-action" href="mailto:parktownnorthra@gmail.com?subject=Security WhatsApp groups">View Policy &amp; Join Groups <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="service-card">
+        <div class="service-title fire"><span class="service-icon" aria-hidden="true">♨</span><h2>Private Fire &amp; Rescue Services</h2></div>
+        <div class="service-content">
+          <p>In partnership with <strong>Fire Operations (Pty) Ltd</strong>, PNRA Security Scheme clients have access to first-responder firefighting and rescue services with no additional membership fee.</p>
+          <div class="registration">
+            <h3>4-Step Registration</h3>
+            <ol>
+              <li><span>1.</span> Scan or click for the Fire Ops page</li>
+              <li><span>2.</span> Submit your details</li>
+              <li><span>3.</span> Receive your registration code</li>
+              <li><span>4.</span> Download the LominaSOS App</li>
+            </ol>
+          </div>
+        </div>
+        <a class="secondary-action" href="mailto:parktownnorthra@gmail.com?subject=Fire Ops registration">Register for Fire Ops <span aria-hidden="true">↗</span></a>
+      </article>
+    </section>
+  </main>
+</div>
