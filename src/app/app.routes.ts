@@ -3,7 +3,7 @@ import { Routes, UrlSegment } from '@angular/router';
 const websitePageMatcher = (segments: UrlSegment[]) => {
   const isLandingPage = segments.length === 0;
   const isStaticPage =
-    segments.length === 1 && ['help', 'membership', 'our-community', 'projects', 'resident-services', 'security'].includes(segments[0].path);
+    segments.length === 1 && ['help', 'membership', 'our-community', 'projects', 'resident-services', 'resources', 'security'].includes(segments[0].path);
 
   return isLandingPage || isStaticPage ? { consumed: [] } : null;
 };

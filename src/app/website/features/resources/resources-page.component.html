@@ -1,0 +1,37 @@
+<main class="resources-page website-page">
+  <section class="hero" aria-labelledby="resources-title">
+    <h1 id="resources-title">Parktown North Resources</h1>
+    <p>Find forms, municipal information, planning documents, policies and useful neighbourhood resources.</p>
+    <label class="search"><span class="material-symbols-outlined" aria-hidden="true">⌕</span><span class="sr-only">Search resources</span><input type="search" placeholder="Search by-laws, AGM minutes, heritage forms..." [value]="query" (input)="updateSearch($event)" /></label>
+  </section>
+
+  <div class="resource-layout">
+    <section class="library" aria-label="Resource library">
+      <div class="category-grid" aria-label="Resource categories">
+        @for (category of categories; track category[1]) {
+          <button type="button" [class.active]="activeCategory === category[1]" [attr.aria-pressed]="activeCategory === category[1]" (click)="selectCategory(category[1])">
+            <span class="material-symbols-outlined" aria-hidden="true">{{ category[0] }}</span><strong>{{ category[1] }}</strong>
+          </button>
+        }
+      </div>
+
+      <div class="documents" id="documents">
+        <header><h2>Recent Documents</h2><label><span class="material-symbols-outlined" aria-hidden="true">≡</span><span class="sr-only">Sort documents</span><select (change)="updateSort($event)"><option value="newest">Sort by: Newest</option><option value="title">Sort by: A–Z</option></select></label></header>
+        @for (document of visibleDocuments; track document.title) {
+          <article class="document-card">
+            <div class="document-copy"><div class="metadata"><span>{{ document.category }}</span><small>{{ document.date }} · PDF · {{ document.size }}</small></div><h3>{{ document.title }}</h3><p>{{ document.description }}</p></div>
+            <div class="document-actions"><a href="mailto:parktownnorthra@gmail.com?subject=View%20resource" [attr.aria-label]="'Request to view ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">◉</span></a><a class="download" href="mailto:parktownnorthra@gmail.com?subject=Resource%20download" [attr.aria-label]="'Request ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">↓</span> Request</a></div>
+          </article>
+        } @empty { <p class="empty">No documents match your search. Try another keyword or category.</p> }
+        @if (visibleCount < filteredDocuments.length) { <button class="load-more" type="button" (click)="loadMore()">Load More Documents <span class="material-symbols-outlined" aria-hidden="true">⌄</span></button> }
+      </div>
+    </section>
+
+    <aside>
+      <section class="quick-links"><h2><span class="material-symbols-outlined" aria-hidden="true">★</span>Quick Links</h2><nav>
+        @for (link of ['Membership Form', 'Town Planning Objection Template', 'Heritage Applications', 'AGM Minutes', 'By-Laws', 'PAIA Manual']; track link) { <a href="#documents" (click)="query = link"><span class="material-symbols-outlined" aria-hidden="true">›</span>{{ link }}</a> }
+      </nav></section>
+      <section class="help"><span class="material-symbols-outlined" aria-hidden="true">?</span><h2>Can't find what you're looking for?</h2><p>Our committee can assist with specific documents or heritage enquiries.</p><a href="mailto:parktownnorthra@gmail.com?subject=Resources%20enquiry">Contact PNRA</a></section>
+    </aside>
+  </div>
+</main>
