@@ -5,10 +5,14 @@
 .main-nav { display:flex; align-items:stretch; height:100%; gap:25px; flex:1; }
 .main-nav a { display:flex; align-items:center; font-family:var(--website-font-heading); font-size:15px; position:relative; }
 .main-nav a.active::after { content:''; position:absolute; left:0; right:0; bottom:17px; height:2px; background:var(--lime,#79c92b); }
+.main-nav .help-link { align-self:center; justify-content:center; width:32px; height:32px; margin-left:auto; border:1px solid #d9ddd9; border-radius:50%; color:#52635b; font-family:var(--website-font-body); font-size:16px; font-weight:700; transition:border-color .2s,color .2s,background .2s; }
+.main-nav .help-link:hover,.main-nav .help-link.active { border-color:var(--lime,#79c92b); background:#f2f8ed; color:#355426; }
+.main-nav .help-link.active::after { display:none; }
+.help-label { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .nav-actions { display:flex; gap:14px; align-items:center; }
 .contact-link { border:1px solid #e9c77b; color:#ba8521; padding:11px 18px; border-radius:6px; font-size:12px; letter-spacing:.08em; }
 .join-button { color:white; background:var(--green,#071f17); border-radius:5px; font-weight:600; padding:8px 18px; font-size:12px; text-align:center; line-height:1.1; }
 .join-button span { display:block; }
 .menu-toggle { display:none; border:0; background:none; font-size:24px; }
 
-@media(max-width:900px){.site-header{height:auto}.nav-wrap{min-height:70px;flex-wrap:wrap}.menu-toggle{display:block;margin-left:auto}.main-nav{display:none;order:4;flex-basis:100%;height:auto;flex-direction:column;gap:0;padding-bottom:15px}.main-nav--open{display:flex}.main-nav a{padding:10px}.main-nav a.active::after{display:none}.nav-actions{display:none}}
+@media(max-width:900px){.site-header{height:auto}.nav-wrap{min-height:70px;flex-wrap:wrap}.menu-toggle{display:block;margin-left:auto}.main-nav{display:none;order:4;flex-basis:100%;height:auto;flex-direction:column;gap:0;padding-bottom:15px}.main-nav--open{display:flex}.main-nav a{padding:10px}.main-nav a.active::after{display:none}.main-nav .help-link{align-self:stretch;justify-content:flex-start;width:auto;height:auto;margin:0;border:0;border-radius:0;font-family:var(--website-font-heading);font-size:15px;font-weight:400}.main-nav .help-link>span:first-child{display:none}.help-label{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto;white-space:normal}.nav-actions{display:none}}
