@@ -17,10 +17,17 @@
 
       <div class="documents" id="documents">
         <header><h2>Recent Documents</h2><label><span class="material-symbols-outlined" aria-hidden="true">≡</span><span class="sr-only">Sort documents</span><select (change)="updateSort($event)"><option value="newest">Sort by: Newest</option><option value="title">Sort by: A–Z</option></select></label></header>
-        @for (document of visibleDocuments; track document.title) {
+        @for (document of visibleDocuments; track document.id) {
           <article class="document-card">
-            <div class="document-copy"><div class="metadata"><span>{{ document.category }}</span><small>{{ document.date }} · PDF · {{ document.size }}</small></div><h3>{{ document.title }}</h3><p>{{ document.description }}</p></div>
-            <div class="document-actions"><a href="mailto:parktownnorthra@gmail.com?subject=View%20resource" [attr.aria-label]="'Request to view ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">◉</span></a><a class="download" href="mailto:parktownnorthra@gmail.com?subject=Resource%20download" [attr.aria-label]="'Request ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">↓</span> Request</a></div>
+            <div class="document-copy"><div class="metadata"><span>{{ document.category }}</span><small>Published {{ publicationLabel(document.publishedOn) }}@if (document.fileSizeBytes) { · PDF · {{ fileSizeLabel(document.fileSizeBytes) }}}</small></div><h3>{{ document.title }}</h3><p>{{ document.description }}</p>@if (!document.documentUrl && document.requestReason) { <p class="availability-note">{{ document.requestReason }}</p> }</div>
+            <div class="document-actions">
+              @if (document.documentUrl) {
+                @if (document.previewUrl) { <a [href]="document.previewUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Preview ' + document.title + ' in a new tab'"><span class="material-symbols-outlined" aria-hidden="true">◉</span> View</a> }
+                <a class="download" [href]="document.documentUrl" [download]="document.filename" [attr.aria-label]="'Download ' + document.title + ' as ' + document.filename"><span class="material-symbols-outlined" aria-hidden="true">↓</span> Download</a>
+              } @else {
+                <a class="request" [href]="requestUrl(document)" [attr.aria-label]="'Request this document: ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">✉</span> Request this document</a>
+              }
+            </div>
           </article>
         } @empty { <p class="empty">No documents match your search. Try another keyword or category.</p> }
         @if (visibleCount < filteredDocuments.length) { <button class="load-more" type="button" (click)="loadMore()">Load More Documents <span class="material-symbols-outlined" aria-hidden="true">⌄</span></button> }
@@ -29,7 +36,7 @@
 
     <aside>
       <section class="quick-links"><h2><span class="material-symbols-outlined" aria-hidden="true">★</span>Quick Links</h2><nav>
-        @for (link of ['Membership Form', 'Town Planning Objection Template', 'Heritage Applications', 'AGM Minutes', 'By-Laws', 'PAIA Manual']; track link) { <a href="#documents" (click)="query = link"><span class="material-symbols-outlined" aria-hidden="true">›</span>{{ link }}</a> }
+        @for (link of quickLinks; track link.documentId) { <a href="#documents" (click)="followQuickLink(link.documentId)"><span class="material-symbols-outlined" aria-hidden="true">›</span>{{ link.label }}</a> }
       </nav></section>
       <section class="help"><span class="material-symbols-outlined" aria-hidden="true">?</span><h2>Can't find what you're looking for?</h2><p>Our committee can assist with specific documents or heritage enquiries.</p><a href="mailto:parktownnorthra@gmail.com?subject=Resources%20enquiry">Contact PNRA</a></section>
     </aside>
