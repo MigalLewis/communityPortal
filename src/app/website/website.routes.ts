@@ -65,6 +65,7 @@ const WEBSITE_PAGE_ROUTES: Routes = [
   },
   {
     path: 'help',
+    title: 'FAQ | Parktown North Residents Association',
     loadComponent: () =>
       import('./features/help/help-page.component').then((m) => m.HelpPageComponent)
   }
