@@ -1,0 +1,90 @@
+<div class="landing-page">
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="brand" routerLink="/" aria-label="PNRA home">PNRA</a>
+      <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="Toggle navigation">☰</button>
+      <nav class="main-nav" [class.main-nav--open]="menuOpen" aria-label="Main navigation">
+        <a class="active" routerLink="/">Home</a>
+        <a href="#community">Our Community</a>
+        <a href="#services">Resident Services</a>
+        <a href="#security">Security</a>
+        <a href="#projects">Projects</a>
+        <a href="#events">Events</a>
+        <a routerLink="/directory">Resources</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="contact-link" href="mailto:parktownnorthra@gmail.com">Contact</a>
+        <a class="join-button" routerLink="/register">Join <span>PNRA</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <p class="eyebrow">Parktown North Ratepayers' and Residents' Association</p>
+        <h1 id="hero-title">Welcome to Parktown North:<br />A Community in Action</h1>
+        <p>Preserving the heritage, security, and vibrant spirit of Johannesburg's most iconic leafy suburb.</p>
+        <div class="hero-actions">
+          <a class="primary-button" routerLink="/register">Join PNRA Today</a>
+          <a class="secondary-button" href="#projects">Latest News</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section portfolios" id="community" aria-labelledby="portfolio-title">
+      <div class="section-heading centered">
+        <h2 id="portfolio-title">Community Portfolios</h2>
+        <p>Dedicated committees ensuring the sustained excellence of our neighborhood.</p>
+      </div>
+      <div class="portfolio-grid">
+        @for (portfolio of portfolios; track portfolio.title) {
+          <article class="portfolio-card">
+            <span class="portfolio-icon" aria-hidden="true">{{ portfolio.icon }}</span>
+            <h3>{{ portfolio.title }}</h3>
+            <p>{{ portfolio.description }}</p>
+            <a href="mailto:parktownnorthra@gmail.com?subject={{ portfolio.title }}">Learn More <span>→</span></a>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="section services" id="services" aria-labelledby="services-title">
+      <div class="services-intro">
+        <h2 id="services-title">Resident Services</h2>
+        <p>Quick access to essential neighborhood resources and reporting tools.</p>
+        <div class="service-image" role="img" aria-label="A resident using community services on a mobile phone"></div>
+      </div>
+      <div class="service-grid">
+        @for (service of services; track service.title) {
+          <a class="service-card" href="mailto:parktownnorthra@gmail.com?subject={{ service.title }}">
+            <span class="service-icon service-icon--{{ service.tone }}" aria-hidden="true">{{ service.icon }}</span>
+            <span><strong>{{ service.title }}</strong><small>{{ service.description }}</small></span>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="section projects" id="projects" aria-labelledby="projects-title">
+      <div class="section-heading project-heading">
+        <div><h2 id="projects-title">Latest Projects</h2><p>Active initiatives improving our suburb.</p></div>
+        <a routerLink="/projects">View All Projects</a>
+      </div>
+      <div class="project-grid">
+        <article class="project-card">
+          <div class="project-image project-image--park" role="img" aria-label="A thriving green community garden"></div>
+          <div class="project-copy"><div class="project-title"><h3>Pocket Park Initiative</h3><span class="status ongoing">Ongoing</span></div><p>Transforming unused urban spaces into beautiful, green communal areas for residents to enjoy.</p><a href="mailto:parktownnorthra@gmail.com?subject=Pocket Park Initiative">Read more</a></div>
+        </article>
+        <article class="project-card">
+          <div class="project-image project-image--street" role="img" aria-label="A clean tree-lined residential street"></div>
+          <div class="project-copy"><div class="project-title"><h3>Graffiti Abatement</h3><span class="status">Active</span></div><p>A continuous effort by the CIA Squad to rapidly remove graffiti and maintain the pristine aesthetic of our streets.</p><a href="mailto:parktownnorthra@gmail.com?subject=Graffiti Abatement">Read more</a></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="security">
+    <div><h2>PNRA</h2><p>Parktown North Ratepayers' and Residents'<br />Association</p><p>Email: parktownnorthra&#64;gmail.com<br />Tel: 073 633 4560</p><small>© 2026 Parktown North Residents Association (PNRA). All rights reserved.</small></div>
+    <div class="footer-links"><strong>Legal & Resources</strong><a href="tel:112">Emergency Contacts</a><a href="#">Privacy Policy</a><a href="#">PAIA Manual</a><a href="#">Terms & Conditions</a></div>
+  </footer>
+</div>

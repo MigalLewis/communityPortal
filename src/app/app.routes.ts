@@ -9,7 +9,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'dashboard'
+    loadComponent: () => import('./features/landing/landing-page.component').then((m) => m.LandingPageComponent)
   },
   {
     path: 'dashboard',

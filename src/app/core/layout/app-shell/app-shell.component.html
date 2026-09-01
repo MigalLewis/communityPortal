@@ -1,7 +1,9 @@
 <div class="shell">
-  <app-top-bar />
+  @if (!isLandingPage) {
+    <app-top-bar />
+  }
 
-  <main class="content" role="main">
+  <main class="content" [class.content--landing]="isLandingPage" role="main">
     <router-outlet />
   </main>
 </div>
