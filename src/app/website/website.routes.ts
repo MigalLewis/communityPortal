@@ -24,6 +24,14 @@ const WEBSITE_PAGE_ROUTES: Routes = [
       )
   },
   {
+    path: 'projects',
+    title: 'Community Projects | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/projects/projects-page.component').then(
+        (m) => m.ProjectsPageComponent
+      )
+  },
+  {
     path: 'security',
     title: 'Security | Parktown North Residents Association',
     loadComponent: () =>
