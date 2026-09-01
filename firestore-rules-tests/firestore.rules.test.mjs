@@ -60,6 +60,7 @@ async function seed() {
       setDoc(doc(db, 'payments/payment'), { id: 'payment', userId: 'resident', amount: 100 }),
       setDoc(doc(db, 'userTransitionAudits/audit'), { id: 'audit', userId: 'resident' }),
       setDoc(doc(db, 'contactEnquiries/enquiry'), { name: 'Sender', message: 'Private message' })
+      ,setDoc(doc(db, 'municipalReports/owned'), { id: 'owned', ownerId: 'resident', referenceNumber: 'PNRA-2026-OWNED', status: 'submitted', createdAt: '2026-01-01', attachments: [{ name: 'road.jpg', contentType: 'image/jpeg', size: 1200 }] })
     ]);
   });
 }
@@ -193,5 +194,26 @@ describe('contact enquiries remain backend and administrator only', () => {
     await assertSucceeds(getDoc(doc(authed('admin', { admin: true }), 'contactEnquiries/enquiry')));
     await assertFails(getDoc(doc(authed('admin'), 'contactEnquiries/enquiry')));
     await assertFails(getDoc(doc(anon(), 'contactEnquiries/enquiry')));
+  });
+});
+
+describe('municipal report ownership and administration', () => {
+  test('allows an owner and trusted active administrator to read a report', async () => {
+    await assertSucceeds(getDoc(doc(authed('resident'), 'municipalReports/owned')));
+    await assertSucceeds(getDoc(doc(authed('admin', { admin: true }), 'municipalReports/owned')));
+  });
+  test('denies anonymous and other-resident access', async () => {
+    await assertFails(getDoc(doc(anon(), 'municipalReports/owned')));
+    await assertFails(getDoc(doc(authed('outsider'), 'municipalReports/owned')));
+  });
+  test('denies direct creation, attachment changes, and status transitions', async () => {
+    await assertFails(setDoc(doc(authed('resident'), 'municipalReports/forged'), { ownerId: 'resident', status: 'submitted' }));
+    await assertFails(updateDoc(doc(authed('resident'), 'municipalReports/owned'), { attachments: [] }));
+    await assertFails(updateDoc(doc(authed('admin', { admin: true }), 'municipalReports/owned'), { status: 'closed' }));
+  });
+  test('requires an ownership-constrained resident list query', async () => {
+    await assertSucceeds(getDocs(query(collection(authed('resident'), 'municipalReports'), where('ownerId', '==', 'resident'))));
+    await assertFails(getDocs(collection(authed('resident'), 'municipalReports')));
+    await assertSucceeds(getDocs(collection(authed('admin', { admin: true }), 'municipalReports')));
   });
 });

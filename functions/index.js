@@ -8,6 +8,10 @@ initializeApp();
 const contactSubjects = new Set(['General enquiry', 'Membership', 'Municipal issue', 'Security',
   'Town Planning & Heritage', 'Community project', 'Website feedback', 'Other']);
 
+const reportCategories = new Set(['roads', 'water', 'electricity', 'waste', 'parks', 'stormwater', 'other']);
+const reportEntities = new Set(['Johannesburg Roads Agency', 'Johannesburg Water', 'City Power', 'Pikitup', 'Johannesburg City Parks', 'Other / unsure']);
+const reportTransitions = { submitted: ['assigned', 'closed'], assigned: ['in_progress', 'closed'], in_progress: ['resolved', 'closed'], resolved: ['in_progress', 'closed'], closed: [] };
+
 function contactText(value, field, max, required = true) {
   if (value == null && !required) return '';
   if (typeof value !== 'string') throw new HttpsError('invalid-argument', `${field} is invalid.`);
@@ -17,6 +21,72 @@ function contactText(value, field, max, required = true) {
   }
   return normalized;
 }
+
+// Membership is required so ownership and status visibility remain reliable.
+// Anonymous clients receive unauthenticated and can resume their locally saved draft after login.
+exports.submitMunicipalReport = onCall(async (request) => {
+  const db = getFirestore();
+  await requireResident(db, request.auth);
+  const contentLength = Number(request.rawRequest?.get('content-length') || 0);
+  if (contentLength > 20000) throw new HttpsError('invalid-argument', 'Submission is too large.');
+  const input = request.data || {};
+  const category = contactText(input.category, 'Category', 30);
+  const entity = contactText(input.entity, 'Municipal entity', 80);
+  const location = contactText(input.location, 'Location', 250);
+  const description = contactText(input.description, 'Description', 4000);
+  const cityReference = contactText(input.cityReference, 'City reference', 80, false);
+  if (!reportCategories.has(category) || !reportEntities.has(entity) || description.length < 20
+      || !['email', 'phone', 'none'].includes(input.contactPreference)) {
+    throw new HttpsError('invalid-argument', 'Report details are invalid.');
+  }
+  if (!Array.isArray(input.attachments) || input.attachments.length > 5) throw new HttpsError('invalid-argument', 'Too many attachments.');
+  const attachments = input.attachments.map((item) => {
+    if (!item || typeof item.name !== 'string' || !item.name.trim() || item.name.length > 180
+        || !['image/jpeg', 'image/png', 'application/pdf'].includes(item.contentType)
+        || !Number.isInteger(item.size) || item.size < 1 || item.size > 5_000_000
+        || item.storagePath != null) throw new HttpsError('invalid-argument', 'Attachment metadata is invalid.');
+    return { name: item.name.trim(), contentType: item.contentType, size: item.size };
+  });
+  const now = Timestamp.now();
+  const forwarded = request.rawRequest?.get('x-forwarded-for');
+  const ip = (forwarded ? forwarded.split(',')[0] : request.rawRequest?.ip) || 'unknown';
+  const fingerprint = createHash('sha256').update(`report:${request.auth.uid}:${ip}`).digest('hex');
+  const limitRef = db.doc(`municipalReportRateLimits/${fingerprint}`);
+  const reportRef = db.collection('municipalReports').doc();
+  const referenceNumber = `PNRA-${now.toDate().getUTCFullYear()}-${reportRef.id.slice(0, 8).toUpperCase()}`;
+  await db.runTransaction(async (transaction) => {
+    const limit = await transaction.get(limitRef); const start = limit.get('windowStart');
+    const active = start && now.toMillis() - start.toMillis() < 60 * 60 * 1000;
+    const count = active ? (limit.get('count') || 0) : 0;
+    if (count >= 5) throw new HttpsError('resource-exhausted', 'Too many reports. Please try again later.');
+    transaction.set(limitRef, { windowStart: active ? start : now, count: count + 1, updatedAt: now });
+    transaction.create(reportRef, { id: reportRef.id, referenceNumber, ownerId: request.auth.uid, category, entity,
+      location, description, cityReference: cityReference || null, contactPreference: input.contactPreference,
+      attachments, status: 'submitted', assigneeId: null, createdAt: now, updatedAt: now });
+  });
+  return { reportId: reportRef.id, referenceNumber };
+});
+
+exports.manageMunicipalReport = onCall(async (request) => {
+  const db = getFirestore();
+  if (!request.auth || request.auth.token.admin !== true) throw new HttpsError('permission-denied', 'Administrator access is required.');
+  const actor = await db.doc(`users/${request.auth.uid}`).get();
+  if (!actor.exists || actor.get('status') !== 'active') throw new HttpsError('permission-denied', 'Active administrator access is required.');
+  const { reportId, status } = request.data || {};
+  const assigneeId = contactText(request.data?.assigneeId, 'Assignee', 128, false);
+  const resolutionNote = contactText(request.data?.resolutionNote, 'Resolution note', 2000, false);
+  if (typeof reportId !== 'string' || !Object.hasOwn(reportTransitions, status)) throw new HttpsError('invalid-argument', 'Report and status are required.');
+  await db.runTransaction(async (transaction) => {
+    const ref = db.doc(`municipalReports/${reportId}`); const report = await transaction.get(ref);
+    if (!report.exists) throw new HttpsError('not-found', 'Report was not found.');
+    if (!reportTransitions[report.get('status')]?.includes(status)) throw new HttpsError('failed-precondition', 'That status transition is not allowed.');
+    if (['assigned', 'in_progress'].includes(status) && !assigneeId) throw new HttpsError('invalid-argument', 'An assignee is required.');
+    if (['resolved', 'closed'].includes(status) && !resolutionNote) throw new HttpsError('invalid-argument', 'A closing note is required.');
+    transaction.update(ref, { status, assigneeId: assigneeId || report.get('assigneeId') || null,
+      resolutionNote: resolutionNote || null, updatedAt: Timestamp.now(), updatedBy: request.auth.uid });
+  });
+  return { ok: true };
+});
 
 // Public callable contact form. The callable protocol, strict validation,
 // honeypot, payload cap, and transaction-backed IP limit protect the only write

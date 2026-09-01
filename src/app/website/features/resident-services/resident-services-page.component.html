@@ -1,24 +1,13 @@
 <main class="resident-services-page website-page">
-  <section class="hero website-page-section" aria-labelledby="resident-services-title">
-    <div class="hero-copy">
-      <h1 id="resident-services-title">Need help with a neighbourhood issue?</h1>
-      <p>
-        The PNRA works closely with City of Johannesburg entities. We use resident reports to
-        identify recurring problems, track service delivery, and hold providers accountable for
-        the maintenance of our suburb.
-      </p>
-      <a class="report-button" href="mailto:parktownnorthra@gmail.com?subject=Neighbourhood%20issue">
-        Report an Issue
-        <span aria-hidden="true">↓</span>
-      </a>
-    </div>
-
-    <img
-      class="hero-image"
-      src="https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
-      alt="A quiet, leafy street beneath a canopy of mature trees"
-      width="1200"
-      height="800"
-    />
-  </section>
+  <section class="hero website-page-section"><div><p class="eyebrow">Resident services</p><h1>Report a municipal issue</h1><p>Help PNRA follow up with the correct City of Johannesburg entity. Existing City reference numbers help us escalate effectively.</p></div><aside class="emergency"><strong>Is anyone in immediate danger?</strong><p>Do not submit emergencies here. Use our security contacts and emergency guidance.</p><a routerLink="/security">Go to Security →</a></aside></section>
+  <section class="report-layout website-page-section" id="report"><form [formGroup]="form" (ngSubmit)="submit()" novalidate><h2>Issue details</h2>
+    <div class="grid"><label>Issue category<select formControlName="category"><option value="">Select a category</option><option *ngFor="let item of categories" [value]="item">{{ item | titlecase }}</option></select></label><label>Municipal entity<select formControlName="entity"><option value="">Select an entity</option><option *ngFor="let item of entities" [value]="item">{{ item }}</option></select></label></div>
+    <label>Street or location<input formControlName="location" placeholder="Street address, intersection, or landmark"></label>
+    <label>Description<textarea formControlName="description" rows="6" placeholder="Describe the issue, when it began, and any impact"></textarea><small>At least 20 characters. Do not include sensitive personal information.</small></label>
+    <div class="grid"><label>Existing City reference number <span>(optional)</span><input formControlName="cityReference" placeholder="e.g. 8001234567"></label><label>How may PNRA contact you?<select formControlName="contactPreference"><option value="email">Email</option><option value="phone">Phone</option><option value="none">No contact</option></select></label></div>
+    <label>Evidence <span>(optional)</span><input type="file" multiple accept="image/jpeg,image/png,application/pdf" (change)="chooseFiles($event)"><small>Up to 5 JPG, PNG, or PDF files; 5 MB each. Files are uploaded separately after intake.</small></label>
+    <p class="message error" *ngIf="error()">{{ error() }}</p><p class="message success" role="status" *ngIf="success()">{{ success() }}</p>
+    <button type="submit" [disabled]="busy()">{{ busy() ? 'Submitting…' : (auth.isAuthenticated() ? 'Submit report' : 'Sign in & continue') }}</button>
+    <p class="fallback">First report the problem to the relevant City entity via <a href="https://www.joburg.org.za/services_/Pages/Report-a-problem.aspx" target="_blank" rel="noopener">City escalation channels</a>. If this form is unavailable, <a href="mailto:parktownnorthra@gmail.com?subject=Municipal%20issue">email PNRA</a>.</p>
+  </form><aside class="status"><h2>Your reports</h2><p *ngIf="!auth.isAuthenticated()">Sign in to submit and track reports. Your completed draft will be preserved.</p><p *ngIf="auth.isAuthenticated() && !reports().length">No submitted reports yet.</p><article *ngFor="let report of reports()"><strong>{{ report.referenceNumber }}</strong><span class="pill">{{ report.status | titlecase }}</span><p>{{ report.category | titlecase }} · {{ report.location }}</p><small>Updated {{ report.updatedAt | date:'mediumDate' }}</small></article></aside></section>
 </main>
