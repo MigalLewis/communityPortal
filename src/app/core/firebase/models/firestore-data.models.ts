@@ -1,5 +1,5 @@
-import { UserRole } from '../../../features/auth/models/user-role.model';
-import { MembershipStatus, UserAccountStatus } from '../../../features/auth/models/user-profile.model';
+import { UserRole } from '../../../webapp/features/auth/models/user-role.model';
+import { MembershipStatus, UserAccountStatus } from '../../../webapp/features/auth/models/user-profile.model';
 
 export type ISODateString = string;
 
