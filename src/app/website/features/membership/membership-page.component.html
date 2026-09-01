@@ -1,0 +1,47 @@
+<main class="membership-page">
+  <section class="hero" aria-labelledby="membership-title">
+    <div class="hero-copy">
+      <h1 id="membership-title">Invest in your neighbourhood.</h1>
+      <p>PNRA receives no public funding. Its work is made possible by residents and businesses investing in Parktown North.</p>
+      <a class="hero-cta" href="#membership-options">Join PNRA <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="hero-image">
+      <img
+        src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"
+        alt="A quiet, leafy neighbourhood road beneath a canopy of mature trees"
+      />
+    </div>
+  </section>
+
+  <section class="options" id="membership-options" aria-labelledby="options-title">
+    <div class="options-inner">
+      <header class="section-heading">
+        <h2 id="options-title">Membership Options</h2>
+        <p>Choose the plan that fits your role in our community. <strong>One membership = one vote.</strong></p>
+      </header>
+
+      <div class="option-grid">
+        @for (option of membershipOptions; track option.id) {
+          <article class="option-card" [class.option-card--featured]="option.featured">
+            @if (option.featured) {
+              <span class="popular">Popular</span>
+            }
+            <h3>{{ option.name }}</h3>
+            <p class="price"><strong>{{ option.price }}</strong> <span>{{ option.period }}</span></p>
+            @if (option.detail) {
+              <p class="price-detail">{{ option.detail }}</p>
+            }
+            <p class="description">{{ option.description }}</p>
+            <a
+              class="select-button"
+              [class.select-button--filled]="option.featured"
+              routerLink="/register"
+              [queryParams]="{ membership: option.id }"
+            >Select {{ option.name === 'Sectional Title' ? 'Sectional' : option.name }}</a>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+</main>

@@ -16,6 +16,14 @@ const WEBSITE_PAGE_ROUTES: Routes = [
       )
   },
   {
+    path: 'membership',
+    title: 'Join PNRA | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/membership/membership-page.component').then(
+        (m) => m.MembershipPageComponent
+      )
+  },
+  {
     path: 'help',
     loadComponent: () =>
       import('./features/help/help-page.component').then((m) => m.HelpPageComponent)
