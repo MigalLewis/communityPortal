@@ -50,6 +50,24 @@
 
   --font-family-base: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
 
+  /* Public website design tokens */
+  --website-color-ink: #071f17;
+  --website-color-ink-soft: #1b332a;
+  --website-color-body: #4f5651;
+  --website-color-cream: #fbfaf7;
+  --website-color-surface: #f1f0ec;
+  --website-color-line: #dedfd9;
+  --website-color-accent: #79c92b;
+  --website-color-gold: #e2bb58;
+  --website-content-width: 1100px;
+  --website-wide-width: 1180px;
+  --website-section-space: 72px;
+  --website-page-gutter: 24px;
+  --website-radius-card: 10px;
+  --website-shadow-card: 0 9px 25px rgba(18, 34, 27, 0.05);
+  --website-font-body: 'Inter', 'Segoe UI', sans-serif;
+  --website-font-heading: Georgia, 'Times New Roman', serif;
+
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -110,6 +128,65 @@ select {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Shared public website foundation. Scoped to avoid affecting the webapp. */
+.website-shell {
+  --ink: var(--website-color-ink);
+  --ink-soft: var(--website-color-ink-soft);
+  --green: var(--website-color-ink);
+  --body: var(--website-color-body);
+  --cream: var(--website-color-cream);
+  --soft: var(--website-color-surface);
+  --surface: var(--website-color-surface);
+  --line: var(--website-color-line);
+  --lime: var(--website-color-accent);
+  --gold: var(--website-color-gold);
+
+  color: var(--ink);
+  background: var(--cream);
+  font-family: var(--website-font-body);
+}
+
+.website-shell .website-page {
+  min-height: 100%;
+  color: var(--ink);
+  background: var(--cream);
+}
+
+.website-shell .website-page h1,
+.website-shell .website-page h2,
+.website-shell .website-page h3 {
+  font-family: var(--website-font-heading);
+}
+
+.website-page-section {
+  max-width: var(--website-content-width);
+  margin: 0 auto;
+  padding: var(--website-section-space) var(--website-page-gutter);
+}
+
+.website-section-heading {
+  max-width: var(--website-heading-width, 720px);
+  margin: 0 auto var(--website-heading-space, 34px);
+  text-align: center;
+}
+
+.website-section-heading h2 {
+  margin: 0 0 10px;
+}
+
+.website-section-heading p {
+  margin: 0;
+  color: var(--body);
+  line-height: 1.6;
+}
+
+@media (max-width: 560px) {
+  .website-shell {
+    --website-section-space: 52px;
+    --website-page-gutter: 18px;
+  }
 }
 
 .input {
