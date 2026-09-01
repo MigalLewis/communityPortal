@@ -1,0 +1,50 @@
+<main class="contact-page website-page">
+  <section class="hero" aria-labelledby="contact-title">
+    <p class="eyebrow">Contact PNRA</p>
+    <h1 id="contact-title">We're here for our community.</h1>
+    <p>Have a question, neighbourhood concern or suggestion? Get in touch with the Parktown North Ratepayers' and Residents' Association.</p>
+  </section>
+
+  <section class="contact-layout" aria-label="Contact PNRA">
+    <div class="form-card">
+      @if (submitted) {
+        <div class="success" role="status"><strong>Thank you for getting in touch.</strong><span>Your message has been received and our team will respond as soon as possible.</span></div>
+      }
+      <form #contactForm="ngForm" (ngSubmit)="submit(contactForm)" novalidate>
+        <div class="form-grid">
+          <label><span>Name</span><input name="name" ngModel required autocomplete="name" /></label>
+          <label><span>Email</span><input name="email" ngModel required email type="email" autocomplete="email" /></label>
+          <label><span>Phone number</span><input name="phone" ngModel type="tel" autocomplete="tel" /></label>
+          <label><span>Subject</span><select name="subject" ngModel required><option value="" disabled>Select a subject</option><option>General enquiry</option><option>Membership</option><option>Municipal issue</option><option>Security</option><option>Town Planning &amp; Heritage</option><option>Community project</option><option>Website feedback</option><option>Other</option></select></label>
+        </div>
+        <label class="message"><span>Message</span><textarea name="message" ngModel required rows="6"></textarea></label>
+        <label class="privacy"><input name="privacy" ngModel required type="checkbox" /><span>I acknowledge the PNRA privacy policy.</span></label>
+        @if (contactForm.submitted && contactForm.invalid) { <p class="form-error" role="alert">Please complete all required fields and enter a valid email address.</p> }
+        <button type="submit">Send message <span aria-hidden="true">→</span></button>
+      </form>
+    </div>
+
+    <aside class="details-card">
+      <p class="card-label">Get in touch</p>
+      <h2>Parktown North Ratepayers' and Residents' Association</h2>
+      <div class="contact-detail"><span class="detail-icon" aria-hidden="true">✉</span><div><small>Email</small><a href="mailto:parktownnorthra@gmail.com">parktownnorthra&#64;gmail.com</a></div></div>
+      <div class="contact-detail"><span class="detail-icon" aria-hidden="true">☎</span><div><small>Telephone</small><a href="tel:0736334560">073 633 4560</a></div></div>
+      <div class="emergency"><span aria-hidden="true">!</span><div><strong>Emergency notice</strong><p>For emergencies or active security incidents, please contact the appropriate emergency or security service directly.</p><a routerLink="/security">View security contacts →</a></div></div>
+    </aside>
+  </section>
+
+  <section class="quick-links" aria-labelledby="quick-links-title">
+    <p class="eyebrow">Find it faster</p><h2 id="quick-links-title">Quick links</h2>
+    <div class="link-grid">
+      <a routerLink="/resident-services"><span aria-hidden="true">!</span><strong>Report municipal issue</strong></a>
+      <a routerLink="/security"><span aria-hidden="true">◆</span><strong>Security &amp; emergency</strong></a>
+      <a routerLink="/membership"><span aria-hidden="true">✓</span><strong>Membership</strong></a>
+      <a routerLink="/resources"><span aria-hidden="true">⌂</span><strong>Town planning</strong></a>
+      <a routerLink="/resources"><span aria-hidden="true">▤</span><strong>Resources</strong></a>
+    </div>
+  </section>
+
+  <section class="community-image" aria-label="Parktown North neighbourhood"><div><p>Rooted in Parktown North</p><h2>A connected community with a proud heritage.</h2></div></section>
+
+  <section class="feedback"><span aria-hidden="true">✦</span><h2>Have we missed something?</h2><p>We are constantly improving our resources. If there is information you feel should be added to the website, please let us know.</p><a href="#contact-title">Suggest an addition →</a></section>
+</main>

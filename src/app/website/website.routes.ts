@@ -68,6 +68,12 @@ const WEBSITE_PAGE_ROUTES: Routes = [
     title: 'FAQ | Parktown North Residents Association',
     loadComponent: () =>
       import('./features/help/help-page.component').then((m) => m.HelpPageComponent)
+  },
+  {
+    path: 'contact',
+    title: 'Contact PNRA | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/contact/contact-page.component').then((m) => m.ContactPageComponent)
   }
 ];
 
