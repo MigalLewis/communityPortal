@@ -58,7 +58,8 @@ async function seed() {
       setDoc(doc(db, 'messageThreads/thread'), { id: 'thread', participantIds: ['resident', 'contractor'], createdAt: '2026-01-01' }),
       setDoc(doc(db, 'applications/application'), { id: 'application', applicantId: 'resident', contractorId: 'contractor', jobId: 'job', status: 'pending' }),
       setDoc(doc(db, 'payments/payment'), { id: 'payment', userId: 'resident', amount: 100 }),
-      setDoc(doc(db, 'userTransitionAudits/audit'), { id: 'audit', userId: 'resident' })
+      setDoc(doc(db, 'userTransitionAudits/audit'), { id: 'audit', userId: 'resident' }),
+      setDoc(doc(db, 'contactEnquiries/enquiry'), { name: 'Sender', message: 'Private message' })
     ]);
   });
 }
@@ -180,4 +181,17 @@ describe('job and review writes require the trusted services', () => {
 test('no unmatched collection is exposed', async () => {
   await assertFails(setDoc(doc(authed('resident'), 'internalSecrets/secret'), { public: true }));
   assert.ok(true);
+});
+
+
+describe('contact enquiries remain backend and administrator only', () => {
+  test('denies anonymous and authenticated client creation', async () => {
+    await assertFails(setDoc(doc(anon(), 'contactEnquiries/anon'), { name: 'Sender', message: 'Hello' }));
+    await assertFails(setDoc(doc(authed('resident'), 'contactEnquiries/resident'), { name: 'Sender', message: 'Hello' }));
+  });
+  test('allows only trusted active administrators to read enquiries', async () => {
+    await assertSucceeds(getDoc(doc(authed('admin', { admin: true }), 'contactEnquiries/enquiry')));
+    await assertFails(getDoc(doc(authed('admin'), 'contactEnquiries/enquiry')));
+    await assertFails(getDoc(doc(anon(), 'contactEnquiries/enquiry')));
+  });
 });

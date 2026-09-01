@@ -7,20 +7,22 @@
 
   <section class="contact-layout" aria-label="Contact PNRA">
     <div class="form-card">
-      @if (submitted) {
+      @if (state === 'success') {
         <div class="success" role="status"><strong>Thank you for getting in touch.</strong><span>Your message has been received and our team will respond as soon as possible.</span></div>
       }
       <form #contactForm="ngForm" (ngSubmit)="submit(contactForm)" novalidate>
         <div class="form-grid">
-          <label><span>Name</span><input name="name" ngModel required autocomplete="name" /></label>
-          <label><span>Email</span><input name="email" ngModel required email type="email" autocomplete="email" /></label>
-          <label><span>Phone number</span><input name="phone" ngModel type="tel" autocomplete="tel" /></label>
+          <label><span>Name</span><input name="name" ngModel required maxlength="100" autocomplete="name" /></label>
+          <label><span>Email</span><input name="email" ngModel required email maxlength="254" type="email" autocomplete="email" /></label>
+          <label><span>Phone number</span><input name="phone" ngModel maxlength="30" type="tel" autocomplete="tel" /></label>
           <label><span>Subject</span><select name="subject" ngModel required><option value="" disabled>Select a subject</option><option>General enquiry</option><option>Membership</option><option>Municipal issue</option><option>Security</option><option>Town Planning &amp; Heritage</option><option>Community project</option><option>Website feedback</option><option>Other</option></select></label>
         </div>
-        <label class="message"><span>Message</span><textarea name="message" ngModel required rows="6"></textarea></label>
+        <label class="message"><span>Message</span><textarea name="message" ngModel required maxlength="5000" rows="6"></textarea></label>
+        <label class="website-field" aria-hidden="true"><span>Website</span><input name="website" ngModel tabindex="-1" autocomplete="off" /></label>
         <label class="privacy"><input name="privacy" ngModel required type="checkbox" /><span>I acknowledge the PNRA privacy policy.</span></label>
         @if (contactForm.submitted && contactForm.invalid) { <p class="form-error" role="alert">Please complete all required fields and enter a valid email address.</p> }
-        <button type="submit">Send message <span aria-hidden="true">→</span></button>
+        @if (state === 'failure') { <p class="form-error" role="alert">We could not send your message. Your details have been kept so you can try again.</p> }
+        <button type="submit" [disabled]="state === 'sending'">{{ state === 'sending' ? 'Sending…' : 'Send message' }} <span aria-hidden="true">→</span></button>
       </form>
     </div>
 

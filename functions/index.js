@@ -2,7 +2,62 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
+const { createHash } = require('node:crypto');
 initializeApp();
+
+const contactSubjects = new Set(['General enquiry', 'Membership', 'Municipal issue', 'Security',
+  'Town Planning & Heritage', 'Community project', 'Website feedback', 'Other']);
+
+function contactText(value, field, max, required = true) {
+  if (value == null && !required) return '';
+  if (typeof value !== 'string') throw new HttpsError('invalid-argument', `${field} is invalid.`);
+  const normalized = value.normalize('NFKC').replace(/\r\n?/g, '\n').trim();
+  if ((required && !normalized) || normalized.length > max || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(normalized)) {
+    throw new HttpsError('invalid-argument', `${field} is invalid.`);
+  }
+  return normalized;
+}
+
+// Public callable contact form. The callable protocol, strict validation,
+// honeypot, payload cap, and transaction-backed IP limit protect the only write
+// path; Firestore rules prevent browsers from accessing the stored enquiries.
+exports.submitContactEnquiry = onCall(async (request) => {
+  const contentLength = Number(request.rawRequest?.get('content-length') || 0);
+  if (contentLength > 12000) throw new HttpsError('invalid-argument', 'Submission is too large.');
+  const input = request.data || {};
+  if (typeof input.website === 'string' && input.website.trim()) {
+    throw new HttpsError('invalid-argument', 'Submission could not be accepted.');
+  }
+  const name = contactText(input.name, 'Name', 100);
+  const email = contactText(input.email, 'Email', 254).toLowerCase();
+  const phone = contactText(input.phone, 'Phone', 30, false);
+  const subject = contactText(input.subject, 'Subject', 80);
+  const message = contactText(input.message, 'Message', 5000);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || (phone && !/^\+?[0-9 ()-]{7,30}$/.test(phone))
+      || !contactSubjects.has(subject)) {
+    throw new HttpsError('invalid-argument', 'Submission contains invalid contact details.');
+  }
+
+  const db = getFirestore();
+  const forwarded = request.rawRequest?.get('x-forwarded-for');
+  const ip = (forwarded ? forwarded.split(',')[0] : request.rawRequest?.ip) || 'unknown';
+  const fingerprint = createHash('sha256').update(`contact:${ip}`).digest('hex');
+  const limitRef = db.doc(`contactRateLimits/${fingerprint}`);
+  const now = Timestamp.now();
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(limitRef);
+    const windowStart = snapshot.get('windowStart');
+    const withinWindow = windowStart && now.toMillis() - windowStart.toMillis() < 60 * 60 * 1000;
+    const count = withinWindow ? (snapshot.get('count') || 0) : 0;
+    if (count >= 3) throw new HttpsError('resource-exhausted', 'Too many messages. Please try again later.');
+    transaction.set(limitRef, { windowStart: withinWindow ? windowStart : now, count: count + 1, updatedAt: now });
+  });
+
+  const ref = db.collection('contactEnquiries').doc();
+  await ref.create({ id: ref.id, name, email, phone: phone || null, subject, message,
+    status: 'new', createdAt: now, source: 'website' });
+  return { ok: true };
+});
 
 const actions = { approve: 'active', reject: 'rejected', deactivate: 'deactivated' };
 
