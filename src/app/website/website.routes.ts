@@ -74,6 +74,18 @@ const WEBSITE_PAGE_ROUTES: Routes = [
     title: 'Contact PNRA | Parktown North Residents Association',
     loadComponent: () =>
       import('./features/contact/contact-page.component').then((m) => m.ContactPageComponent)
+  },
+  {
+    path: 'privacy',
+    title: 'Privacy Policy | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/privacy/privacy-page.component').then((m) => m.PrivacyPageComponent)
+  },
+  {
+    path: 'terms',
+    title: 'Terms and Conditions | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/terms/terms-page.component').then((m) => m.TermsPageComponent)
   }
 ];
 

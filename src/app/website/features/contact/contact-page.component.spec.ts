@@ -1,4 +1,7 @@
 import { ContactPageComponent } from './contact-page.component';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { ContactSubmissionService } from './contact-submission.service';
 
 describe('ContactPageComponent', () => {
   const values = { name: 'Alex Resident', email: 'alex@example.com', phone: '073 123 4567',
@@ -54,5 +57,29 @@ describe('ContactPageComponent', () => {
     await (component as any).submit(form);
     expect(form.resetForm).not.toHaveBeenCalled();
     expect(form.value).toEqual(values);
+  });
+});
+
+describe('ContactPageComponent privacy link', () => {
+  it('opens the policy separately so entered form data remains in place', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ContactPageComponent],
+      providers: [
+        provideRouter([{ path: 'privacy', component: ContactPageComponent }]),
+        { provide: ContactSubmissionService, useValue: { submit: jasmine.createSpy('submit') } }
+      ]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ContactPageComponent);
+    fixture.detectChanges();
+    const name = fixture.nativeElement.querySelector('input[name="name"]') as HTMLInputElement;
+    name.value = 'Alex Resident';
+    name.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const policy = fixture.nativeElement.querySelector('.privacy a') as HTMLAnchorElement;
+
+    expect(policy.getAttribute('href')).toBe('/privacy');
+    expect(policy.target).toBe('_blank');
+    expect(policy.rel).toContain('noopener');
+    expect(name.value).toBe('Alex Resident');
   });
 });
