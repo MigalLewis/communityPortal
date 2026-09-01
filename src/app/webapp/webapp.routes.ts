@@ -33,6 +33,7 @@ const WEBAPP_PAGE_ROUTES: Routes = [
   { path: 'admin/providers/new', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
   { path: 'admin/categories', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-categories-page.component').then((m) => m.AdminCategoriesPageComponent) },
   { path: 'admin/reviews', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-reviews-page.component').then((m) => m.AdminReviewsPageComponent) },
+  { path: 'admin/municipal-reports', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-municipal-reports-page.component').then((m) => m.AdminMunicipalReportsPageComponent) },
   { path: 'admin/adverts', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent) },
   { path: 'admin/adverts/new', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
   { path: 'admin/adverts/:id/edit', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },

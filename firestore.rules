@@ -234,6 +234,15 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /municipalReports/{reportId} {
+      allow get: if isAdmin() || (activeUser() && resource.data.ownerId == request.auth.uid);
+      allow list: if isAdmin() || (activeUser() && resource.data.ownerId == request.auth.uid);
+      // Creation and every workflow transition go through validated callable functions.
+      allow create, update, delete: if false;
+    }
+
+    match /municipalReportRateLimits/{rateLimitId} { allow read, write: if false; }
+
     // Collections must be explicitly added above; unknown and administrative
     // data is private by default.
     match /{document=**} {
