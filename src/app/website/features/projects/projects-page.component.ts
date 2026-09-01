@@ -5,6 +5,7 @@ type ProjectCategory = 'Environment' | 'Infrastructure' | 'Safety' | 'Community'
 type ProjectStatus = 'Ongoing' | 'Completed';
 
 interface Project {
+  slug: string;
   title: string;
   description: string;
   category: ProjectCategory;
@@ -25,28 +26,28 @@ export class ProjectsPageComponent {
 
   protected readonly projects: Project[] = [
     {
-      title: 'Pocket Park',
+      slug: 'pocket-park', title: 'Pocket Park',
       description: 'Creating sustainable micro-parks throughout the neighbourhood to enhance local biodiversity.',
       category: 'Environment',
       status: 'Ongoing',
       image: 'https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=900&q=85'
     },
     {
-      title: 'Adopt-a-Box',
+      slug: 'adopt-a-box', title: 'Adopt-a-Box',
       description: 'Beautifying street infrastructure through community-sponsored art on utility boxes.',
       category: 'Infrastructure',
       status: 'Ongoing',
       image: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=900&q=85'
     },
     {
-      title: 'Bollard Project',
+      slug: 'bollard-project', title: 'Bollard Project',
       description: 'Installing protective bollards along key pedestrian routes to make everyday journeys safer.',
       category: 'Safety',
       status: 'Completed',
       image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&q=85'
     },
     {
-      title: 'Community-in-Action Squad',
+      slug: 'community-in-action-squad', title: 'Community-in-Action Squad',
       description: 'A rapid-response volunteer group addressing minor maintenance issues across the suburb.',
       category: 'Community',
       status: 'Ongoing',

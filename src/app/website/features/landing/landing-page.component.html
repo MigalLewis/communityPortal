@@ -23,7 +23,7 @@
             <span class="portfolio-icon" aria-hidden="true">{{ portfolio.icon }}</span>
             <h3>{{ portfolio.title }}</h3>
             <p>{{ portfolio.description }}</p>
-            <a href="mailto:parktownnorthra@gmail.com?subject={{ portfolio.title }}">Learn More <span>→</span></a>
+            <a [routerLink]="['/our-community/portfolios', portfolio.slug]">Learn More <span>→</span></a>
           </article>
         }
       </div>
@@ -37,7 +37,7 @@
       </div>
       <div class="service-grid">
         @for (service of services; track service.title) {
-          <a class="service-card" href="mailto:parktownnorthra@gmail.com?subject={{ service.title }}">
+          <a class="service-card" [routerLink]="service.route">
             <span class="service-icon service-icon--{{ service.tone }}" aria-hidden="true">{{ service.icon }}</span>
             <span><strong>{{ service.title }}</strong><small>{{ service.description }}</small></span>
           </a>
@@ -53,11 +53,11 @@
       <div class="project-grid">
         <article class="project-card">
           <div class="project-image project-image--park" role="img" aria-label="A thriving green community garden"></div>
-          <div class="project-copy"><div class="project-title"><h3>Pocket Park Initiative</h3><span class="status ongoing">Ongoing</span></div><p>Transforming unused urban spaces into beautiful, green communal areas for residents to enjoy.</p><a href="mailto:parktownnorthra@gmail.com?subject=Pocket Park Initiative">Read more</a></div>
+          <div class="project-copy"><div class="project-title"><h3>Pocket Park Initiative</h3><span class="status ongoing">Ongoing</span></div><p>Transforming unused urban spaces into beautiful, green communal areas for residents to enjoy.</p><a routerLink="/projects/pocket-park">Read more</a></div>
         </article>
         <article class="project-card">
           <div class="project-image project-image--street" role="img" aria-label="A clean tree-lined residential street"></div>
-          <div class="project-copy"><div class="project-title"><h3>Graffiti Abatement</h3><span class="status">Active</span></div><p>A continuous effort by the CIA Squad to rapidly remove graffiti and maintain the pristine aesthetic of our streets.</p><a href="mailto:parktownnorthra@gmail.com?subject=Graffiti Abatement">Read more</a></div>
+          <div class="project-copy"><div class="project-title"><h3>Graffiti Abatement</h3><span class="status">Active</span></div><p>A continuous effort by the CIA Squad to rapidly remove graffiti and maintain the pristine aesthetic of our streets.</p><a routerLink="/projects/graffiti-abatement">Read more</a></div>
         </article>
       </div>
     </section>

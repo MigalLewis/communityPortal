@@ -19,3 +19,34 @@ describe('public legal routes', () => {
     });
   }
 });
+
+describe('public content detail routes', () => {
+  beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes)] }));
+
+  for (const path of [
+    '/projects/pocket-park',
+    '/events/spring-community-market-day',
+    '/our-community/portfolios/civic-affairs',
+    '/our-community/heritage/parktown-north-heritage',
+    '/our-community/maps/neighbourhood-map'
+  ]) {
+    it(`resolves the stable content URL ${path}`, async () => {
+      const router = TestBed.inject(Router);
+      expect(await router.navigateByUrl(path)).toBeTrue();
+      expect(router.url).toBe(path);
+    });
+  }
+
+  for (const [unknown, fallback] of [
+    ['/projects/not-a-project', '/projects'],
+    ['/events/not-an-event', '/events'],
+    ['/our-community/heritage/not-a-place', '/our-community']
+  ]) {
+    it(`redirects the unknown slug ${unknown}`, async () => {
+      const router = TestBed.inject(Router);
+      await router.navigateByUrl(unknown);
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(router.url).toBe(fallback);
+    });
+  }
+});

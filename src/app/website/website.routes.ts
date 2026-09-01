@@ -32,6 +32,14 @@ const WEBSITE_PAGE_ROUTES: Routes = [
       )
   },
   {
+    path: 'projects/:slug',
+    title: 'Project | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/content-detail/project-detail-page.component').then(
+        (m) => m.ProjectDetailPageComponent
+      )
+  },
+  {
     path: 'events',
     title: 'Events | Parktown North Residents Association',
     loadComponent: () =>
@@ -39,6 +47,23 @@ const WEBSITE_PAGE_ROUTES: Routes = [
         (m) => m.EventsPageComponent
       )
   },
+  {
+    path: 'events/:slug',
+    title: 'Event | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/content-detail/event-detail-page.component').then(
+        (m) => m.EventDetailPageComponent
+      )
+  },
+  ...['portfolios', 'heritage', 'maps', 'guides'].map((kind) => ({
+    path: `our-community/${kind}/:slug`,
+    title: 'Our Community | Parktown North Residents Association',
+    data: { kind },
+    loadComponent: () =>
+      import('./features/content-detail/community-detail-page.component').then(
+        (m) => m.CommunityDetailPageComponent
+      )
+  })),
   {
     path: 'resources',
     title: 'Resources | Parktown North Residents Association',

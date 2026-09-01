@@ -45,6 +45,7 @@
               <span class="portfolio-icon" aria-hidden="true">{{ portfolio.icon }}</span>
               <h3>{{ portfolio.title }}</h3>
               <p>{{ portfolio.description }}</p>
+              <a [routerLink]="['/our-community/portfolios', portfolio.slug]">Learn more</a>
             </article>
           }
         </div>
@@ -72,10 +73,10 @@
       <div class="suburb page-section website-page-section">
         <div><h2>The Suburb of Parktown North</h2><p>Established in 1903, Parktown North is one of Johannesburg's oldest and most distinguished northern suburbs. Known for its historical homes, lush tree-lined avenues, and strong sense of community, it offers a unique blend of heritage charm and modern lifestyle.</p></div>
         <nav class="suburb-links" aria-label="Learn about Parktown North">
-          <a href="mailto:parktownnorthra@gmail.com?subject=History of Parktown North"><span aria-hidden="true">◷</span> History of Parktown North</a>
-          <a href="mailto:parktownnorthra@gmail.com?subject=Neighbourhood Map"><span aria-hidden="true">⌖</span> Neighbourhood Map</a>
-          <a href="mailto:parktownnorthra@gmail.com?subject=Heritage Sites"><span aria-hidden="true">▥</span> Heritage Sites</a>
-          <a href="mailto:parktownnorthra@gmail.com?subject=Local Community"><span aria-hidden="true">◉</span> Local Community</a>
+          <a routerLink="/our-community/guides/history-of-parktown-north"><span aria-hidden="true">◷</span> History of Parktown North</a>
+          <a routerLink="/our-community/maps/neighbourhood-map"><span aria-hidden="true">⌖</span> Neighbourhood Map</a>
+          <a routerLink="/our-community/heritage/parktown-north-heritage"><span aria-hidden="true">▥</span> Heritage Sites</a>
+          <a routerLink="/our-community/guides/local-community"><span aria-hidden="true">◉</span> Local Community</a>
         </nav>
       </div>
     </section>
@@ -83,8 +84,8 @@
     <section class="get-involved" aria-labelledby="involved-title">
       <h2 id="involved-title">Parktown North works because its community gets involved.</h2>
       <p>Your participation, whether through membership or volunteering, is what keeps our suburb thriving.</p>
-      <div class="cta-actions"><a class="primary-cta" routerLink="/register">Join PNRA</a><a class="secondary-cta" href="mailto:parktownnorthra@gmail.com?subject=Volunteer with PNRA">Volunteer / Get Involved</a></div>
-      <a class="contact" href="mailto:parktownnorthra@gmail.com">Contact Us</a>
+      <div class="cta-actions"><a class="primary-cta" routerLink="/register">Join PNRA</a><a class="secondary-cta" href="mailto:parktownnorthra@gmail.com?subject=Volunteer with PNRA">Email PNRA to volunteer</a></div>
+      <a class="contact" href="mailto:parktownnorthra@gmail.com">Email PNRA</a>
     </section>
   </main>
 
