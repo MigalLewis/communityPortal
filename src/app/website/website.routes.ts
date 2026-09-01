@@ -24,6 +24,14 @@ const WEBSITE_PAGE_ROUTES: Routes = [
       )
   },
   {
+    path: 'security',
+    title: 'Security | Parktown North Residents Association',
+    loadComponent: () =>
+      import('./features/security/security-page.component').then(
+        (m) => m.SecurityPageComponent
+      )
+  },
+  {
     path: 'membership',
     title: 'Join PNRA | Parktown North Residents Association',
     loadComponent: () =>
