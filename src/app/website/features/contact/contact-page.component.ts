@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ContactSubmission, ContactSubmissionService } from './contact-submission.service';
 
 @Component({
   selector: 'app-contact-page',
@@ -10,15 +11,25 @@ import { RouterLink } from '@angular/router';
   styleUrl: './contact-page.component.scss'
 })
 export class ContactPageComponent {
-  protected submitted = false;
+  protected state: 'idle' | 'sending' | 'success' | 'failure' = 'idle';
 
-  protected submit(form: NgForm): void {
+  constructor(private readonly contactSubmissions: ContactSubmissionService) {}
+
+  protected async submit(form: NgForm): Promise<void> {
+    if (this.state === 'sending') return;
     if (form.invalid) {
       form.control.markAllAsTouched();
       return;
     }
 
-    this.submitted = true;
-    form.resetForm();
+    this.state = 'sending';
+    try {
+      const { privacy: _privacy, ...submission } = form.value as ContactSubmission & { privacy: boolean };
+      await this.contactSubmissions.submit(submission);
+      this.state = 'success';
+      form.resetForm();
+    } catch {
+      this.state = 'failure';
+    }
   }
 }
