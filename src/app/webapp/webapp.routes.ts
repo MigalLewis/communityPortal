@@ -6,7 +6,7 @@ import { authGuard } from './features/auth/guards/auth.guard';
 import { guestGuard } from './features/auth/guards/guest.guard';
 
 /** Contractor directory and account application routes. */
-export const WEBAPP_ROUTES: Routes = [
+const WEBAPP_PAGE_ROUTES: Routes = [
   { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent) },
   { path: 'directory', loadComponent: () => import('./features/contractor-directory/contractor-directory-page.component').then((m) => m.ContractorDirectoryPageComponent) },
   { path: 'directory/:id', loadComponent: () => import('./features/contractor-profile/contractor-profile-page.component').then((m) => m.ContractorProfilePageComponent) },
@@ -40,4 +40,13 @@ export const WEBAPP_ROUTES: Routes = [
   { path: 'contractor/profile/edit', canActivate: [contractorGuard, approvedContractorGuard], loadComponent: () => import('./features/contractor-profile/contractor-profile-edit.component').then((m) => m.ContractorProfileEditComponent) },
   { path: 'work-orders', canActivate: [contractorGuard], loadComponent: () => import('./features/work-orders/work-orders-page.component').then((m) => m.WorkOrdersPageComponent) },
   { path: 'settings', canActivate: [activeUserGuard], loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent) }
+];
+
+export const WEBAPP_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('../core/layout/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: WEBAPP_PAGE_ROUTES
+  }
 ];

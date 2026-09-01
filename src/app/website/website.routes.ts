@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 /** Public website pages that do not require account features. */
-export const WEBSITE_ROUTES: Routes = [
+const WEBSITE_PAGE_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
@@ -19,5 +19,14 @@ export const WEBSITE_ROUTES: Routes = [
     path: 'help',
     loadComponent: () =>
       import('./features/help/help-page.component').then((m) => m.HelpPageComponent)
+  }
+];
+
+export const WEBSITE_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./layout/website-shell/website-shell.component').then((m) => m.WebsiteShellComponent),
+    children: WEBSITE_PAGE_ROUTES
   }
 ];

@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SiteFooterComponent } from '../../components/site-footer/site-footer.component';
-import { SiteHeaderComponent } from '../../components/site-header/site-header.component';
 
 interface CommunityPortfolio {
   icon: string;
@@ -19,7 +17,7 @@ interface ResidentService {
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RouterLink, SiteHeaderComponent, SiteFooterComponent],
+  imports: [RouterLink],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })

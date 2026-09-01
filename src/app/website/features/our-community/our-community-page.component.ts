@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SiteFooterComponent } from '../../components/site-footer/site-footer.component';
-import { SiteHeaderComponent } from '../../components/site-header/site-header.component';
 
 interface Portfolio {
   icon: string;
@@ -19,7 +17,7 @@ interface CommitteeMember {
 @Component({
   selector: 'app-our-community-page',
   standalone: true,
-  imports: [RouterLink, SiteHeaderComponent, SiteFooterComponent],
+  imports: [RouterLink],
   templateUrl: './our-community-page.component.html',
   styleUrl: './our-community-page.component.scss'
 })
