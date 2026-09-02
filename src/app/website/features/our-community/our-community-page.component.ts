@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 interface Portfolio {
+  slug: string;
   icon: string;
   title: string;
   description: string;
@@ -32,12 +33,12 @@ export class OurCommunityPageComponent {
   ];
 
   protected readonly portfolios: Portfolio[] = [
-    { icon: '⌂', title: 'Civic Affairs', description: 'Liaising with municipal entities regarding service delivery, infrastructure maintenance, and local government initiatives.' },
-    { icon: '♧', title: 'Environmental Affairs', description: 'Protecting our parks, coordinating tree planting, managing waste initiatives, and preserving the natural beauty of the suburb.' },
-    { icon: '⬡', title: 'Security', description: 'Collaborating with local security providers, SAPS, and community surveillance networks to help keep residents safe.' },
-    { icon: '△', title: 'Town Planning & Heritage', description: 'Monitoring development applications, protecting heritage structures, and encouraging adherence to zoning regulations.' },
-    { icon: '◌', title: 'Community Forums', description: 'Facilitating communication, hosting town halls, and managing platforms for resident engagement and updates.' },
-    { icon: '⚒', title: 'Projects', description: 'Leading park upgrades, public-space beautification, and community infrastructure improvements.' }
+    { slug: 'civic-affairs', icon: '⌂', title: 'Civic Affairs', description: 'Liaising with municipal entities regarding service delivery, infrastructure maintenance, and local government initiatives.' },
+    { slug: 'environmental-affairs', icon: '♧', title: 'Environmental Affairs', description: 'Protecting our parks, coordinating tree planting, managing waste initiatives, and preserving the natural beauty of the suburb.' },
+    { slug: 'security', icon: '⬡', title: 'Security', description: 'Collaborating with local security providers, SAPS, and community surveillance networks to help keep residents safe.' },
+    { slug: 'town-planning-and-heritage', icon: '△', title: 'Town Planning & Heritage', description: 'Monitoring development applications, protecting heritage structures, and encouraging adherence to zoning regulations.' },
+    { slug: 'community-forums', icon: '◌', title: 'Community Forums', description: 'Facilitating communication, hosting town halls, and managing platforms for resident engagement and updates.' },
+    { slug: 'projects', icon: '⚒', title: 'Projects', description: 'Leading park upgrades, public-space beautification, and community infrastructure improvements.' }
   ];
 
   protected readonly committee: CommitteeMember[] = [

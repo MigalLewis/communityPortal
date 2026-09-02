@@ -22,7 +22,7 @@
           <p>Transforming underutilised neighbourhood corners into lush, accessible green spaces for residents to gather, relax, and connect with nature.</p>
           <div class="progress-label"><span>Phase 2 progress</span><strong>65%</strong></div>
           <div class="progress" role="progressbar" aria-label="Phase 2 progress" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"><span></span></div>
-          <a class="primary-button" href="mailto:parktownnorthra@gmail.com?subject=Pocket Park Initiative">Learn more <span aria-hidden="true">→</span></a>
+          <a class="primary-button" routerLink="/projects/pocket-park">Learn more <span aria-hidden="true">→</span></a>
         </div>
       </article>
     </section>
@@ -33,7 +33,7 @@
         @for (project of filteredProjects; track project.title) {
           <article class="project-card">
             <div class="card-image"><img [src]="project.image" [alt]="project.title + ' community project'" /><span class="category">{{ project.category }}</span><span class="status" [class.status--ongoing]="project.status === 'Ongoing'">{{ project.status }}</span></div>
-            <div class="card-copy"><h3>{{ project.title }}</h3><p>{{ project.description }}</p><a [href]="'mailto:parktownnorthra@gmail.com?subject=' + project.title">View project <span aria-hidden="true">→</span></a></div>
+            <div class="card-copy"><h3>{{ project.title }}</h3><p>{{ project.description }}</p><a [routerLink]="['/projects', project.slug]">View project <span aria-hidden="true">→</span></a></div>
           </article>
         } @empty {
           <p class="empty">No projects match this filter yet.</p>
@@ -45,9 +45,9 @@
       <div class="website-page-section">
         <h2 id="involved-title">Want to help improve Parktown North?</h2>
         <div class="involved-grid">
-          <article><span aria-hidden="true">♡</span><h3>Volunteer</h3><p>Give your time and skills to ongoing projects.</p><a href="mailto:parktownnorthra@gmail.com?subject=Volunteer with PNRA">Sign up</a></article>
-          <article><span aria-hidden="true">◇</span><h3>Support</h3><p>Help fund specific initiatives in our area.</p><a href="mailto:parktownnorthra@gmail.com?subject=Support a PNRA project">Donate</a></article>
-          <article><span aria-hidden="true">☼</span><h3>Suggest</h3><p>Have an idea for a new neighbourhood project?</p><a href="mailto:parktownnorthra@gmail.com?subject=Project idea">Submit idea</a></article>
+          <article><span aria-hidden="true">♡</span><h3>Volunteer</h3><p>Give your time and skills to ongoing projects.</p><a href="mailto:parktownnorthra@gmail.com?subject=Volunteer with PNRA">Email PNRA to volunteer</a></article>
+          <article><span aria-hidden="true">◇</span><h3>Support</h3><p>Help fund specific initiatives in our area.</p><a href="mailto:parktownnorthra@gmail.com?subject=Support a PNRA project">Email PNRA to donate</a></article>
+          <article><span aria-hidden="true">☼</span><h3>Suggest</h3><p>Have an idea for a new neighbourhood project?</p><a href="mailto:parktownnorthra@gmail.com?subject=Project idea">Email PNRA with an idea</a></article>
           <article class="join"><span aria-hidden="true">♧</span><h3>Join PNRA</h3><p>Become a member to support all our work.</p><a routerLink="/membership">Join now</a></article>
         </div>
       </div>

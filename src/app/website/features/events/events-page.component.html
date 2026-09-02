@@ -13,7 +13,7 @@
       <div class="detail"><span aria-hidden="true">◷</span>{{ featured.time }}</div>
       <div class="detail"><span aria-hidden="true">⌖</span>{{ featured.location }}</div>
       <p>{{ featured.description }} It's the perfect opportunity to welcome the new season and connect with fellow residents.</p>
-      <div class="actions"><a class="primary" href="mailto:parktownnorthra@gmail.com?subject=Spring Community Market Day">View event <span>→</span></a><button type="button" (click)="addToCalendar(featured)"><span aria-hidden="true">＋</span> Add to calendar</button></div>
+      <div class="actions"><a class="primary" routerLink="/events/spring-community-market-day">View event <span>→</span></a><button type="button" (click)="addToCalendar(featured)"><span aria-hidden="true">＋</span> Add to calendar</button></div>
     </div>
   </section>
 
@@ -27,7 +27,7 @@
       @for (event of filteredEvents; track event.title) {
         <article class="event-card">
           <div class="card-image"><img [src]="event.image" [alt]="event.title" /><div class="date"><span>{{ event.month }}</span><strong>{{ event.day }}</strong></div></div>
-          <div class="card-copy"><span class="category">{{ event.category }}</span><h3>{{ event.title }}</h3><div class="detail"><span aria-hidden="true">◷</span>{{ event.time }}</div><div class="detail"><span aria-hidden="true">{{ event.icon }}</span>{{ event.location }}</div><p>{{ event.description }}</p><div class="card-actions"><a [href]="'mailto:parktownnorthra@gmail.com?subject=' + event.title">View details <span>→</span></a><button type="button" title="Add to calendar" [attr.aria-label]="'Add ' + event.title + ' to calendar'" (click)="addToCalendar(event)">＋</button></div></div>
+          <div class="card-copy"><span class="category">{{ event.category }}</span><h3>{{ event.title }}</h3><div class="detail"><span aria-hidden="true">◷</span>{{ event.time }}</div><div class="detail"><span aria-hidden="true">{{ event.icon }}</span>{{ event.location }}</div><p>{{ event.description }}</p><div class="card-actions"><a [routerLink]="['/events', event.slug]">View details <span>→</span></a><button type="button" title="Add to calendar" [attr.aria-label]="'Add ' + event.title + ' to calendar'" (click)="addToCalendar(event)">＋</button></div></div>
         </article>
       } @empty { <p class="empty">There are no upcoming events in this category just yet.</p> }
     </div>
@@ -35,5 +35,5 @@
 
   <section class="past" aria-labelledby="past-title"><h2 id="past-title">Past events</h2><div class="past-grid"><article><div class="past-date"><span>Sep</span><strong>22</strong></div><div><h3>Heritage Day Braai</h3><p>Zoo Lake Sports Club</p></div></article><article><div class="past-date"><span>Aug</span><strong>14</strong></div><div><h3>Town Hall: Pothole Initiative</h3><p>St. Teresa's School Hall</p></div></article></div></section>
 
-  <section class="submit"><span class="submit-icon" aria-hidden="true">◖</span><h2>Know about something happening<br />in Parktown North?</h2><p>Organising a street party, charity run, or community initiative? Let us know so we can share it with the neighbourhood.</p><a href="mailto:parktownnorthra@gmail.com?subject=Community event submission">Submit an event</a></section>
+  <section class="submit"><span class="submit-icon" aria-hidden="true">◖</span><h2>Know about something happening<br />in Parktown North?</h2><p>Organising a street party, charity run, or community initiative? Let us know so we can share it with the neighbourhood.</p><a href="mailto:parktownnorthra@gmail.com?subject=Community event submission">Email PNRA to submit an event</a></section>
 </main>
