@@ -44,6 +44,7 @@ async function seed() {
       setDoc(doc(db, 'users/contractor'), user('contractor', 'contractor')),
       setDoc(doc(db, 'users/outsider'), user('outsider', 'resident')),
       setDoc(doc(db, 'users/admin'), user('admin', 'admin')),
+      setDoc(doc(db, 'users/super-admin'), user('super-admin', 'super_admin')),
       setDoc(doc(db, 'contractors/contractor'), contractorProfile('contractor')),
       setDoc(doc(db, 'contractors/private'), contractorProfile('private', { profileVisibility: 'hidden' })),
       setDoc(doc(db, 'serviceProviders/public'), { id: 'public', status: 'active', approved: true, isPublic: true }),
@@ -131,6 +132,10 @@ describe('trusted administrators', () => {
     await assertSucceeds(updateDoc(doc(authed('admin', { admin: true }), 'users/resident'), { status: 'deactivated' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'adverts/new'), { id: 'new', status: 'active', isPublic: true }));
     await assertFails(updateDoc(doc(authed('admin'), 'users/resident'), { status: 'deactivated' }));
+  });
+
+  test('allows a provisioned super administrator to use administrator access', async () => {
+    await assertSucceeds(updateDoc(doc(authed('super-admin', { admin: true, superAdmin: true }), 'users/resident'), { status: 'deactivated' }));
   });
 });
 
