@@ -3,7 +3,7 @@ import { USER_ROLES, UserRole } from './user-role.model';
 
 describe('authenticated user models', () => {
   it('supports every authenticated role', () => {
-    const roles: UserRole[] = ['resident', 'paid_resident', 'contractor', 'admin'];
+    const roles: UserRole[] = ['resident', 'paid_resident', 'contractor', 'admin', 'super_admin'];
 
     expect(USER_ROLES).toEqual(roles);
   });

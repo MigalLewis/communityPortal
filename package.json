@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:firestore-rules": "npm --prefix firestore-rules-tests test",
+    "provision:admins": "npm --prefix functions run provision:admins --",
     "deploy:firestore": "npm run test:firestore-rules && firebase deploy --only firestore"
   },
   "private": true,

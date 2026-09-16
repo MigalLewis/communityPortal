@@ -1,4 +1,5 @@
 {
   "name": "community-portal-functions", "private": true, "main": "index.js", "engines": { "node": "20" },
+  "scripts": { "provision:admins": "node scripts/provision-administrators.js" },
   "dependencies": { "firebase-admin": "^13.4.0", "firebase-functions": "^6.4.0" }
 }

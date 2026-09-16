@@ -190,7 +190,7 @@ exports.setUserPrivileges = onCall(async (request) => {
   const [actor, target] = await Promise.all([db.doc(`users/${request.auth.uid}`).get(), db.doc(`users/${userId}`).get()]);
   if (!actor.exists || actor.get('status') !== 'active') throw new HttpsError('permission-denied', 'Active administrator access is required.');
   if (!target.exists || target.get('status') !== 'active') throw new HttpsError('failed-precondition', 'Privileges require an active account.');
-  if (admin && target.get('role') !== 'admin') throw new HttpsError('failed-precondition', 'Administrator claims require a backend-managed admin profile.');
+  if (admin && !['admin', 'super_admin'].includes(target.get('role'))) throw new HttpsError('failed-precondition', 'Administrator claims require a backend-managed admin profile.');
   if (paidResident && target.get('role') !== 'paid_resident') throw new HttpsError('failed-precondition', 'Paid membership requires a paid-resident profile.');
   const identity = await getAuth().getUser(userId);
   await getAuth().setCustomUserClaims(userId, { ...identity.customClaims, admin, paidResident });

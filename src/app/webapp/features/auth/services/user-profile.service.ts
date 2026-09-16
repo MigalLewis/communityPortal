@@ -52,7 +52,9 @@ export class UserProfileService {
   readonly currentProfile = computed(() => this.appUserSignal());
   readonly initializationState = computed(() => this.stateSignal());
   readonly isResident = computed(() => this.currentProfile()?.role === 'resident');
-  readonly isAdmin = computed(() => this.currentProfile()?.role === 'admin' && this.currentProfile()?.status === 'active');
+  readonly isAdmin = computed(() =>
+    ['admin', 'super_admin'].includes(this.currentProfile()?.role ?? '')
+      && this.currentProfile()?.status === 'active');
 
   async createPublicProfile(authUser: AuthUser, registration: PublicProfileRegistration): Promise<void> {
     const profile: UserProfile = {

@@ -31,4 +31,19 @@ describe('UserProfileService public registration', () => {
     await expectAsync(service.createPublicProfile(authUser, { role: 'resident', fullName: 'Rita', phone: '5551234', acceptedTermsAt: 'now' })).toBeRejectedWithError(/incomplete/);
     expect(service.getCurrentUserProfile()).toBeNull();
   });
+
+  for (const role of ['admin', 'super_admin'] as const) {
+    it(`recognizes an active ${role} profile as an administrator`, async () => {
+      spyOn(window, 'fetch').and.resolveTo(new Response(JSON.stringify({ fields: {
+        id: { stringValue: 'uid-1' }, email: { stringValue: authUser.email },
+        fullName: { stringValue: 'Portal Administrator' }, role: { stringValue: role },
+        status: { stringValue: 'active' }, membershipStatus: { stringValue: 'none' },
+        createdAt: { timestampValue: '2026-01-01T00:00:00Z' }
+      } }), { status: 200 }));
+
+      await service.syncCurrentProfile(authUser);
+
+      expect(service.isAdmin()).toBeTrue();
+    });
+  }
 });
