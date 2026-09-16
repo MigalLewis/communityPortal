@@ -78,9 +78,32 @@
 }
 
 body {
+  margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--color-bg-main);
   color: var(--color-text-primary);
+}
+
+/* The signed-in portal shares the public site's editorial typography. */
+.webapp-shell h1,
+.webapp-shell h2,
+.webapp-shell h3 {
+  font-family: var(--website-font-heading);
+}
+
+.webapp-shell button,
+.webapp-shell a {
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease,
+    transform 160ms ease;
+}
+
+.webapp-shell button:focus-visible,
+.webapp-shell a:focus-visible,
+.webapp-shell input:focus-visible,
+.webapp-shell select:focus-visible,
+.webapp-shell textarea:focus-visible {
+  outline: 3px solid rgba(121, 201, 43, 0.42);
+  outline-offset: 3px;
 }
 
 /* Headings */

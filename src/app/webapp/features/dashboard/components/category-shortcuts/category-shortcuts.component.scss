@@ -11,8 +11,7 @@
 .shortcut-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-light);
-  border-left: 4px solid var(--color-success-600);
-  border-radius: 1rem;
+  border-radius: var(--website-radius-card);
   padding: 1.1rem;
   display: grid;
   gap: 0.4rem;
@@ -23,14 +22,16 @@
     border-radius: 0.65rem;
     display: inline-grid;
     place-items: center;
-    background: #eff6ff;
-    color: var(--color-primary-800);
+    background: #edf7e5;
+    color: #315b43;
     font-size: 1rem;
   }
 
   h3 {
     margin: 0.25rem 0 0;
     font-size: 1.2rem;
+    font-family: var(--website-font-heading);
+    font-weight: 500;
   }
 
   p {

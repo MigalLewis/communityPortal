@@ -1,8 +1,46 @@
 .shell {
   min-height: 100vh;
-  background: var(--color-bg-page);
+  color: var(--website-color-ink);
+  background: var(--website-color-cream);
+  font-family: var(--website-font-body);
+
+  /* Keep feature components on the same visual system as the public site. */
+  --color-primary: var(--website-color-ink);
+  --color-primary-hover: var(--website-color-ink-soft);
+  --color-primary-900: var(--website-color-ink);
+  --color-primary-800: var(--website-color-ink-soft);
+  --color-primary-700: #315b43;
+  --color-primary-600: #477557;
+  --color-success-600: #5da920;
+  --color-success-500: var(--website-color-accent);
+  --color-success-100: #edf7e5;
+  --color-bg-main: var(--website-color-cream);
+  --color-bg-page: var(--website-color-cream);
+  --color-bg-card: #fff;
+  --color-bg-muted: var(--website-color-surface);
+  --color-surface: #fff;
+  --color-surface-alt: var(--website-color-surface);
+  --color-text: var(--website-color-ink);
+  --color-text-primary: var(--website-color-ink);
+  --color-text-secondary: var(--website-color-body);
+  --color-text-muted: #7b827d;
+  --color-border: var(--website-color-line);
+  --color-border-light: var(--website-color-line);
+  --color-border-soft: #ecece7;
+  --shadow-sm: var(--website-shadow-card);
+  --shadow-md: 0 16px 42px rgba(18, 34, 27, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
 }
 
 .content {
-  padding: var(--space-7);
+  min-height: calc(100vh - 76px);
+  padding: clamp(2rem, 5vw, 4.5rem) var(--website-page-gutter);
+}
+
+@media (max-width: 560px) {
+  .content {
+    padding: 2rem 18px 3rem;
+  }
 }

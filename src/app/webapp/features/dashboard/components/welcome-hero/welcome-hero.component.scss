@@ -8,14 +8,16 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-primary-700);
+    color: #5d8f2e;
   }
 
   h1 {
     margin: 0;
     font-size: clamp(1.75rem, 3vw, 2.7rem);
     line-height: 1.15;
-    color: var(--color-text-primary);
+    color: var(--website-color-ink);
+    font-family: var(--website-font-heading);
+    font-weight: 500;
   }
 
   .description {

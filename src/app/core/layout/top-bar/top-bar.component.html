@@ -1,5 +1,5 @@
 <header class="topbar">
-  <a class="brand" routerLink="/dashboard">The Parks Contractor Portal</a>
+  <a class="brand" routerLink="/" aria-label="PNRA website home">PNRA</a>
 
   <nav class="top-nav" aria-label="Primary">
     @for (item of navItems; track item.route) {
@@ -14,5 +14,8 @@
     }
   </nav>
 
-  <a class="login-link" routerLink="/login">Login</a>
+  <div class="topbar-actions">
+    <a class="website-link" routerLink="/">Main website</a>
+    <a class="login-link" routerLink="/login">Login</a>
+  </div>
 </header>
