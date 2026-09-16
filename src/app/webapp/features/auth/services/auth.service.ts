@@ -101,6 +101,10 @@ export class AuthService {
   }
 
   private async callIdentityToolkit<TResponse>(path: string, payload: object): Promise<TResponse> {
+    if (!firebaseClient.isConfigured) {
+      throw new Error('Authentication is not configured. Please contact the site administrator.');
+    }
+
     const response = await fetch(`${firebaseClient.identityBaseUrl}/${path}?key=${firebaseClient.apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

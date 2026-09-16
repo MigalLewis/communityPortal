@@ -1,3 +1,4 @@
+import { firebaseClient } from '../../../../core/firebase/firebase.client';
 import { TestBed } from '@angular/core/testing';
 import { AuthService, ProfileOnboardingRequiredError } from './auth.service';
 import { UserProfileService } from './user-profile.service';
@@ -12,6 +13,19 @@ describe('AuthService registration', () => {
     profiles = jasmine.createSpyObj<UserProfileService>('UserProfileService', ['syncCurrentProfile', 'createPublicProfile', 'clearCurrentProfile']);
     TestBed.configureTestingModule({ providers: [AuthService, { provide: UserProfileService, useValue: profiles }] });
     service = TestBed.inject(AuthService);
+  });
+
+  it('rejects missing configuration before making a login request', async () => {
+    const configured = firebaseClient.isConfigured;
+    const fetchSpy = spyOn(window, 'fetch');
+    firebaseClient.isConfigured = false;
+    try {
+      await expectAsync(service.login('admin@example.com', 'secret1'))
+        .toBeRejectedWithError(/Authentication is not configured/);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      firebaseClient.isConfigured = configured;
+    }
   });
 
   it('maps duplicate-email responses to an actionable error', async () => {

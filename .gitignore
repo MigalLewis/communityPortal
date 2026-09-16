@@ -41,3 +41,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Local Firebase environment and generated configuration
+.env.local
+/src/environments/firebase.config.generated.ts

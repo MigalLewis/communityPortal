@@ -1,4 +1,5 @@
-export interface FirebaseConfigPlaceholder {
+// Values are generated from .env.local or the build environment.
+export interface FirebaseConfig {
   apiKey: string;
   authDomain: string;
   projectId: string;
@@ -8,12 +9,4 @@ export interface FirebaseConfigPlaceholder {
   measurementId: string;
 }
 
-export const firebaseConfig: FirebaseConfigPlaceholder = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
-  measurementId: 'YOUR_MEASUREMENT_ID'
-};
+export { firebaseConfig } from './firebase.config.generated';

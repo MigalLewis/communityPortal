@@ -8,12 +8,13 @@ const hasFirebaseConfig = ![
   firebaseConfig.apiKey,
   firebaseConfig.projectId,
   firebaseConfig.authDomain
-].some((value) => value.startsWith('YOUR_'));
+].some((value) => !value.trim() || value.startsWith('YOUR_'));
 
 export const firebaseClient = {
   identityBaseUrl,
   firestoreBaseUrl,
   functionsBaseUrl,
   apiKey: firebaseConfig.apiKey,
+  isConfigured: hasFirebaseConfig,
   useMockFirestore: !hasFirebaseConfig
 };

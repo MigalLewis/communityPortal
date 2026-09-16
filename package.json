@@ -9,7 +9,12 @@
     "test": "ng test",
     "test:firestore-rules": "npm --prefix firestore-rules-tests test",
     "provision:admins": "npm --prefix functions run provision:admins --",
-    "deploy:firestore": "npm run test:firestore-rules && firebase deploy --only firestore"
+    "deploy:firestore": "npm run test:firestore-rules && firebase deploy --only firestore",
+    "config:firebase": "node scripts/generate-firebase-config.mjs",
+    "prestart": "npm run config:firebase",
+    "prebuild": "npm run config:firebase",
+    "prewatch": "npm run config:firebase",
+    "pretest": "npm run config:firebase"
   },
   "private": true,
   "dependencies": {

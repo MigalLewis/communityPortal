@@ -4,7 +4,18 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `npm start` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+
+Copy `.env.example` to `.env.local` and fill in your Firebase web app configuration.
+The local file and generated `src/environments/firebase.config.generated.ts` are
+ignored by Git.
+
+Use `npm start`, `npm run build`, or `npm run watch`: these generate the Firebase
+config before Angular runs. `npm test` also generates the config. Restart after
+changing `.env.local`. Environment variables override the local file; CI uses the
+`FIREBASE_*` GitHub repository variables for both preview and production builds.
+Missing required values stop startup/build with an actionable error. Do not store
+Admin SDK credentials or service account keys in these frontend environment values.
 
 ## Code scaffolding
 
@@ -12,11 +23,11 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
 ## Provision administrator accounts
 
