@@ -1,7 +1,7 @@
 .resident-dashboard {
   display: grid;
   gap: clamp(1.2rem, 2.8vw, 2.1rem);
-  max-width: 74rem;
+  max-width: var(--website-content-width);
   margin: 0 auto;
   padding: clamp(0.1rem, 1vw, 0.6rem);
 }
@@ -23,6 +23,8 @@
 
   h2 {
     margin: 0;
-    font-size: 1.8rem;
+    font-family: var(--website-font-heading);
+    font-size: clamp(1.65rem, 3vw, 2.15rem);
+    font-weight: 500;
   }
 }
