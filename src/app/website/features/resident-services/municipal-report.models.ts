@@ -22,6 +22,10 @@ export interface MunicipalReport extends Omit<MunicipalReportDraft, 'category' |
   resolutionNote?: string; createdAt: string; updatedAt: string;
 }
 
+export interface MunicipalReportAssignee { id: string; fullName: string; email: string; }
+export interface MunicipalReportPage { reports: MunicipalReport[]; page: number; hasNextPage: boolean; }
+export interface MunicipalReportEdit { status: ReportStatus; assigneeId: string; resolutionNote: string; }
+
 export function validateMunicipalDraft(draft: MunicipalReportDraft): string[] {
   const errors: string[] = [];
   if (!ISSUE_CATEGORIES.includes(draft.category as IssueCategory)) errors.push('category');
@@ -39,4 +43,12 @@ export function canTransitionReport(from: ReportStatus, to: ReportStatus): boole
     in_progress: ['resolved', 'closed'], resolved: ['in_progress', 'closed'], closed: []
   };
   return transitions[from].includes(to);
+}
+
+export function validateMunicipalReportEdit(report: MunicipalReport, edit: MunicipalReportEdit): string[] {
+  const errors: string[] = [];
+  if (edit.status !== report.status && !canTransitionReport(report.status, edit.status)) errors.push('status');
+  if (['assigned', 'in_progress'].includes(edit.status) && !edit.assigneeId) errors.push('assigneeId');
+  if (edit.status === 'closed' && !edit.resolutionNote.trim()) errors.push('resolutionNote');
+  return errors;
 }

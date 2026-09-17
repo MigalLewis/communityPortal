@@ -52,6 +52,9 @@
     ] },
     { "collectionGroup": "municipalReports", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "users", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "role", "order": "ASCENDING" }, { "fieldPath": "fullName", "order": "ASCENDING" }
     ] }
   ],
   "fieldOverrides": []
