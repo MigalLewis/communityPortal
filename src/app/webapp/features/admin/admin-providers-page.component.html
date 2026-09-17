@@ -11,13 +11,9 @@
 
   <article class="card">
     <h2>Upload provider file</h2>
-    <div class="dropzone" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-      <p>Drag and drop a .csv or .xlsx file here.</p>
-      <input type="file" accept=".csv,.xlsx" (change)="onFileSelected($event)" />
-      @if (selectedFile()) {
-        <p class="selected-file">Selected file: {{ selectedFile()?.name }}</p>
-      }
-    </div>
+    <app-file-upload label="Choose your provider file" hint="Drag and drop a CSV or Excel (.xlsx) file, or browse your device."
+      accept=".csv,.xlsx" [files]="selectedFile() ? [selectedFile()!] : []"
+      [disabled]="isParsing() || isImporting()" (filesChange)="onFilesChanged($event)" />
 
     <div class="actions">
       <button type="button" class="btn" (click)="parseUpload()" [disabled]="!selectedFile() || isParsing()">

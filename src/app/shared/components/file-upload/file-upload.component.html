@@ -1,0 +1,13 @@
+<div class="upload-zone" [class.is-dragging]="dragging()" [class.is-disabled]="disabled" (dragenter)="enter($event)" (dragleave)="leave($event)" (dragover)="over($event)" (drop)="drop($event)">
+  <div class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"/></svg></div>
+  <div class="upload-copy"><strong>{{ dragging() ? 'Drop your files here' : label }}</strong><p>{{ hint }}</p></div>
+  <input #picker type="file" hidden [accept]="accept" [multiple]="multiple" [disabled]="disabled" (change)="choose($event)" />
+  <button class="browse-button" type="button" [disabled]="disabled" [attr.aria-label]="'Browse files: ' + label" (click)="picker.click()">{{ files.length ? 'Replace' : 'Browse files' }} <span aria-hidden="true">↑</span></button>
+</div>
+<div class="selection" aria-live="polite">
+  @for (file of files; track $index) {
+    <div class="file-row"><span class="file-icon" aria-hidden="true">✓</span><span class="file-name">{{ file.name }}</span><span class="file-size">{{ sizeLabel(file.size) }}</span></div>
+  }
+  @if (files.length) { <button class="clear-button" type="button" [disabled]="disabled" (click)="clear()">Clear selection</button> }
+</div>
+@if (error()) { <p class="upload-error" role="alert">{{ error() }}</p> }

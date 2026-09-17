@@ -1,3 +1,4 @@
+import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { CommonModule } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,7 +12,7 @@ import { ProviderImportRowResult } from './provider-import.models';
 @Component({
   selector: 'app-admin-providers-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
   templateUrl: './admin-providers-page.component.html',
   styleUrl: './admin-providers-page.component.scss'
 })
@@ -65,25 +66,9 @@ export class AdminProvidersPageComponent {
     this.loadCategoryMap();
   }
 
-  protected onDragOver(event: DragEvent): void {
-    event.preventDefault();
-  }
-
-  protected onDrop(event: DragEvent): void {
-    event.preventDefault();
-    const file = event.dataTransfer?.files?.item(0);
-    if (file) {
-      this.useSelectedFile(file);
-    }
-  }
-
-  protected onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0);
-
-    if (file) {
-      this.useSelectedFile(file);
-    }
+  protected onFilesChanged(files: File[]): void {
+    this.clearImport();
+    if (files[0]) this.useSelectedFile(files[0]);
   }
 
   protected async parseUpload(): Promise<void> {
