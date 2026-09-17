@@ -1,12 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-interface CommunityPortfolio {
-  slug: string;
-  icon: string;
-  title: string;
-  description: string;
-}
+import { CommunityPortfolioDocument } from '../../../core/firebase/models/firestore-data.models';
+import { PublicCommunityContentRepository } from '../../services/public-community-content.repository';
 
 interface ResidentService {
   route: string;
@@ -23,24 +18,13 @@ interface ResidentService {
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
-export class LandingPageComponent {
-  protected readonly portfolios: CommunityPortfolio[] = [
-    {
-      slug: 'civic-affairs', icon: '⌂',
-      title: 'Civic Affairs',
-      description: 'Managing relationships with municipal bodies and ensuring service delivery standards are met.'
-    },
-    {
-      slug: 'environmental-affairs', icon: '◒',
-      title: 'Environmental Affairs',
-      description: 'Protecting our urban forest, managing waste, and promoting sustainable community practices.'
-    },
-    {
-      slug: 'town-planning-and-heritage', icon: '△',
-      title: 'Town Planning & Heritage',
-      description: 'Safeguarding the architectural integrity and historic value of Parktown North properties.'
-    }
-  ];
+export class LandingPageComponent implements OnInit {
+  protected readonly portfolios = signal<CommunityPortfolioDocument[]>([]);
+  protected readonly portfoliosLoading = signal(true);
+  protected readonly portfoliosError = signal('');
+  constructor(private readonly repository: PublicCommunityContentRepository) {}
+  async ngOnInit(): Promise<void> { try { this.portfolios.set((await this.repository.listPortfolios()).slice(0, 3)); }
+    catch { this.portfoliosError.set('Portfolios could not be loaded.'); } finally { this.portfoliosLoading.set(false); } }
 
   protected readonly services: ResidentService[] = [
     { route: '/resident-services', icon: '!', title: 'Report an Issue', description: 'JRA, Water, or Power', tone: 'green' },

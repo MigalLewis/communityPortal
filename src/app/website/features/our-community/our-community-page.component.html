@@ -40,10 +40,13 @@
           <p>The PNRA operates through dedicated portfolios, each focused on a crucial aspect of maintaining and improving our neighbourhood.</p>
         </div>
         <div class="portfolio-grid">
-          @for (portfolio of portfolios; track portfolio.title) {
+          @if (loading()) { <p>Loading portfolios…</p> }
+          @else if (error()) { <p role="alert">{{ error() }}</p> }
+          @else if (!portfolios().length) { <p>No portfolios are currently published.</p> }
+          @for (portfolio of portfolios(); track portfolio.id) {
             <article class="portfolio-card">
               <span class="portfolio-icon" aria-hidden="true">{{ portfolio.icon }}</span>
-              <h3>{{ portfolio.title }}</h3>
+              <h3>{{ portfolio.title || portfolio.name }}</h3>
               <p>{{ portfolio.description }}</p>
               <a [routerLink]="['/our-community/portfolios', portfolio.slug]">Learn more</a>
             </article>
@@ -58,9 +61,12 @@
         <p>Dedicated volunteers serving the Parktown North community.</p>
       </div>
       <div class="committee-grid">
-        @for (member of committee; track member.name) {
+        @if (loading()) { <p>Loading committee…</p> }
+        @else if (error()) { <p role="alert">{{ error() }}</p> }
+        @else if (!committee().length) { <p>No committee profiles are currently published.</p> }
+        @for (member of committee(); track member.id) {
           <article class="member-card">
-            <div class="member-photo" aria-hidden="true"><span>{{ member.initials }}</span></div>
+            <div class="member-photo" aria-hidden="true"><span>{{ member.name.slice(0, 2).toUpperCase() }}</span></div>
             <h3>{{ member.name }}</h3>
             <p class="member-role">{{ member.role }}</p>
             <p>{{ member.description }}</p>

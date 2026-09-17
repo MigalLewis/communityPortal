@@ -8,7 +8,8 @@ describe('FirestoreDataService collection access', () => {
     'communityProjects',
     'resources',
     'resourceCategories',
-    'committee'
+    'committeeMembers',
+    'communityPortfolios'
   ];
   const originalMockMode = firebaseClient.useMockFirestore;
 

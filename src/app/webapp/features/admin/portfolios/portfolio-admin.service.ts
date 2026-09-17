@@ -1,0 +1,7 @@
+import { Injectable } from '@angular/core';
+import { CommunityPortfolioDocument } from '../../../../core/firebase/models/firestore-data.models';
+import { FirestoreDataService } from '../../../../core/firebase/services/firestore-data.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { UserProfileService } from '../../auth/services/user-profile.service';
+export type PortfolioInput=Omit<CommunityPortfolioDocument,'id'|'createdAt'|'updatedAt'|'publishedAt'>;
+@Injectable({providedIn:'root'}) export class PortfolioAdminService { constructor(private data:FirestoreDataService,private auth:AuthService,private profiles:UserProfileService){} list(){return this.data.communityPortfolios.list(this.token());}get(id:string){return this.data.communityPortfolios.getById(id,this.token());}async save(input:PortfolioInput,existing?:CommunityPortfolioDocument){if((await this.list()).some(x=>x.slug===input.slug&&x.id!==existing?.id))throw new Error('Slug is already in use.');const now=new Date().toISOString();return this.data.communityPortfolios.upsert({...input,id:existing?.id??crypto.randomUUID(),createdAt:existing?.createdAt??now,updatedAt:now,...(input.publicationState==='published'?{publishedAt:existing?.publishedAt??now}:{})},this.token());}remove(id:string){return this.data.communityPortfolios.remove(id,this.token());}private token(){const user=this.auth.authUser();if(!user||!this.profiles.isAdmin())throw new Error('Administrator access is required.');return user.idToken;}}

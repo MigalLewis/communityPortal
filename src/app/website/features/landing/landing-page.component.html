@@ -18,7 +18,10 @@
         <p>Dedicated committees ensuring the sustained excellence of our neighborhood.</p>
       </div>
       <div class="portfolio-grid">
-        @for (portfolio of portfolios; track portfolio.title) {
+        @if (portfoliosLoading()) { <p>Loading portfolios…</p> }
+        @else if (portfoliosError()) { <p role="alert">{{ portfoliosError() }}</p> }
+        @else if (!portfolios().length) { <p>No portfolios are currently published.</p> }
+        @for (portfolio of portfolios(); track portfolio.id) {
           <article class="portfolio-card">
             <span class="portfolio-icon" aria-hidden="true">{{ portfolio.icon }}</span>
             <h3>{{ portfolio.title }}</h3>

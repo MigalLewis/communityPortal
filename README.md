@@ -69,3 +69,13 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+# Community content migration
+
+Import the legacy committee, portfolio, event, and project constants with deterministic document IDs. Always select the Firebase project explicitly; preview and validate first:
+
+```bash
+npm --prefix functions run migrate:community-content -- --project your-project-id --dry-run
+npm --prefix functions run migrate:community-content -- --project your-project-id
+```
+
+The importer uses merge upserts and stable slug IDs, so it is safe to run repeatedly without creating duplicate documents.
