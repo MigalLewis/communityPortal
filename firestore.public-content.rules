@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /committeeMembers/{contentId} {
+      allow read: if resource.data.publicationState == 'published';
+    }
+
+    match /communityProjects/{contentId} {
+      allow read: if resource.data.publicationState == 'published';
+    }
+
+    match /communityPortfolios/{contentId} {
+      allow read: if resource.data.publicationState == 'published';
+    }
+
+    match /events/{contentId} {
+      allow read: if resource.data.status == 'published';
+    }
+
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

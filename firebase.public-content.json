@@ -1,0 +1,6 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.public-content.rules"
+  }
+}
