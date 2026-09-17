@@ -55,7 +55,8 @@ async function seed() {
       setDoc(doc(db, 'adverts/draft'), { id: 'draft', status: 'draft', isPublic: true }),
       setDoc(doc(db, 'jobs/job'), { id: 'job', residentId: 'resident', contractorId: 'contractor', status: 'completed', createdAt: '2026-01-01' }),
       setDoc(doc(db, 'jobs/incomplete'), { id: 'incomplete', residentId: 'resident', contractorId: 'contractor', status: 'in_progress', createdAt: '2026-01-01' }),
-      setDoc(doc(db, 'reviews/review'), { id: 'review', jobId: 'job', residentId: 'resident', contractorId: 'contractor', rating: 5 }),
+      setDoc(doc(db, 'reviews/review'), { id: 'review', jobId: 'job', residentId: 'resident', contractorId: 'contractor', rating: 5, moderationStatus: 'approved' }),
+      setDoc(doc(db, 'reviews/pending'), { id: 'pending', jobId: 'job', residentId: 'resident', contractorId: 'contractor', rating: 1, moderationStatus: 'pending' }),
       setDoc(doc(db, 'messageThreads/thread'), { id: 'thread', participantIds: ['resident', 'contractor'], createdAt: '2026-01-01' }),
       setDoc(doc(db, 'applications/application'), { id: 'application', applicantId: 'resident', contractorId: 'contractor', jobId: 'job', status: 'pending' }),
       setDoc(doc(db, 'payments/payment'), { id: 'payment', userId: 'resident', amount: 100 }),
@@ -79,7 +80,7 @@ describe('public visibility is explicitly scoped', () => {
   });
   test('denies private/inactive directory records and sensitive collections', async () => {
     for (const path of ['contractors/private', 'serviceProviders/unapproved', 'categories/inactive', 'adverts/draft',
-      'users/resident', 'jobs/job', 'reviews/review', 'messageThreads/thread', 'applications/application',
+      'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
       'payments/payment', 'userTransitionAudits/audit']) {
       await assertFails(getDoc(doc(anon(), path)));
     }
@@ -143,6 +144,8 @@ describe('participant collections and immutable ownership', () => {
   test('limits jobs and reviews to their participants', async () => {
     await assertSucceeds(getDoc(doc(authed('resident'), 'jobs/job')));
     await assertSucceeds(getDoc(doc(authed('contractor'), 'reviews/review')));
+    await assertSucceeds(getDoc(doc(anon(), 'reviews/review')));
+    await assertFails(getDoc(doc(authed('contractor'), 'reviews/pending')));
     await assertFails(getDoc(doc(authed('outsider'), 'jobs/job')));
     await assertFails(getDoc(doc(authed('outsider'), 'reviews/review')));
     await assertFails(updateDoc(doc(authed('resident'), 'jobs/job'), { residentId: 'outsider' }));
@@ -167,6 +170,21 @@ describe('participant collections and immutable ownership', () => {
   });
 });
 
+describe('review moderation visibility and authorization', () => {
+  test('requires approved predicate for public and contractor review lists', async () => {
+    await assertSucceeds(getDocs(query(collection(anon(), 'reviews'), where('moderationStatus', '==', 'approved'))));
+    await assertSucceeds(getDocs(query(collection(authed('contractor'), 'reviews'), where('moderationStatus', '==', 'approved'))));
+    await assertFails(getDocs(collection(anon(), 'reviews')));
+    await assertFails(getDocs(collection(authed('contractor'), 'reviews')));
+    await assertSucceeds(getDocs(collection(authed('admin', { admin: true }), 'reviews')));
+  });
+  test('prevents even administrators from bypassing the trusted moderation transaction', async () => {
+    const admin = authed('admin', { admin: true });
+    await assertFails(updateDoc(doc(admin, 'reviews/pending'), { moderationStatus: 'approved' }));
+    await assertFails(deleteDoc(doc(admin, 'reviews/review')));
+  });
+});
+
 describe('job and review writes require the trusted services', () => {
   test('denies anonymous job and review creation', async () => {
     await assertFails(setDoc(doc(anon(), 'jobs/anonymous'), { id: 'anonymous', residentId: 'resident', contractorId: 'contractor', status: 'open' }));
@@ -181,6 +199,7 @@ describe('job and review writes require the trusted services', () => {
   test('prevents clients from forging contractor aggregates', async () => {
     await assertFails(updateDoc(doc(authed('resident'), 'contractors/contractor'), { rating: 5, reviewCount: 3 }));
     await assertFails(updateDoc(doc(authed('contractor'), 'contractors/contractor'), { rating: 5, reviewCount: 3 }));
+    await assertFails(updateDoc(doc(authed('admin', { admin: true }), 'contractors/contractor'), { rating: 5, reviewCount: 3 }));
   });
 });
 
