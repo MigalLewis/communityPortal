@@ -50,8 +50,9 @@ export class FirestoreDataService {
     adverts: new Map(),
     events: new Map(),
     resourceCategories: new Map(),
-    resources: new Map()
-    communityProjects: new Map()
+    resources: new Map(),
+    communityProjects: new Map(),
+    committee: new Map()
   };
 
   readonly users = new FirestoreEntityService<'users'>('users', this);
@@ -68,6 +69,8 @@ export class FirestoreDataService {
   readonly events = new FirestoreEntityService<'events'>('events', this);
   readonly resourceCategories = new FirestoreEntityService<'resourceCategories'>('resourceCategories', this);
   readonly resources = new FirestoreEntityService<'resources'>('resources', this);
+  readonly communityProjects = new FirestoreEntityService<'communityProjects'>('communityProjects', this);
+  readonly committee = new FirestoreEntityService<'committee'>('committee', this);
 
   async listPublishedResources(): Promise<CollectionModelMap['resources'][]> {
     return this.listPublicByState('resources');
@@ -75,7 +78,7 @@ export class FirestoreDataService {
 
   async listPublishedResourceCategories(): Promise<CollectionModelMap['resourceCategories'][]> {
     return this.listPublicByState('resourceCategories');
-  readonly communityProjects = new FirestoreEntityService<'communityProjects'>('communityProjects', this);
+  }
 
   /** Lists public PNRA projects using the publication predicate required by Firestore rules. */
   async listPublishedCommunityProjects(): Promise<CollectionModelMap['communityProjects'][]> {
