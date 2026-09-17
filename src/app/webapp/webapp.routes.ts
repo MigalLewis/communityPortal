@@ -43,6 +43,9 @@ export const WEBAPP_PAGE_ROUTES: Routes = [
       { path: 'adverts', loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent) },
       { path: 'adverts/new', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
       { path: 'adverts/:id/edit', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
+      { path: 'events', loadComponent: () => import('./features/admin/events/admin-events-page.component').then((m) => m.AdminEventsPageComponent) },
+      { path: 'events/new', loadComponent: () => import('./features/admin/events/event-editor.component').then((m) => m.EventEditorComponent) },
+      { path: 'events/:id/edit', loadComponent: () => import('./features/admin/events/event-editor.component').then((m) => m.EventEditorComponent) },
       { path: 'settings', loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent) }
     ]
   },

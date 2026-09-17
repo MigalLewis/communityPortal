@@ -6,5 +6,6 @@ export const ADMIN_NAVIGATION = [
   { label: 'Reviews', route: '/admin/reviews', description: 'Review and moderate community feedback.' },
   { label: 'Municipal reports', route: '/admin/municipal-reports', description: 'Manage reports about municipal issues.' },
   { label: 'Adverts', route: '/admin/adverts', description: 'Create and manage community advertising.' },
+  { label: 'Manage Events', route: '/admin/events', description: 'Create, publish, and feature community events.' },
   { label: 'Account Settings', route: '/admin/settings', description: 'Manage your administrator profile, notifications, and sign-in security.' }
 ];

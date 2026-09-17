@@ -11,5 +11,6 @@ export const FIRESTORE_COLLECTIONS: Record<CollectionName, CollectionName> = {
   verifications: 'verifications',
   userTransitionAudits: 'userTransitionAudits',
   reviewModerationAudits: 'reviewModerationAudits',
-  adverts: 'adverts'
+  adverts: 'adverts',
+  events: 'events'
 };

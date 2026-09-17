@@ -1,13 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { EVENTS, findBySlug } from '../../content/community-content';
+import { EventDocument } from '../../../core/firebase/models/firestore-data.models';
+import { PublicEventsService } from '../events/public-events.service';
 
-@Component({ selector: 'app-event-detail-page', standalone: true, imports: [RouterLink], template: `
-  @if (event) { <main class="detail-page"><article class="detail"><p class="eyebrow">{{ event.eyebrow }}</p><h1>{{ event.title }}</h1><p class="lead">{{ event.summary }}</p><div class="meta"><span>{{ event.date }}</span><span>{{ event.time }}</span><span>{{ event.location }}</span></div><div class="body">@for (paragraph of event.details; track paragraph) { <p>{{ paragraph }}</p> }</div><div class="actions"><a routerLink="/events">← All events</a><a href="mailto:parktownnorthra@gmail.com?subject=Request information: {{ event.title }}">Request information</a></div></article></main> }
-`, styleUrl: './content-detail.component.scss' })
-export class EventDetailPageComponent {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  protected readonly event = findBySlug(EVENTS, this.route.snapshot.paramMap.get('slug'));
-  constructor() { if (!this.event) void this.router.navigateByUrl('/events'); }
-}
+@Component({selector:'app-event-detail-page',standalone:true,imports:[RouterLink],template:`@if(loading()){<main class="detail-page"><p>Loading event…</p></main>}@else{@if(event();as item){<main class="detail-page"><article class="detail"><p class="eyebrow">{{item.category}} event</p><h1>{{item.title}}</h1><p class="lead">{{item.summary}}</p><img [src]="item.image.url" [alt]="item.image.altText"><div class="meta"><span>{{item.startAt}}</span><span>{{item.venue}}</span></div><div class="body">@for(paragraph of paragraphs(item.description);track paragraph){<p>{{paragraph}}</p>}</div><div class="actions"><a routerLink="/events">← All events</a><a href="mailto:parktownnorthra@gmail.com?subject=Request information: {{item.title}}">Request information</a></div></article></main>}}`,styleUrl:'./content-detail.component.scss'})
+export class EventDetailPageComponent implements OnInit{readonly event=signal<EventDocument|null>(null);readonly loading=signal(true);constructor(private readonly route:ActivatedRoute,private readonly router:Router,private readonly events:PublicEventsService){}async ngOnInit(){const event=await this.events.bySlug(this.route.snapshot.paramMap.get('slug')??'');if(!event){await this.router.navigateByUrl('/events');return;}this.event.set(event);this.loading.set(false);}paragraphs(value:string):string[]{return value.split(/\n\s*\n/).filter(Boolean);}}

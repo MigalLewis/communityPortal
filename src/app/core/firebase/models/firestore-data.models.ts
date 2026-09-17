@@ -196,6 +196,29 @@ export interface AdvertDocument extends FirestoreEntity {
   deactivatedByAdminId?: string;
 }
 
+export type EventPublicationStatus = 'draft' | 'published' | 'archived';
+
+/** A community event as stored in Firestore. Dates are ISO-8601 instants. */
+export interface EventDocument extends FirestoreEntity {
+  slug: string;
+  title: string;
+  summary: string;
+  description: string;
+  category: string;
+  venue: string;
+  startAt: ISODateString;
+  endAt: ISODateString;
+  image: {
+    url: string;
+    altText: string;
+    caption?: string;
+  };
+  status: EventPublicationStatus;
+  featured: boolean;
+  publishedAt?: ISODateString;
+  archivedAt?: ISODateString;
+}
+
 export interface CollectionModelMap {
   users: UserDocument;
   contractors: ContractorDocument;
@@ -208,6 +231,7 @@ export interface CollectionModelMap {
   userTransitionAudits: UserTransitionAuditDocument;
   reviewModerationAudits: ReviewModerationAuditDocument;
   adverts: AdvertDocument;
+  events: EventDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;
