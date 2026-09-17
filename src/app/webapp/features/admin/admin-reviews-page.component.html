@@ -1,0 +1,26 @@
+<section class="reviews">
+  <header><div><h1 class="h2">Moderate Reviews</h1><p class="text-body">Approve trustworthy feedback before it affects public contractor ratings.</p></div><span class="count">{{ filtered().length }} reviews</span></header>
+  <div class="filters">
+    <label>Search<input type="search" placeholder="Comment, resident, or contractor" [ngModel]="search()" (ngModelChange)="search.set($event)"></label>
+    <label>Status<select [ngModel]="status()" (ngModelChange)="status.set($event)"><option value="all">All states</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></label>
+  </div>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  @if (busy() && !rows().length) { <p>Loading reviews…</p> }
+  @else if (!filtered().length) { <p class="empty">No reviews match these filters.</p> }
+  @else {
+    <div class="table-wrap"><table><thead><tr><th>Rating</th><th>Review</th><th>Resident</th><th>Contractor</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      @for (review of filtered(); track review.id) { <tr>
+        <td class="rating" [attr.aria-label]="review.rating + ' out of 5 stars'">★ {{ review.rating }}/5</td>
+        <td><strong>{{ review.title || 'Review' }}</strong><p>{{ review.comment }}</p>@if (review.moderationReason) { <small>Reason: {{ review.moderationReason }}</small> }</td>
+        <td>{{ review.residentName }}</td><td>{{ review.contractorName }}</td><td>{{ review.createdAt | date:'mediumDate' }}</td>
+        <td><span class="status" [class]="'status ' + review.moderationStatus">{{ review.moderationStatus }}</span></td>
+        <td><div class="actions">
+          @if (review.moderationStatus === 'pending') { <button [disabled]="busy()" (click)="moderate(review, 'approve')">Approve</button><button class="danger" [disabled]="busy()" (click)="moderate(review, 'reject')">Reject</button> }
+          @if (review.moderationStatus === 'rejected') { <button [disabled]="busy()" (click)="moderate(review, 'restore')">Restore</button> }
+          @if (review.moderationStatus === 'approved') { <button class="danger" [disabled]="busy()" (click)="moderate(review, 'reject')">Reject</button> }
+          <button class="danger ghost" [disabled]="busy()" (click)="moderate(review, 'remove')">Remove</button>
+        </div></td>
+      </tr> }
+    </tbody></table></div>
+  }
+</section>

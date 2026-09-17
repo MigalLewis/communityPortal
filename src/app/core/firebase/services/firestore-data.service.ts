@@ -44,6 +44,7 @@ export class FirestoreDataService {
     messageThreads: new Map(),
     verifications: new Map(),
     userTransitionAudits: new Map(),
+    reviewModerationAudits: new Map(),
     adverts: new Map()
   };
 
@@ -56,6 +57,7 @@ export class FirestoreDataService {
   readonly messageThreads = new FirestoreEntityService<'messageThreads'>('messageThreads', this);
   readonly verifications = new FirestoreEntityService<'verifications'>('verifications', this);
   readonly userTransitionAudits = new FirestoreEntityService<'userTransitionAudits'>('userTransitionAudits', this);
+  readonly reviewModerationAudits = new FirestoreEntityService<'reviewModerationAudits'>('reviewModerationAudits', this);
   readonly adverts = new FirestoreEntityService<'adverts'>('adverts', this);
 
   async list<K extends CollectionName>(collection: K, idToken?: string): Promise<CollectionModelMap[K][]> {

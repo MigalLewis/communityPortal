@@ -104,6 +104,23 @@ export interface ReviewDocument extends FirestoreEntity {
   rating: number;
   title?: string;
   comment: string;
+  moderationStatus: ReviewModerationStatus;
+  moderationReason?: string;
+  moderatorId?: string;
+  moderatedAt?: ISODateString;
+}
+
+export type ReviewModerationStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ReviewModerationAuditDocument extends FirestoreEntity {
+  reviewId: string;
+  contractorId: string;
+  action: 'approve' | 'reject' | 'restore' | 'remove';
+  fromStatus: ReviewModerationStatus;
+  toStatus?: ReviewModerationStatus;
+  reason?: string;
+  actorId: string;
+  occurredAt: ISODateString;
 }
 
 export type JobStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled';
@@ -187,6 +204,7 @@ export interface CollectionModelMap {
   messageThreads: MessageThreadDocument;
   verifications: VerificationDocument;
   userTransitionAudits: UserTransitionAuditDocument;
+  reviewModerationAudits: ReviewModerationAuditDocument;
   adverts: AdvertDocument;
 }
 

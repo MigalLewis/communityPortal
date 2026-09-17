@@ -3,6 +3,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { createHash } = require('node:crypto');
+const { aggregateAfterTransition, validateReviewTransition } = require('./review-moderation');
 initializeApp();
 
 const contactSubjects = new Set(['General enquiry', 'Membership', 'Municipal issue', 'Security',
@@ -254,15 +255,44 @@ exports.createReview = onCall(async (request) => {
     const contractorRef = db.doc(`contractors/${contractorId}`);
     const contractor = await transaction.get(contractorRef);
     if (!contractor.exists) throw new HttpsError('not-found', 'Contractor was not found.');
-    const previousCount = contractor.get('reviewCount') || 0;
-    const previousRating = contractor.get('rating') || 0;
-    const reviewCount = previousCount + 1;
-    const aggregateRating = ((previousRating * previousCount) + rating) / reviewCount;
     const now = Timestamp.now().toDate().toISOString();
     const review = { id: jobId, jobId, contractorId, residentId: request.auth.uid, rating,
-      comment: comment.trim(), ...(title ? { title: title.trim() } : {}), createdAt: now, updatedAt: now };
+      comment: comment.trim(), moderationStatus: 'pending', ...(title ? { title: title.trim() } : {}), createdAt: now, updatedAt: now };
     transaction.create(reviewRef, review);
-    transaction.update(contractorRef, { rating: aggregateRating, reviewCount, updatedAt: now });
     return review;
   });
+});
+
+exports.manageReview = onCall(async (request) => {
+  const db = getFirestore();
+  if (!request.auth || request.auth.token.admin !== true) throw new HttpsError('permission-denied', 'Administrator access is required.');
+  const actor = await db.doc(`users/${request.auth.uid}`).get();
+  if (!actor.exists || actor.get('status') !== 'active') throw new HttpsError('permission-denied', 'Active administrator access is required.');
+  const { reviewId, action } = request.data || {};
+  const reason = contactText(request.data?.reason, 'Moderation reason', 1000, false);
+  if (typeof reviewId !== 'string' || !reviewId) throw new HttpsError('invalid-argument', 'A review is required.');
+
+  await db.runTransaction(async (transaction) => {
+    const reviewRef = db.doc(`reviews/${reviewId}`);
+    const review = await transaction.get(reviewRef);
+    if (!review.exists) throw new HttpsError('not-found', 'Review was not found.');
+    let target;
+    try { target = validateReviewTransition(review.get('moderationStatus') || 'pending', action, reason); }
+    catch (error) { throw new HttpsError('failed-precondition', error.message); }
+    const contractorRef = db.doc(`contractors/${review.get('contractorId')}`);
+    const contractor = await transaction.get(contractorRef);
+    if (!contractor.exists) throw new HttpsError('failed-precondition', 'The review contractor is missing.');
+    const aggregate = aggregateAfterTransition(contractor.get('rating') || 0, contractor.get('reviewCount') || 0,
+      review.get('rating'), review.get('moderationStatus') || 'pending', target);
+    const now = Timestamp.now().toDate().toISOString();
+    transaction.update(contractorRef, { rating: aggregate.rating, reviewCount: aggregate.reviewCount, updatedAt: now });
+    if (action === 'remove') transaction.delete(reviewRef);
+    else transaction.update(reviewRef, { moderationStatus: target, moderationReason: reason || null,
+      moderatorId: request.auth.uid, moderatedAt: now, updatedAt: now });
+    const auditRef = db.collection('reviewModerationAudits').doc();
+    transaction.create(auditRef, { id: auditRef.id, reviewId, contractorId: review.get('contractorId'), action,
+      fromStatus: review.get('moderationStatus') || 'pending', ...(target ? { toStatus: target } : {}),
+      reason: reason || null, actorId: request.auth.uid, occurredAt: now, createdAt: now, updatedAt: now });
+  });
+  return { ok: true };
 });
