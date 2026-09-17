@@ -255,6 +255,8 @@ export interface ResourceDocument extends FirestoreEntity {
   requestReason?: string;
   featured: boolean;
   quickLink: boolean;
+}
+
 export type CommunityProjectStatus = 'planned' | 'active' | 'on_hold' | 'completed' | 'archived';
 export type CommunityProjectPublicationState = 'draft' | 'published';
 
@@ -280,6 +282,14 @@ export interface CommunityProjectDocument extends FirestoreEntity {
   archivedAt?: ISODateString;
 }
 
+/** A committee member profile reserved for the forthcoming managed committee page. */
+export interface CommitteeDocument extends FirestoreEntity {
+  name: string;
+  role: string;
+  description: string;
+  initials: string;
+}
+
 export interface CollectionModelMap {
   users: UserDocument;
   contractors: ContractorDocument;
@@ -296,6 +306,7 @@ export interface CollectionModelMap {
   resourceCategories: ResourceCategoryDocument;
   resources: ResourceDocument;
   communityProjects: CommunityProjectDocument;
+  committee: CommitteeDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;
