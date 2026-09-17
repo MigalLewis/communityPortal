@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { firebaseClient } from '../../../../core/firebase/firebase.client';
 import { AuthUser } from '../models/auth-user.model';
-import { MEMBERSHIP_STATUSES, MembershipStatus, USER_ACCOUNT_STATUSES, UserAccountStatus, UserProfile } from '../models/user-profile.model';
+import { MEMBERSHIP_STATUSES, MembershipStatus, NotificationPreferences, USER_ACCOUNT_STATUSES, UserAccountStatus, UserProfile } from '../models/user-profile.model';
 import { USER_ROLES, UserRole } from '../models/user-role.model';
 
 interface FirestoreDocumentResponse {
@@ -20,6 +20,11 @@ interface FirestoreDocumentResponse {
     membershipStartedAt?: { timestampValue: string };
     membershipExpiresAt?: { timestampValue: string };
     externalPaymentReference?: { stringValue: string };
+    phone?: { stringValue: string };
+    notificationPreferences?: { mapValue?: { fields?: {
+      email?: { booleanValue: boolean };
+      communityUpdates?: { booleanValue: boolean };
+    } } };
   };
 }
 
@@ -40,6 +45,12 @@ export interface PublicProfileRegistration {
   verificationDocumentName?: string;
   verificationDocumentType?: string;
   verificationDocumentReference?: string;
+}
+
+export interface AccountSettingsUpdate {
+  fullName: string;
+  phone: string;
+  notificationPreferences: NotificationPreferences;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -156,6 +167,11 @@ export class UserProfileService {
       membershipStartedAt: doc.fields.membershipStartedAt?.timestampValue,
       membershipExpiresAt: doc.fields.membershipExpiresAt?.timestampValue,
       externalPaymentReference: doc.fields.externalPaymentReference?.stringValue
+      , phone: doc.fields.phone?.stringValue
+      , notificationPreferences: {
+        email: doc.fields.notificationPreferences?.mapValue?.fields?.email?.booleanValue ?? true,
+        communityUpdates: doc.fields.notificationPreferences?.mapValue?.fields?.communityUpdates?.booleanValue ?? true
+      }
       });
     } catch {
       if (requestId === this.requestId) {
@@ -183,6 +199,29 @@ export class UserProfileService {
 
   getCurrentUserRole(): UserRole | null {
     return this.currentProfile()?.role ?? null;
+  }
+
+  async updateAccountSettings(authUser: AuthUser, update: AccountSettingsUpdate): Promise<void> {
+    const current = this.appUserSignal();
+    if (!current || current.id !== authUser.id) throw new Error('Your profile is not available. Please sign in again.');
+
+    const fields = {
+      fullName: { stringValue: update.fullName.trim() },
+      phone: { stringValue: update.phone.trim() },
+      notificationPreferences: { mapValue: { fields: {
+        email: { booleanValue: update.notificationPreferences.email },
+        communityUpdates: { booleanValue: update.notificationPreferences.communityUpdates }
+      } } },
+      updatedAt: { timestampValue: new Date().toISOString() }
+    };
+    const mask = Object.keys(fields).map((field) => `updateMask.fieldPaths=${encodeURIComponent(field)}`).join('&');
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}/users/${authUser.id}?key=${firebaseClient.apiKey}&${mask}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authUser.idToken}` },
+      body: JSON.stringify({ fields })
+    });
+    if (!response.ok) throw new Error('We could not save your account settings. Please try again.');
+    this.appUserSignal.set({ ...current, ...update, fullName: update.fullName.trim(), phone: update.phone.trim() });
   }
 
   private isUserRole(value: string | undefined): value is UserRole {

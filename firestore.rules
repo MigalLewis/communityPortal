@@ -67,14 +67,15 @@ service cloud.firestore {
       allow update: if ownUser(userId) && activeUser()
         && ((resource.data.role in ['resident', 'paid_resident']
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'fullName', 'phone', 'avatarUrl', 'updatedAt'
+            'fullName', 'phone', 'avatarUrl', 'updatedAt',
+            'notificationPreferences'
           ]))
         || (resource.data.role == 'contractor'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'fullName', 'phone', 'avatarUrl', 'businessName',
             'serviceCategories', 'serviceAreas', 'businessDescription',
             'businessContactEmail', 'businessContactPhone', 'businessWebsite',
-            'updatedAt'
+            'updatedAt', 'notificationPreferences'
           ])));
 
       // Trusted-claim administrators may transition account state. Backend code

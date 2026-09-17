@@ -1,3 +1,65 @@
-<app-card-container title="Settings" subtitle="Phase 1 placeholder route.">
-  <p>Portal preferences and account settings will live here.</p>
-</app-card-container>
+<div class="settings-page">
+  <header class="page-heading">
+    <p class="eyebrow">ACCOUNT</p>
+    <h1>Account settings</h1>
+    <p>Manage your personal details, notifications, and sign-in security.</p>
+  </header>
+
+  <app-card-container title="Profile and notifications" subtitle="These details belong to your account, including when you use the administration area.">
+    <form class="settings-form" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+      <div class="field">
+        <label for="full-name">Full name</label>
+        <input id="full-name" type="text" formControlName="fullName" autocomplete="name" />
+        @if (profileForm.controls.fullName.touched && profileForm.controls.fullName.hasError('required')) {
+          <p class="error" id="full-name-error">Enter your full name.</p>
+        }
+        @if (profileForm.controls.fullName.touched && profileForm.controls.fullName.hasError('maxlength')) {
+          <p class="error">Full name must be 120 characters or fewer.</p>
+        }
+      </div>
+      <div class="field">
+        <label for="phone">Phone number</label>
+        <input id="phone" type="tel" formControlName="phone" autocomplete="tel" />
+        @if (profileForm.controls.phone.touched && profileForm.controls.phone.invalid) {
+          <p class="error">Phone number must be 30 characters or fewer.</p>
+        }
+      </div>
+      <fieldset>
+        <legend>Notification preferences</legend>
+        <label class="check"><input type="checkbox" formControlName="emailNotifications" /> Email notifications about account activity</label>
+        <label class="check"><input type="checkbox" formControlName="communityUpdates" /> Community news and updates</label>
+      </fieldset>
+      @if (profileError()) { <p class="feedback error" role="alert">{{ profileError() }}</p> }
+      @if (profileSuccess()) { <p class="feedback success" role="status">{{ profileSuccess() }}</p> }
+      <button class="primary" type="submit" [disabled]="savingProfile()">{{ savingProfile() ? 'Saving…' : 'Save settings' }}</button>
+    </form>
+  </app-card-container>
+
+  <app-card-container title="Access and security" subtitle="Authorization details are managed separately and cannot be changed here.">
+    <dl class="account-facts">
+      <div><dt>Email</dt><dd>{{ profile()?.email }}</dd></div>
+      <div><dt>Role</dt><dd>{{ profile()?.role }}</dd></div>
+      <div><dt>Account status</dt><dd>{{ profile()?.status }}</dd></div>
+    </dl>
+    <p class="muted">Roles, custom claims, membership, and account status are read-only. Contact another administrator if they need to change.</p>
+    <form class="settings-form password-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+      <div class="field"><label for="new-password">New password</label><input id="new-password" type="password" formControlName="password" autocomplete="new-password" />
+        @if (passwordForm.controls.password.touched && passwordForm.controls.password.invalid) { <p class="error">Use at least 6 characters.</p> }
+      </div>
+      <div class="field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+        @if (passwordForm.controls.confirmPassword.touched && passwordForm.getRawValue().password !== passwordForm.getRawValue().confirmPassword) { <p class="error">Passwords must match.</p> }
+      </div>
+      @if (passwordError()) { <p class="feedback error" role="alert">{{ passwordError() }}</p> }
+      @if (reauthenticationRequired()) { <p class="reauth">Sign out below, sign in again, then return here to retry.</p> }
+      @if (passwordSuccess()) { <p class="feedback success" role="status">{{ passwordSuccess() }}</p> }
+      <div class="actions">
+        <button class="primary" type="submit" [disabled]="changingPassword()">{{ changingPassword() ? 'Changing…' : 'Change password' }}</button>
+        <button class="secondary" type="button" (click)="sendPasswordReset()" [disabled]="sendingReset()">{{ sendingReset() ? 'Sending…' : 'Email me a reset link' }}</button>
+      </div>
+    </form>
+  </app-card-container>
+
+  <app-card-container title="Sign out" subtitle="End your session on this device.">
+    <button class="danger" type="button" (click)="signOut()">Sign out</button>
+  </app-card-container>
+</div>

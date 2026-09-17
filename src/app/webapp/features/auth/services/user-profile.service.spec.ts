@@ -61,6 +61,25 @@ describe('UserProfileService public registration', () => {
     expect(service.getCurrentUserProfile()).toBeNull();
   });
 
+  it('patches only editable account settings and retains privileged profile fields', async () => {
+    const request = spyOn(window, 'fetch').and.resolveTo(new Response(JSON.stringify({ fields: {
+      role: { stringValue: 'admin' }, status: { stringValue: 'active' },
+      fullName: { stringValue: 'Administrator' }
+    } }), { status: 200 }));
+    await service.syncCurrentProfile(authUser);
+    request.and.resolveTo(new Response('{}', { status: 200 }));
+    await service.updateAccountSettings(authUser, {
+      fullName: 'Updated Administrator', phone: '123',
+      notificationPreferences: { email: false, communityUpdates: true }
+    });
+    const [url, init] = request.calls.mostRecent().args as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(url).toContain('updateMask.fieldPaths=notificationPreferences');
+    expect(body.fields.role).toBeUndefined();
+    expect(body.fields.status).toBeUndefined();
+    expect(service.currentProfile()).toEqual(jasmine.objectContaining({ role: 'admin', status: 'active', fullName: 'Updated Administrator' }));
+  });
+
   for (const role of ['admin', 'super_admin'] as const) {
     it(`recognizes an active ${role} profile as an administrator`, async () => {
       spyOn(window, 'fetch').and.resolveTo(new Response(JSON.stringify({ fields: {
