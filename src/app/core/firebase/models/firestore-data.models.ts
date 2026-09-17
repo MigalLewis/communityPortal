@@ -219,6 +219,31 @@ export interface EventDocument extends FirestoreEntity {
   archivedAt?: ISODateString;
 }
 
+export type CommunityProjectStatus = 'planned' | 'active' | 'on_hold' | 'completed' | 'archived';
+export type CommunityProjectPublicationState = 'draft' | 'published';
+
+/** PNRA-managed public content, intentionally separate from resident JobDocument requests. */
+export interface CommunityProjectDocument extends FirestoreEntity {
+  slug: string;
+  title: string;
+  summary: string;
+  content: string;
+  category: string;
+  status: CommunityProjectStatus;
+  image: {
+    url: string;
+    altText: string;
+    caption?: string;
+  };
+  progress: number;
+  featured: boolean;
+  publicationState: CommunityProjectPublicationState;
+  startDate?: ISODateString;
+  completionDate?: ISODateString;
+  publishedAt?: ISODateString;
+  archivedAt?: ISODateString;
+}
+
 export interface CollectionModelMap {
   users: UserDocument;
   contractors: ContractorDocument;
@@ -232,6 +257,7 @@ export interface CollectionModelMap {
   reviewModerationAudits: ReviewModerationAuditDocument;
   adverts: AdvertDocument;
   events: EventDocument;
+  communityProjects: CommunityProjectDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;

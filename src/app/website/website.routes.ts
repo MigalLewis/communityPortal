@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 /** Public website pages that do not require account features. */
-const WEBSITE_PAGE_ROUTES: Routes = [
+export const WEBSITE_PAGE_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',

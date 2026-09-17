@@ -1,67 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommunityProjectDocument } from '../../../core/firebase/models/firestore-data.models';
+import { PublicCommunityProjectsService } from './public-community-projects.service';
 
-type ProjectCategory = 'Environment' | 'Infrastructure' | 'Safety' | 'Community';
-type ProjectStatus = 'Ongoing' | 'Completed';
-
-interface Project {
-  slug: string;
-  title: string;
-  description: string;
-  category: ProjectCategory;
-  status: ProjectStatus;
-  image: string;
-}
-
-@Component({
-  selector: 'app-projects-page',
-  standalone: true,
-  imports: [RouterLink],
-  templateUrl: './projects-page.component.html',
-  styleUrl: './projects-page.component.scss'
-})
-export class ProjectsPageComponent {
-  protected readonly filters = ['All', 'Environment', 'Infrastructure', 'Safety', 'Community', 'Completed'];
-  protected activeFilter = 'All';
-
-  protected readonly projects: Project[] = [
-    {
-      slug: 'pocket-park', title: 'Pocket Park',
-      description: 'Creating sustainable micro-parks throughout the neighbourhood to enhance local biodiversity.',
-      category: 'Environment',
-      status: 'Ongoing',
-      image: 'https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=900&q=85'
-    },
-    {
-      slug: 'adopt-a-box', title: 'Adopt-a-Box',
-      description: 'Beautifying street infrastructure through community-sponsored art on utility boxes.',
-      category: 'Infrastructure',
-      status: 'Ongoing',
-      image: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=900&q=85'
-    },
-    {
-      slug: 'bollard-project', title: 'Bollard Project',
-      description: 'Installing protective bollards along key pedestrian routes to make everyday journeys safer.',
-      category: 'Safety',
-      status: 'Completed',
-      image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&q=85'
-    },
-    {
-      slug: 'community-in-action-squad', title: 'Community-in-Action Squad',
-      description: 'A rapid-response volunteer group addressing minor maintenance issues across the suburb.',
-      category: 'Community',
-      status: 'Ongoing',
-      image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=85'
-    }
-  ];
-
-  protected get filteredProjects(): Project[] {
-    if (this.activeFilter === 'All') return this.projects;
-    if (this.activeFilter === 'Completed') return this.projects.filter(({ status }) => status === 'Completed');
-    return this.projects.filter(({ category }) => category === this.activeFilter);
-  }
-
-  protected selectFilter(filter: string): void {
-    this.activeFilter = filter;
-  }
+@Component({ selector: 'app-projects-page', standalone: true, imports: [RouterLink], templateUrl: './projects-page.component.html', styleUrl: './projects-page.component.scss' })
+export class ProjectsPageComponent implements OnInit {
+  readonly projects = signal<CommunityProjectDocument[]>([]); readonly loading = signal(true); readonly error = signal('');
+  activeFilter = 'All';
+  constructor(private readonly repository: PublicCommunityProjectsService) {}
+  async ngOnInit(): Promise<void> { try { this.projects.set(await this.repository.list()); } catch { this.error.set('Community projects could not be loaded. Please try again later.'); } finally { this.loading.set(false); } }
+  get featured(): CommunityProjectDocument | null { return this.repository.featured(this.projects()); }
+  get filters(): string[] { return ['All', ...new Set(this.projects().map(project => project.category)), 'Completed']; }
+  get filteredProjects(): CommunityProjectDocument[] { return this.projects().filter(project => project.id !== this.featured?.id && (this.activeFilter === 'All' || (this.activeFilter === 'Completed' ? project.status === 'completed' : project.category === this.activeFilter))); }
+  selectFilter(filter: string): void { this.activeFilter = filter; }
+  statusLabel(status: CommunityProjectDocument['status']): string { return ({ planned: 'Planned', active: 'Active', on_hold: 'On hold', completed: 'Completed', archived: 'Archived' })[status]; }
 }

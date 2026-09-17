@@ -48,7 +48,8 @@ export class FirestoreDataService {
     userTransitionAudits: new Map(),
     reviewModerationAudits: new Map(),
     adverts: new Map(),
-    events: new Map()
+    events: new Map(),
+    communityProjects: new Map()
   };
 
   readonly users = new FirestoreEntityService<'users'>('users', this);
@@ -63,6 +64,28 @@ export class FirestoreDataService {
   readonly reviewModerationAudits = new FirestoreEntityService<'reviewModerationAudits'>('reviewModerationAudits', this);
   readonly adverts = new FirestoreEntityService<'adverts'>('adverts', this);
   readonly events = new FirestoreEntityService<'events'>('events', this);
+  readonly communityProjects = new FirestoreEntityService<'communityProjects'>('communityProjects', this);
+
+  /** Lists public PNRA projects using the publication predicate required by Firestore rules. */
+  async listPublishedCommunityProjects(): Promise<CollectionModelMap['communityProjects'][]> {
+    if (this.mockMode) {
+      return Array.from(this.mockStore.communityProjects.values())
+        .filter(project => project.publicationState === 'published');
+    }
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
+      method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: FIRESTORE_COLLECTIONS.communityProjects }],
+          where: { fieldFilter: { field: { fieldPath: 'publicationState' }, op: 'EQUAL', value: { stringValue: 'published' } } }
+        }
+      })
+    });
+    if (!response.ok) throw new Error('Failed to list published community projects.');
+    const payload = await response.json() as FirestoreQueryResponse[];
+    return payload.map(item => item.document && fromFirestoreDocument<CollectionModelMap['communityProjects']>(item.document))
+      .filter((project): project is CollectionModelMap['communityProjects'] => !!project)
+      .sort((a, b) => (b.startDate ?? '').localeCompare(a.startDate ?? '') || a.title.localeCompare(b.title));
+  }
 
   /** Lists only records that Firestore rules permit an unauthenticated visitor to see. */
   async listPublishedEvents(): Promise<CollectionModelMap['events'][]> {
