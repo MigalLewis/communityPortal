@@ -59,6 +59,30 @@ export class AuthService {
     return this.setAuthUser(response);
   }
 
+  async refreshSession(): Promise<void> {
+    const user = this.authUserSignal();
+    if (!user) return;
+    const response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${firebaseClient.apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: user.refreshToken })
+    });
+    if (!response.ok) {
+      await this.logout();
+      return;
+    }
+    const token = await response.json() as {
+      user_id: string; id_token: string; refresh_token: string; expires_in: string;
+    };
+    // A logout or another login may have happened while the refresh was in flight.
+    if (this.authUserSignal() !== user) return;
+    this.setAuthUser({
+      localId: token.user_id, email: user.email, idToken: token.id_token,
+      refreshToken: token.refresh_token, expiresIn: token.expires_in
+    });
+    await this.waitUntilReady();
+  }
+
   async register(registration: PublicRegistration): Promise<AuthUser> {
     const response = await this.callIdentityToolkit<FirebaseAuthResponse>('accounts:signUp', {
       email: registration.email,

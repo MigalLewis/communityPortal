@@ -13,8 +13,9 @@ describe('access guards', () => {
   });
 
   async function run(guard: typeof activeUserGuard, value: UserProfile | null, claims = { admin: false, paidResident: false }, authenticated = true,
-    waits: { auth?: Promise<void>; profile?: Promise<void> } = {}): Promise<true | UrlTree> {
+    waits: { auth?: Promise<void>; profile?: Promise<void>; refreshedAdmin?: boolean; refreshFails?: boolean } = {}): Promise<true | UrlTree> {
     const auth = {
+      refreshSession: async () => { if (waits.refreshFails) throw new Error('Offline'); if (waits.refreshedAdmin) claims.admin = true; },
       waitUntilReady: () => waits.auth ?? Promise.resolve(), isAuthenticated: () => authenticated,
       authUser: () => authenticated ? { claims } : null
     };
@@ -33,6 +34,21 @@ describe('access guards', () => {
   it('sends signed-in administrators to their admin home', async () => expect(path(await run(guestGuard, profile('admin'), { admin: true, paidResident: false }))).toBe('/admin'));
   it('keeps the community home for other signed-in users', async () => expect(path(await run(guestGuard, profile('resident')))).toBe('/dashboard'));
   it('preserves status restrictions for administrators on guest pages', async () => expect(path(await run(guestGuard, profile('admin', 'deactivated'), { admin: true, paidResident: false }))).toBe('/account/deactivated'));
+  it('returns anonymous admin visitors to login with the admin destination', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([]),
+      { provide: AuthService, useValue: { waitUntilReady: async () => {}, isAuthenticated: () => false } },
+      { provide: UserProfileService, useValue: { waitUntilReady: async () => {}, currentProfile: () => null } }
+    ] });
+    const result = await TestBed.runInInjectionContext(() => administratorGuard({} as never, { url: '/admin' } as never));
+    expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/login?redirectTo=%2Fadmin');
+  });
+  it('refreshes a provisioned administrator session before checking trusted claims', async () => {
+    expect(await run(administratorGuard, profile('admin'), { admin: false, paidResident: false }, true, { refreshedAdmin: true })).toBeTrue();
+  });
+  it('shows a recoverable account page if refreshing an administrator fails', async () => {
+    expect(path(await run(administratorGuard, profile('admin'), undefined, true, { refreshFails: true })))
+      .toBe('/account/profile-unavailable?redirectTo=%2Fprotected');
+  });
   it('allows an active user', async () => expect(await run(activeUserGuard, profile('resident'))).toBeTrue());
   it('reports a missing profile separately from a pending account', async () => {
     expect(path(await run(administratorGuard, null, { admin: true, paidResident: false })))
