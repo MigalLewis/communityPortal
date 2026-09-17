@@ -1,0 +1,29 @@
+:host { display: block; }
+.settings-page { display: grid; gap: 24px; max-width: 900px; }
+.page-heading h1 { margin: 5px 0 8px; font-size: clamp(2rem, 5vw, 3rem); }
+.page-heading p { margin: 0; color: var(--color-text-secondary); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; }
+.settings-form { display: grid; gap: 18px; }
+.field { display: grid; gap: 7px; }
+label, legend { font-weight: 650; }
+input[type='text'], input[type='tel'], input[type='password'] { width: 100%; max-width: 520px; box-sizing: border-box; padding: 11px 12px; border: 1px solid var(--color-border); border-radius: 6px; font: inherit; }
+input:focus { outline: 3px solid rgba(93, 169, 32, .2); border-color: var(--color-success-600); }
+fieldset { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--color-border); border-radius: 7px; }
+.check { display: flex; gap: 9px; align-items: center; font-weight: 400; }
+.error { color: #a42c25; }
+.success { color: #2f6d20; }
+.field p, .feedback, .reauth, .muted { margin: 0; font-size: .9rem; }
+.feedback { padding: 10px 12px; border-radius: 6px; background: var(--color-bg-muted); }
+.reauth, .muted { color: var(--color-text-secondary); }
+.account-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; }
+.account-facts div { padding: 12px; border-radius: 6px; background: var(--color-bg-muted); }
+dt { color: var(--color-text-secondary); font-size: .78rem; }
+dd { margin: 4px 0 0; font-weight: 650; overflow-wrap: anywhere; }
+.password-form { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button { border-radius: 6px; padding: 11px 16px; font: inherit; font-weight: 650; cursor: pointer; }
+button:disabled { cursor: wait; opacity: .65; }
+.primary { border: 0; color: white; background: var(--website-color-ink); justify-self: start; }
+.secondary { border: 1px solid var(--color-border); background: white; }
+.danger { border: 1px solid #a42c25; color: #8a211b; background: white; }
+@media (max-width: 600px) { .account-facts { grid-template-columns: 1fr; } }

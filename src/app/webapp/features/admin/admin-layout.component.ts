@@ -17,7 +17,6 @@ import { ADMIN_NAVIGATION } from './admin-navigation';
             <a [routerLink]="item.route" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: item.route !== '/admin/adverts' }" ariaCurrentWhenActive="page" (click)="menuOpen.set(false)">{{ item.label }}</a>
           }
           <a class="community-link" routerLink="/dashboard">← Community dashboard</a>
-          <a routerLink="/settings">Account settings</a>
         </nav>
       </aside>
       <div class="admin-content"><router-outlet /></div>

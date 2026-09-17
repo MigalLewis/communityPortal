@@ -33,4 +33,10 @@ export interface UserProfile {
   membershipStartedAt?: string;
   membershipExpiresAt?: string;
   externalPaymentReference?: string;
+  notificationPreferences?: NotificationPreferences;
+}
+
+export interface NotificationPreferences {
+  email: boolean;
+  communityUpdates: boolean;
 }

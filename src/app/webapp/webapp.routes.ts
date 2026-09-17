@@ -6,7 +6,7 @@ import { authGuard } from './features/auth/guards/auth.guard';
 import { guestGuard } from './features/auth/guards/guest.guard';
 
 /** Contractor directory and account application routes. */
-const WEBAPP_PAGE_ROUTES: Routes = [
+export const WEBAPP_PAGE_ROUTES: Routes = [
   { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent) },
   { path: 'directory', loadComponent: () => import('./features/contractor-directory/contractor-directory-page.component').then((m) => m.ContractorDirectoryPageComponent) },
   { path: 'directory/:id', loadComponent: () => import('./features/contractor-profile/contractor-profile-page.component').then((m) => m.ContractorProfilePageComponent) },
@@ -43,6 +43,7 @@ const WEBAPP_PAGE_ROUTES: Routes = [
       { path: 'adverts', loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent) },
       { path: 'adverts/new', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
       { path: 'adverts/:id/edit', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
+      { path: 'settings', loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent) }
     ]
   },
   { path: 'projects', canActivate: [residentOrPaidResidentGuard], loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent) },

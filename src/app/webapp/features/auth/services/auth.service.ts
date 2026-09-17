@@ -15,6 +15,13 @@ export class ProfileOnboardingRequiredError extends Error {
   }
 }
 
+export class ReauthenticationRequiredError extends Error {
+  constructor() {
+    super('For your security, sign out and sign in again before changing your password.');
+    this.name = 'ReauthenticationRequiredError';
+  }
+}
+
 interface FirebaseAuthResponse {
   localId: string;
   email: string;
@@ -124,6 +131,15 @@ export class AuthService {
     });
   }
 
+  async updatePassword(password: string): Promise<void> {
+    const user = this.authUserSignal();
+    if (!user) throw new ReauthenticationRequiredError();
+    const response = await this.callIdentityToolkit<FirebaseAuthResponse>('accounts:update', {
+      idToken: user.idToken, password, returnSecureToken: true
+    });
+    this.setAuthUser(response);
+  }
+
   private async callIdentityToolkit<TResponse>(path: string, payload: object): Promise<TResponse> {
     if (!firebaseClient.isConfigured) {
       throw new Error('Authentication is not configured. Please contact the site administrator.');
@@ -201,6 +217,10 @@ export class AuthService {
         return 'Please choose a stronger password (at least 6 characters).';
       case 'TOO_MANY_ATTEMPTS_TRY_LATER':
         return 'Too many attempts. Please wait a minute and try again.';
+      case 'CREDENTIAL_TOO_OLD_LOGIN_AGAIN':
+      case 'TOKEN_EXPIRED':
+      case 'INVALID_ID_TOKEN':
+        throw new ReauthenticationRequiredError();
       default:
         return 'Something went wrong. Please try again.';
     }

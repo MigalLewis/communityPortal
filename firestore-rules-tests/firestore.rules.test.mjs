@@ -114,6 +114,9 @@ describe('registration and profile escalation defenses', () => {
   });
   test('allows resident profile fields but not contractor-only or membership fields', async () => {
     await assertSucceeds(updateDoc(doc(authed('resident'), 'users/resident'), { fullName: 'Updated', phone: '123' }));
+    await assertSucceeds(updateDoc(doc(authed('resident'), 'users/resident'), {
+      notificationPreferences: { email: true, communityUpdates: false }
+    }));
     await assertSucceeds(updateDoc(doc(authed('paid'), 'users/paid'), { avatarUrl: 'avatar.png' }));
     await assertFails(updateDoc(doc(authed('resident'), 'users/resident'), { businessName: 'Escalation Ltd' }));
     await assertFails(updateDoc(doc(authed('paid'), 'users/paid'), { membershipStatus: 'active' }));
@@ -135,6 +138,15 @@ describe('trusted administrators', () => {
     await assertSucceeds(updateDoc(doc(authed('admin', { admin: true }), 'users/resident'), { status: 'deactivated' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'adverts/new'), { id: 'new', status: 'active', isPublic: true }));
     await assertFails(updateDoc(doc(authed('admin'), 'users/resident'), { status: 'deactivated' }));
+  });
+
+  test('lets administrators edit their personal settings without making authority client-editable', async () => {
+    const admin = authed('admin', { admin: true });
+    await assertSucceeds(updateDoc(doc(admin, 'users/admin'), {
+      fullName: 'Updated Administrator', phone: '555-0100',
+      notificationPreferences: { email: false, communityUpdates: true }
+    }));
+    await assertFails(updateDoc(doc(authed('resident'), 'users/resident'), { role: 'admin', status: 'active' }));
   });
 
   test('allows a provisioned super administrator to use administrator access', async () => {
