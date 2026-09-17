@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { routes } from '../app.routes';
+import { WEBSITE_PAGE_ROUTES } from './website.routes';
 
 describe('public legal routes', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes)] }));
@@ -24,7 +25,6 @@ describe('public content detail routes', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes)] }));
 
   for (const path of [
-    '/projects/pocket-park',
     '/events/spring-community-market-day',
     '/our-community/portfolios/civic-affairs',
     '/our-community/heritage/parktown-north-heritage',
@@ -36,6 +36,13 @@ describe('public content detail routes', () => {
       expect(router.url).toBe(path);
     });
   }
+
+
+  it('registers the community-project slug route without relying on hard-coded project content', async () => {
+    const route = WEBSITE_PAGE_ROUTES.find(candidate => candidate.path === 'projects/:slug');
+    expect(route).toBeDefined();
+    expect(await route!.loadComponent!()).toBeDefined();
+  });
 
   for (const [unknown, fallback] of [
     ['/projects/not-a-project', '/projects'],

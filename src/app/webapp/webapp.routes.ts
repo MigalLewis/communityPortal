@@ -47,6 +47,9 @@ export const WEBAPP_PAGE_ROUTES: Routes = [
       { path: 'resources', loadComponent: () => import('./features/admin/resources/admin-resources-page.component').then((m) => m.AdminResourcesPageComponent) },
       { path: 'events/new', loadComponent: () => import('./features/admin/events/event-editor.component').then((m) => m.EventEditorComponent) },
       { path: 'events/:id/edit', loadComponent: () => import('./features/admin/events/event-editor.component').then((m) => m.EventEditorComponent) },
+      { path: 'projects', loadComponent: () => import('./features/admin/projects/admin-projects-page.component').then((m) => m.AdminProjectsPageComponent) },
+      { path: 'projects/new', loadComponent: () => import('./features/admin/projects/community-project-editor.component').then((m) => m.CommunityProjectEditorComponent) },
+      { path: 'projects/:id/edit', loadComponent: () => import('./features/admin/projects/community-project-editor.component').then((m) => m.CommunityProjectEditorComponent) },
       { path: 'settings', loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent) }
     ]
   },

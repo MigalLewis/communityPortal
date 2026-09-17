@@ -18,3 +18,12 @@ describe('account settings routes', () => {
     expect(await settings!.loadComponent!()).toBe(SettingsPageComponent);
   });
 });
+
+
+describe('community project administration routes', () => {
+  it('registers list, create, and edit routes inside the guarded admin area', () => {
+    const admin = WEBAPP_PAGE_ROUTES.find((route) => route.path === 'admin');
+    expect(admin?.children?.filter((route) => route.path?.startsWith('projects')).map((route) => route.path)).toEqual(['projects', 'projects/new', 'projects/:id/edit']);
+    expect(admin?.canActivateChild).toEqual([adminRoleGuard]);
+  });
+});

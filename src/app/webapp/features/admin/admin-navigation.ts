@@ -8,5 +8,6 @@ export const ADMIN_NAVIGATION = [
   { label: 'Adverts', route: '/admin/adverts', description: 'Create and manage community advertising.' },
   { label: 'Manage Events', route: '/admin/events', description: 'Create, publish, and feature community events.' },
   { label: 'Manage Resources', route: '/admin/resources', description: 'Publish and maintain the public resource library.' },
+  { label: 'Manage Projects', route: '/admin/projects', description: 'Create, publish, and track PNRA community projects.' },
   { label: 'Account Settings', route: '/admin/settings', description: 'Manage your administrator profile, notifications, and sign-in security.' }
 ];

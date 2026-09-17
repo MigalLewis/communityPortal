@@ -6,4 +6,8 @@ describe('ADMIN_NAVIGATION', () => {
       label: 'Account Settings', route: '/admin/settings'
     }));
   });
+
+  it('links to the distinct community-project manager', () => {
+    expect(ADMIN_NAVIGATION).toContain(jasmine.objectContaining({ label: 'Manage Projects', route: '/admin/projects' }));
+  });
 });
