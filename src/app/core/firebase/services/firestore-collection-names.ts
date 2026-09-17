@@ -12,5 +12,7 @@ export const FIRESTORE_COLLECTIONS: Record<CollectionName, CollectionName> = {
   userTransitionAudits: 'userTransitionAudits',
   reviewModerationAudits: 'reviewModerationAudits',
   adverts: 'adverts',
-  events: 'events'
+  events: 'events',
+  resourceCategories: 'resourceCategories',
+  resources: 'resources'
 };

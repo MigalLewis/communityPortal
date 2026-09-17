@@ -8,22 +8,24 @@
   <div class="resource-layout">
     <section class="library" aria-label="Resource library">
       <div class="category-grid" aria-label="Resource categories">
-        @for (category of categories; track category[1]) {
-          <button type="button" [class.active]="activeCategory === category[1]" [attr.aria-pressed]="activeCategory === category[1]" (click)="selectCategory(category[1])">
-            <span class="material-symbols-outlined" aria-hidden="true">{{ category[0] }}</span><strong>{{ category[1] }}</strong>
+        @for (category of categories; track category.id) {
+          <button type="button" [class.active]="activeCategory === category.id" [attr.aria-pressed]="activeCategory === category.id" (click)="selectCategory(category.id)">
+            <span class="material-symbols-outlined" aria-hidden="true">{{ category.icon }}</span><strong>{{ category.title }}</strong>
           </button>
         }
       </div>
 
       <div class="documents" id="documents">
         <header><h2>Recent Documents</h2><label><span class="material-symbols-outlined" aria-hidden="true">≡</span><span class="sr-only">Sort documents</span><select (change)="updateSort($event)"><option value="newest">Sort by: Newest</option><option value="title">Sort by: A–Z</option></select></label></header>
+        @if (loading) { <p class="empty">Loading resources…</p> }
+        @if (error) { <p class="empty" role="alert">{{ error }}</p> }
         @for (document of visibleDocuments; track document.id) {
           <article class="document-card">
-            <div class="document-copy"><div class="metadata"><span>{{ document.category }}</span><small>Published {{ publicationLabel(document.publishedOn) }}@if (document.fileSizeBytes) { · PDF · {{ fileSizeLabel(document.fileSizeBytes) }}}</small></div><h3>{{ document.title }}</h3><p>{{ document.description }}</p>@if (!document.documentUrl && document.requestReason) { <p class="availability-note">{{ document.requestReason }}</p> }</div>
+            <div class="document-copy"><div class="metadata"><span>{{ categoryTitle(document.categoryId) }}</span><small>Published {{ publicationLabel(document.publicationDate) }}@if (document.file) { · {{ document.file.extension.toUpperCase() }} · {{ fileSizeLabel(document.file.sizeBytes) }}}</small></div><h3>{{ document.title }}</h3><p>{{ document.description }}</p>@if (document.accessMode === 'request' && document.requestReason) { <p class="availability-note">{{ document.requestReason }}</p> }</div>
             <div class="document-actions">
-              @if (document.documentUrl) {
-                @if (document.previewUrl) { <a [href]="document.previewUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Preview ' + document.title + ' in a new tab'"><span class="material-symbols-outlined" aria-hidden="true">◉</span> View</a> }
-                <a class="download" [href]="document.documentUrl" [download]="document.filename" [attr.aria-label]="'Download ' + document.title + ' as ' + document.filename"><span class="material-symbols-outlined" aria-hidden="true">↓</span> Download</a>
+              @if (document.accessMode === 'download' && document.file) {
+                @if (document.file.previewUrl) { <a [href]="document.file.previewUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Preview ' + document.title + ' in a new tab'"><span class="material-symbols-outlined" aria-hidden="true">◉</span> View</a> }
+                <a class="download" [href]="document.file.downloadUrl" [download]="document.file.fileName" [attr.aria-label]="'Download ' + document.title + ' as ' + document.file.fileName"><span class="material-symbols-outlined" aria-hidden="true">↓</span> Download</a>
               } @else {
                 <a class="request" [href]="requestUrl(document)" [attr.aria-label]="'Request this document: ' + document.title"><span class="material-symbols-outlined" aria-hidden="true">✉</span> Request this document</a>
               }
@@ -36,7 +38,7 @@
 
     <aside>
       <section class="quick-links"><h2><span class="material-symbols-outlined" aria-hidden="true">★</span>Quick Links</h2><nav>
-        @for (link of quickLinks; track link.documentId) { <a href="#documents" (click)="followQuickLink(link.documentId)"><span class="material-symbols-outlined" aria-hidden="true">›</span>{{ link.label }}</a> }
+        @for (link of quickLinks; track link.id) { <a href="#documents" (click)="followQuickLink(link)"><span class="material-symbols-outlined" aria-hidden="true">›</span>{{ link.title }}</a> }
       </nav></section>
       <section class="help"><span class="material-symbols-outlined" aria-hidden="true">?</span><h2>Can't find what you're looking for?</h2><p>Our committee can assist with specific documents or heritage enquiries.</p><a href="mailto:parktownnorthra@gmail.com?subject=Resources%20enquiry">Contact PNRA</a></section>
     </aside>

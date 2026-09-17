@@ -7,5 +7,6 @@ export const ADMIN_NAVIGATION = [
   { label: 'Municipal reports', route: '/admin/municipal-reports', description: 'Manage reports about municipal issues.' },
   { label: 'Adverts', route: '/admin/adverts', description: 'Create and manage community advertising.' },
   { label: 'Manage Events', route: '/admin/events', description: 'Create, publish, and feature community events.' },
+  { label: 'Manage Resources', route: '/admin/resources', description: 'Publish and maintain the public resource library.' },
   { label: 'Account Settings', route: '/admin/settings', description: 'Manage your administrator profile, notifications, and sign-in security.' }
 ];
