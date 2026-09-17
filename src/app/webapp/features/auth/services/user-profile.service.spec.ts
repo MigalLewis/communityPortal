@@ -11,6 +11,35 @@ describe('UserProfileService public registration', () => {
     service = TestBed.inject(UserProfileService);
   });
 
+  it('reports a missing Firestore profile', async () => {
+    spyOn(window, 'fetch').and.resolveTo(new Response('{}', { status: 404 }));
+    await service.syncCurrentProfile(authUser);
+    expect(service.currentProfile()).toBeNull();
+    expect(service.profileLoadError()).toContain('profile is missing');
+  });
+
+  it('recovers from a failed profile request on retry', async () => {
+    const request = spyOn(window, 'fetch').and.rejectWith(new TypeError('Network error'));
+    await service.syncCurrentProfile(authUser);
+    await service.waitUntilReady();
+    expect(service.profileLoadError()).toContain('Check your connection');
+    expect(service.initializationState()).toBe('ready');
+    request.and.resolveTo(new Response(JSON.stringify({ fields: {
+      role: { stringValue: 'admin' }, status: { stringValue: 'active' }
+    } }), { status: 200 }));
+    await service.syncCurrentProfile(authUser);
+    expect(service.profileLoadError()).toBeNull();
+    expect(service.isAdmin()).toBeTrue();
+  });
+
+  it('reports invalid profile fields instead of a pending approval', async () => {
+    spyOn(window, 'fetch').and.resolveTo(new Response(JSON.stringify({ fields: {
+      role: { stringValue: 'admin' }
+    } }), { status: 200 }));
+    await service.syncCurrentProfile(authUser);
+    expect(service.profileLoadError()).toContain('invalid role or status');
+  });
+
   it('assigns an active resident role', async () => {
     const fetchSpy = spyOn(window, 'fetch').and.resolveTo(new Response('{}', { status: 200 }));
     await service.createPublicProfile(authUser, { role: 'resident', fullName: 'Rita Resident', phone: '5551234', acceptedTermsAt: '2026-01-01T00:00:00Z' });

@@ -45,3 +45,4 @@ Thumbs.db
 # Local Firebase environment and generated configuration
 .env.local
 /src/environments/firebase.config.generated.ts
+communityportal-deefe-firebase-adminsdk-fbsvc-6576990e84.json

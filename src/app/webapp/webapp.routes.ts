@@ -21,22 +21,30 @@ const WEBAPP_PAGE_ROUTES: Routes = [
     loadComponent: () => import('./features/auth/pages/register-page.component').then((m) => m.RegisterPageComponent)
   })),
   { path: 'forgot-password', canActivate: [guestGuard], loadComponent: () => import('./features/auth/pages/forgot-password-page.component').then((m) => m.ForgotPasswordPageComponent) },
-  ...(['pending', 'rejected', 'deactivated'] as const).map((status) => ({
+  ...(['pending', 'rejected', 'deactivated', 'profile-unavailable'] as const).map((status) => ({
     path: `account/${status}`,
     loadComponent: () => import('./features/auth/pages/account-status-page.component').then((m) => m.AccountStatusPageComponent)
   })),
   { path: 'messages', canActivate: [authGuard], loadComponent: () => import('./features/messages/messages-page.component').then((m) => m.MessagesPageComponent) },
-  { path: 'admin', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-page.component').then((m) => m.AdminPageComponent) },
-  { path: 'admin/users', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-users-page.component').then((m) => m.AdminUsersPageComponent) },
-  { path: 'admin/providers', pathMatch: 'full', redirectTo: 'admin/providers/import' },
-  { path: 'admin/providers/import', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
-  { path: 'admin/providers/new', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
-  { path: 'admin/categories', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-categories-page.component').then((m) => m.AdminCategoriesPageComponent) },
-  { path: 'admin/reviews', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-reviews-page.component').then((m) => m.AdminReviewsPageComponent) },
-  { path: 'admin/municipal-reports', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/admin-municipal-reports-page.component').then((m) => m.AdminMunicipalReportsPageComponent) },
-  { path: 'admin/adverts', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent) },
-  { path: 'admin/adverts/new', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
-  { path: 'admin/adverts/:id/edit', canActivate: [adminRoleGuard], loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
+  {
+    path: 'admin',
+    canActivate: [adminRoleGuard],
+    canActivateChild: [adminRoleGuard],
+    loadComponent: () => import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/admin/admin-page.component').then((m) => m.AdminPageComponent) },
+      { path: 'users', loadComponent: () => import('./features/admin/admin-users-page.component').then((m) => m.AdminUsersPageComponent) },
+      { path: 'providers', pathMatch: 'full', redirectTo: 'providers/import' },
+      { path: 'providers/import', loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
+      { path: 'providers/new', loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
+      { path: 'categories', loadComponent: () => import('./features/admin/admin-categories-page.component').then((m) => m.AdminCategoriesPageComponent) },
+      { path: 'reviews', loadComponent: () => import('./features/admin/admin-reviews-page.component').then((m) => m.AdminReviewsPageComponent) },
+      { path: 'municipal-reports', loadComponent: () => import('./features/admin/admin-municipal-reports-page.component').then((m) => m.AdminMunicipalReportsPageComponent) },
+      { path: 'adverts', loadComponent: () => import('./features/admin/adverts/admin-adverts-page.component').then((m) => m.AdminAdvertsPageComponent) },
+      { path: 'adverts/new', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
+      { path: 'adverts/:id/edit', loadComponent: () => import('./features/admin/adverts/advert-editor.component').then((m) => m.AdvertEditorComponent) },
+    ]
+  },
   { path: 'projects', canActivate: [residentOrPaidResidentGuard], loadComponent: () => import('./features/projects/projects-page.component').then((m) => m.ProjectsPageComponent) },
   { path: 'contractor/profile/edit', canActivate: [contractorGuard, approvedContractorGuard], loadComponent: () => import('./features/contractor-profile/contractor-profile-edit.component').then((m) => m.ContractorProfileEditComponent) },
   { path: 'work-orders', canActivate: [contractorGuard], loadComponent: () => import('./features/work-orders/work-orders-page.component').then((m) => m.WorkOrdersPageComponent) },

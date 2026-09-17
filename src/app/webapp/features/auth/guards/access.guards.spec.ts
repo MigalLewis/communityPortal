@@ -5,6 +5,8 @@ import { AuthService } from '../services/auth.service';
 import { UserProfileService } from '../services/user-profile.service';
 import { activeUserGuard, administratorGuard, contractorGuard, residentOrPaidResidentGuard } from './access.guards';
 
+import { guestGuard } from './guest.guard';
+
 describe('access guards', () => {
   const profile = (role: UserProfile['role'], status: UserProfile['status'] = 'active'): UserProfile => ({
     id: 'u1', fullName: 'User', email: 'user@example.com', role, status, membershipStatus: 'none', createdAt: '2026-01-01T00:00:00Z'
@@ -28,7 +30,23 @@ describe('access guards', () => {
   for (const status of ['pending', 'rejected', 'deactivated'] as const) {
     it(`redirects a ${status} account to its status page`, async () => expect(path(await run(activeUserGuard, profile('resident', status)))).toBe(`/account/${status}`));
   }
+  it('sends signed-in administrators to their admin home', async () => expect(path(await run(guestGuard, profile('admin'), { admin: true, paidResident: false }))).toBe('/admin'));
+  it('keeps the community home for other signed-in users', async () => expect(path(await run(guestGuard, profile('resident')))).toBe('/dashboard'));
+  it('preserves status restrictions for administrators on guest pages', async () => expect(path(await run(guestGuard, profile('admin', 'deactivated'), { admin: true, paidResident: false }))).toBe('/account/deactivated'));
   it('allows an active user', async () => expect(await run(activeUserGuard, profile('resident'))).toBeTrue());
+  it('reports a missing profile separately from a pending account', async () => {
+    expect(path(await run(administratorGuard, null, { admin: true, paidResident: false })))
+      .toBe('/account/profile-unavailable?redirectTo=%2Fprotected');
+  });
+  for (const role of ['admin', 'super_admin'] as const) {
+    it(`allows an active ${role} with a trusted admin claim`, async () => {
+      expect(await run(administratorGuard, profile(role), { admin: true, paidResident: false })).toBeTrue();
+    });
+  }
+  it('still blocks a pending administrator with a trusted claim', async () => {
+    expect(path(await run(administratorGuard, profile('admin', 'pending'), { admin: true, paidResident: false })))
+      .toBe('/account/pending');
+  });
   it('allows a resident capability', async () => expect(await run(residentOrPaidResidentGuard, profile('resident'))).toBeTrue());
   it('requires a trusted claim for a paid resident', async () => {
     expect(path(await run(residentOrPaidResidentGuard, profile('paid_resident')))).toBe('/dashboard');

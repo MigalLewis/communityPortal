@@ -48,6 +48,7 @@ export class UserProfileService {
   private readonly stateSignal = signal<'loading' | 'ready'>('ready');
   private readyPromise: Promise<void> = Promise.resolve();
   private requestId = 0;
+  readonly profileLoadError = signal<string | null>(null);
 
   readonly currentProfile = computed(() => this.appUserSignal());
   readonly initializationState = computed(() => this.stateSignal());
@@ -103,6 +104,7 @@ export class UserProfileService {
 
   async syncCurrentProfile(authUser: AuthUser | null): Promise<void> {
     const requestId = ++this.requestId;
+    this.profileLoadError.set(null);
     this.stateSignal.set('loading');
     this.readyPromise = this.loadCurrentProfile(authUser, requestId);
     await this.readyPromise;
@@ -121,6 +123,9 @@ export class UserProfileService {
       if (requestId !== this.requestId) return;
       if (!response.ok) {
         this.appUserSignal.set(null);
+        this.profileLoadError.set(response.status === 404
+          ? 'Your account profile is missing. Ask an administrator to complete account provisioning.'
+          : 'Your account profile could not be loaded. Please retry or contact support.');
         return;
       }
       const doc = (await response.json()) as FirestoreDocumentResponse;
@@ -130,6 +135,7 @@ export class UserProfileService {
 
       if (!doc.fields || !this.isUserRole(role) || !this.isUserAccountStatus(status)) {
         this.appUserSignal.set(null);
+        this.profileLoadError.set('Your account profile has an invalid role or status. Ask an administrator to correct it.');
         return;
       }
 
@@ -151,6 +157,11 @@ export class UserProfileService {
       membershipExpiresAt: doc.fields.membershipExpiresAt?.timestampValue,
       externalPaymentReference: doc.fields.externalPaymentReference?.stringValue
       });
+    } catch {
+      if (requestId === this.requestId) {
+        this.appUserSignal.set(null);
+        this.profileLoadError.set('Your account profile could not be loaded. Check your connection and retry.');
+      }
     } finally {
       if (requestId === this.requestId) this.stateSignal.set('ready');
     }
@@ -160,6 +171,7 @@ export class UserProfileService {
 
   clearCurrentProfile(): void {
     this.requestId++;
+    this.profileLoadError.set(null);
     this.appUserSignal.set(null);
     this.stateSignal.set('ready');
     this.readyPromise = Promise.resolve();

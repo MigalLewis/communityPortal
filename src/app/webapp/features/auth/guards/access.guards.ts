@@ -24,7 +24,7 @@ function guard(test: AccessTest, denied = '/dashboard'): CanActivateFn {
       return router.createUrlTree(['/login'], { queryParams: { redirectTo: state.url } });
     }
     const profile = profiles.currentProfile();
-    if (!profile) return router.createUrlTree(['/account/pending']);
+    if (!profile) return router.createUrlTree(['/account/profile-unavailable'], { queryParams: { redirectTo: state.url } });
     const statusPage = statusDestination(profile.status);
     if (statusPage) return router.createUrlTree([statusPage]);
     return test(profile, auth) ? true : router.createUrlTree([denied]);
@@ -37,4 +37,3 @@ export const administratorGuard = guard((_profile, auth) => auth.authUser()?.cla
 export const contractorGuard = guard((profile) => profile.role === 'contractor');
 export const residentOrPaidResidentGuard = guard((profile, auth) =>
   profile.role === 'resident' || (profile.role === 'paid_resident' && auth.authUser()?.claims.paidResident === true));
-

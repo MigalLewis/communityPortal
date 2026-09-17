@@ -14,5 +14,5 @@ export const guestGuard: CanActivateFn = async () => {
   const status = profiles.currentProfile()?.status;
   return status && status !== 'active'
     ? router.createUrlTree([`/account/${status}`])
-    : router.createUrlTree(['/dashboard']);
+    : router.createUrlTree([authService.authUser()?.claims.admin === true ? '/admin' : '/dashboard']);
 };

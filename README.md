@@ -41,13 +41,26 @@ npm run provision:admins -- \
   --admin-email admin@example.com
 ```
 
-Optional `--super-admin-name` and `--admin-name` values set the display names in the
-Firestore profiles. The script is idempotent: it creates an active profile and trusted
-Firebase Authentication claims only when that role does not already exist, and
-synchronizes claims for an existing active account. It never creates Authentication
-users and refuses to replace an existing user's different role. Both accounts can use
-the normal webapp login after the script finishes; a user who was already signed in
-must sign out and back in to receive the new claims.
+Use actual emails of existing Authentication users. Install the backend dependencies
+first with `npm --prefix functions ci` if they are not already installed.
+
+The target project is selected from `--project`, then `FIREBASE_PROJECT_ID`, then
+`.env.local`, then `.firebaserc`. To explicitly select a project, append
+`--project your-project-id`. The script prints its target project and uses the
+`(default)` Firestore database. Admin SDK credentials must have access to both
+Authentication and Firestore in that project; frontend API keys are not sufficient.
+
+Names are optional: `--super-admin-name` and `--admin-name` override the Authentication
+display name or the default administrator labels. The script creates or repairs an
+active `users/{Authentication UID}` profile, preserves its creation time, synchronizes
+trusted claims, and reads the profile back to verify the write. It never creates
+Authentication users, overwrites a different role, or silently substitutes another
+existing administrator for the supplied email. If another active account already
+holds that role, it stops with an error.
+
+Successful runs print `Verified active profile: users/...` for each account. If the
+script fails, inspect the error rather than assuming provisioning completed. Sign
+out and back in after successful provisioning to receive the new claims.
 
 ## Running end-to-end tests
 

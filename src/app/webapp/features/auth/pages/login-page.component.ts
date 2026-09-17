@@ -41,6 +41,7 @@ export class LoginPageComponent {
     try {
       const { email, password } = this.loginForm.getRawValue();
       await this.authService.login(email, password);
+      await this.authService.waitUntilReady();
       await this.router.navigateByUrl(this.safeDestination());
     } catch (error: unknown) {
       this.formError.set(error instanceof Error ? error.message : 'Unable to sign in right now.');
@@ -51,6 +52,6 @@ export class LoginPageComponent {
 
   private safeDestination(): string {
     const destination = this.route.snapshot.queryParamMap.get('redirectTo');
-    return destination?.startsWith('/') && !destination.startsWith('//') ? destination : '/dashboard';
+    return destination?.startsWith('/') && !destination.startsWith('//') ? destination : this.authService.authUser()?.claims.admin === true ? '/admin' : '/dashboard';
   }
 }

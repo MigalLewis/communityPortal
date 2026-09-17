@@ -12,10 +12,12 @@
         {{ item.label }}
       </a>
     }
+    @if (auth.isAuthenticated() && auth.authUser()?.claims?.admin) {
+      <a routerLink="/admin" routerLinkActive="is-active" class="nav-link">Administration</a>
+    }
   </nav>
 
   <div class="topbar-actions">
     <a class="website-link" routerLink="/">Main website</a>
-    <a class="login-link" routerLink="/login">Login</a>
   </div>
 </header>
