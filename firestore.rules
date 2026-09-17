@@ -139,7 +139,7 @@ service cloud.firestore {
     }
 
     match /events/{eventId} {
-      allow read: if resource.data.status == 'published' || isAdmin();
+      allow read: if (resource.data.status == 'published' && resource.data.isPublic == true) || isAdmin();
       allow write: if isAdmin();
     }
 
@@ -154,7 +154,7 @@ service cloud.firestore {
     }
 
     match /communityProjects/{projectId} {
-      allow read: if resource.data.publicationState == 'published' || isAdmin();
+      allow read: if (resource.data.publicationState == 'published' && resource.data.isPublic == true) || isAdmin();
       allow write: if isAdmin();
     }
 

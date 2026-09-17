@@ -55,6 +55,18 @@
     ] },
     { "collectionGroup": "users", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "role", "order": "ASCENDING" }, { "fieldPath": "fullName", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "isPublic", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "communityProjects", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "publicationState", "order": "ASCENDING" }, { "fieldPath": "isPublic", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "publicationMode", "order": "ASCENDING" }, { "fieldPath": "visibleFrom", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "communityProjects", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "publicationMode", "order": "ASCENDING" }, { "fieldPath": "visibleFrom", "order": "ASCENDING" }
     ] }
   ],
   "fieldOverrides": []

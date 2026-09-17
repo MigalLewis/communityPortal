@@ -197,6 +197,8 @@ export interface AdvertDocument extends FirestoreEntity {
 }
 
 export type EventPublicationStatus = 'draft' | 'published' | 'archived';
+export type PublicationMode = 'manual' | 'scheduled';
+export type PublicationSchedulingState = 'manual' | 'pending' | 'active' | 'expired';
 
 /** A community event as stored in Firestore. Dates are ISO-8601 instants. */
 export interface EventDocument extends FirestoreEntity {
@@ -214,6 +216,14 @@ export interface EventDocument extends FirestoreEntity {
     caption?: string;
   };
   status: EventPublicationStatus;
+  /** Website visibility scheduling; deliberately separate from startAt/endAt. */
+  publicationMode: PublicationMode;
+  visibleFrom?: ISODateString;
+  visibleUntil?: ISODateString;
+  schedulingState: PublicationSchedulingState;
+  isPublic: boolean;
+  scheduleStateChangedAt?: ISODateString;
+  scheduleStateChangeReason?: string;
   featured: boolean;
   publishedAt?: ISODateString;
   archivedAt?: ISODateString;
@@ -276,6 +286,14 @@ export interface CommunityProjectDocument extends FirestoreEntity {
   progress: number;
   featured: boolean;
   publicationState: CommunityProjectPublicationState;
+  /** Website visibility scheduling; deliberately separate from lifecycle dates. */
+  publicationMode: PublicationMode;
+  visibleFrom?: ISODateString;
+  visibleUntil?: ISODateString;
+  schedulingState: PublicationSchedulingState;
+  isPublic: boolean;
+  scheduleStateChangedAt?: ISODateString;
+  scheduleStateChangeReason?: string;
   startDate?: ISODateString;
   completionDate?: ISODateString;
   publishedAt?: ISODateString;

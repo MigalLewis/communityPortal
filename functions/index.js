@@ -1,4 +1,6 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { processScheduledPublications } = require('./publication-scheduler');
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
@@ -307,4 +309,9 @@ exports.manageReview = onCall(async (request) => {
       reason: reason || null, actorId: request.auth.uid, occurredAt: now, createdAt: now, updatedAt: now });
   });
   return { ok: true };
+});
+
+// Frequent, transaction-backed reconciliation makes retries safe and boundary delays small.
+exports.reconcileScheduledPublications = onSchedule({ schedule: 'every 1 minutes', timeZone: 'UTC' }, async () => {
+  await processScheduledPublications(getFirestore(), new Date());
 });
