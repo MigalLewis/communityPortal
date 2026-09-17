@@ -1,4 +1,4 @@
-import { canTransitionReport, MunicipalReportDraft, validateMunicipalDraft } from './municipal-report.models';
+import { canTransitionReport, MunicipalReport, MunicipalReportDraft, validateMunicipalDraft, validateMunicipalReportEdit } from './municipal-report.models';
 
 describe('municipal report validation', () => {
   const valid = (): MunicipalReportDraft => ({ category: 'roads', entity: 'Johannesburg Roads Agency', location: '12 Example Street', description: 'A large pothole has blocked the southbound lane.', cityReference: '800123', contactPreference: 'email', attachments: [] });
@@ -6,6 +6,13 @@ describe('municipal report validation', () => {
   it('rejects invalid required fields', () => expect(validateMunicipalDraft({ ...valid(), category: '', location: '', description: 'short' })).toEqual(jasmine.arrayContaining(['category', 'location', 'description'])));
   it('rejects unsafe attachment types and sizes', () => expect(validateMunicipalDraft({ ...valid(), attachments: [{ name: 'payload.exe', contentType: 'application/x-msdownload', size: 5_000_001 }] })).toContain('attachments'));
   it('permits no more than five safe evidence files', () => expect(validateMunicipalDraft({ ...valid(), attachments: Array.from({ length: 6 }, (_, i) => ({ name: `${i}.png`, contentType: 'image/png', size: 50 })) })).toContain('attachments'));
+});
+
+describe('municipal report workflow validation', () => {
+  const report = { status: 'submitted' } as MunicipalReport;
+  it('rejects invalid status transitions', () => expect(validateMunicipalReportEdit(report, { status: 'resolved', assigneeId: '', resolutionNote: '' })).toContain('status'));
+  it('requires an assignee for assignment', () => expect(validateMunicipalReportEdit(report, { status: 'assigned', assigneeId: '', resolutionNote: '' })).toContain('assigneeId'));
+  it('requires a resolution note to close', () => expect(validateMunicipalReportEdit(report, { status: 'closed', assigneeId: '', resolutionNote: '  ' })).toContain('resolutionNote'));
 });
 
 describe('municipal report status workflow', () => {

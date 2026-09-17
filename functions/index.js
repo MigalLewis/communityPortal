@@ -4,6 +4,7 @@ const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { createHash } = require('node:crypto');
 const { aggregateAfterTransition, validateReviewTransition } = require('./review-moderation');
+const { buildReportAudit, isAllowedReportTransition } = require('./municipal-report-workflow');
 initializeApp();
 
 const contactSubjects = new Set(['General enquiry', 'Membership', 'Municipal issue', 'Security',
@@ -11,7 +12,6 @@ const contactSubjects = new Set(['General enquiry', 'Membership', 'Municipal iss
 
 const reportCategories = new Set(['roads', 'water', 'electricity', 'waste', 'parks', 'stormwater', 'other']);
 const reportEntities = new Set(['Johannesburg Roads Agency', 'Johannesburg Water', 'City Power', 'Pikitup', 'Johannesburg City Parks', 'Other / unsure']);
-const reportTransitions = { submitted: ['assigned', 'closed'], assigned: ['in_progress', 'closed'], in_progress: ['resolved', 'closed'], resolved: ['in_progress', 'closed'], closed: [] };
 
 function contactText(value, field, max, required = true) {
   if (value == null && !required) return '';
@@ -76,15 +76,27 @@ exports.manageMunicipalReport = onCall(async (request) => {
   const { reportId, status } = request.data || {};
   const assigneeId = contactText(request.data?.assigneeId, 'Assignee', 128, false);
   const resolutionNote = contactText(request.data?.resolutionNote, 'Resolution note', 2000, false);
-  if (typeof reportId !== 'string' || !Object.hasOwn(reportTransitions, status)) throw new HttpsError('invalid-argument', 'Report and status are required.');
+  if (typeof reportId !== 'string' || !['submitted', 'assigned', 'in_progress', 'resolved', 'closed'].includes(status)) throw new HttpsError('invalid-argument', 'Report and status are required.');
   await db.runTransaction(async (transaction) => {
     const ref = db.doc(`municipalReports/${reportId}`); const report = await transaction.get(ref);
     if (!report.exists) throw new HttpsError('not-found', 'Report was not found.');
-    if (!reportTransitions[report.get('status')]?.includes(status)) throw new HttpsError('failed-precondition', 'That status transition is not allowed.');
+    const priorStatus = report.get('status');
+    if (!isAllowedReportTransition(priorStatus, status)) throw new HttpsError('failed-precondition', 'That status transition is not allowed.');
     if (['assigned', 'in_progress'].includes(status) && !assigneeId) throw new HttpsError('invalid-argument', 'An assignee is required.');
-    if (['resolved', 'closed'].includes(status) && !resolutionNote) throw new HttpsError('invalid-argument', 'A closing note is required.');
-    transaction.update(ref, { status, assigneeId: assigneeId || report.get('assigneeId') || null,
-      resolutionNote: resolutionNote || null, updatedAt: Timestamp.now(), updatedBy: request.auth.uid });
+    if (status === 'closed' && !resolutionNote) throw new HttpsError('invalid-argument', 'A resolution note is required to close a report.');
+    if (assigneeId) {
+      const assignee = await transaction.get(db.doc(`users/${assigneeId}`));
+      if (!assignee.exists || assignee.get('status') !== 'active' || !['admin', 'super_admin'].includes(assignee.get('role'))) {
+        throw new HttpsError('invalid-argument', 'Select an active administrator as assignee.');
+      }
+    }
+    const now = Timestamp.now(); const newAssigneeId = assigneeId || null;
+    transaction.update(ref, { status, assigneeId: newAssigneeId,
+      resolutionNote: resolutionNote || null, updatedAt: now, updatedBy: request.auth.uid });
+    const auditRef = db.collection('municipalReportAudits').doc();
+    transaction.create(auditRef, buildReportAudit(auditRef.id, reportId, request.auth.uid, now,
+      { status: priorStatus, assigneeId: report.get('assigneeId') || null, resolutionNote: report.get('resolutionNote') || null },
+      { status, assigneeId: newAssigneeId, resolutionNote: resolutionNote || null }, resolutionNote));
   });
   return { ok: true };
 });

@@ -251,6 +251,12 @@ service cloud.firestore {
 
     match /municipalReportRateLimits/{rateLimitId} { allow read, write: if false; }
 
+    // Append-only server audit records; clients can never alter history.
+    match /municipalReportAudits/{auditId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
     // Collections must be explicitly added above; unknown and administrative
     // data is private by default.
     match /{document=**} {
