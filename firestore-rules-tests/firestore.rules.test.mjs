@@ -53,6 +53,8 @@ async function seed() {
       setDoc(doc(db, 'categories/inactive'), { id: 'inactive', isActive: false }),
       setDoc(doc(db, 'adverts/public'), { id: 'public', status: 'active', isPublic: true }),
       setDoc(doc(db, 'adverts/draft'), { id: 'draft', status: 'draft', isPublic: true }),
+      setDoc(doc(db, 'events/published'), { id: 'published', status: 'published' }),
+      setDoc(doc(db, 'events/draft'), { id: 'draft', status: 'draft' }),
       setDoc(doc(db, 'jobs/job'), { id: 'job', residentId: 'resident', contractorId: 'contractor', status: 'completed', createdAt: '2026-01-01' }),
       setDoc(doc(db, 'jobs/incomplete'), { id: 'incomplete', residentId: 'resident', contractorId: 'contractor', status: 'in_progress', createdAt: '2026-01-01' }),
       setDoc(doc(db, 'reviews/review'), { id: 'review', jobId: 'job', residentId: 'resident', contractorId: 'contractor', rating: 5, moderationStatus: 'approved' }),
@@ -77,10 +79,11 @@ describe('public visibility is explicitly scoped', () => {
     await assertSucceeds(getDoc(doc(anon(), 'serviceProviders/public')));
     await assertSucceeds(getDoc(doc(anon(), 'categories/active')));
     await assertSucceeds(getDoc(doc(anon(), 'adverts/public')));
+    await assertSucceeds(getDoc(doc(anon(), 'events/published')));
   });
   test('denies private/inactive directory records and sensitive collections', async () => {
     for (const path of ['contractors/private', 'serviceProviders/unapproved', 'categories/inactive', 'adverts/draft',
-      'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
+      'events/draft', 'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
       'payments/payment', 'userTransitionAudits/audit']) {
       await assertFails(getDoc(doc(anon(), path)));
     }
@@ -92,6 +95,8 @@ describe('public visibility is explicitly scoped', () => {
     await assertFails(getDocs(collection(anon(), 'categories')));
     await assertSucceeds(getDocs(query(collection(anon(), 'adverts'), where('isPublic', '==', true), where('status', '==', 'active'))));
     await assertFails(getDocs(query(collection(anon(), 'adverts'), where('status', '==', 'active'))));
+    await assertSucceeds(getDocs(query(collection(anon(), 'events'), where('status', '==', 'published'))));
+    await assertFails(getDocs(collection(anon(), 'events')));
   });
 });
 
@@ -137,6 +142,7 @@ describe('trusted administrators', () => {
   test('uses claims rather than a profile role and manages accounts and adverts', async () => {
     await assertSucceeds(updateDoc(doc(authed('admin', { admin: true }), 'users/resident'), { status: 'deactivated' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'adverts/new'), { id: 'new', status: 'active', isPublic: true }));
+    await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'events/new'), { id: 'new', status: 'draft' }));
     await assertFails(updateDoc(doc(authed('admin'), 'users/resident'), { status: 'deactivated' }));
   });
 

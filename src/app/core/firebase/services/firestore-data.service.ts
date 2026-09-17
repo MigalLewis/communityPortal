@@ -47,7 +47,8 @@ export class FirestoreDataService {
     verifications: new Map(),
     userTransitionAudits: new Map(),
     reviewModerationAudits: new Map(),
-    adverts: new Map()
+    adverts: new Map(),
+    events: new Map()
   };
 
   readonly users = new FirestoreEntityService<'users'>('users', this);
@@ -61,6 +62,27 @@ export class FirestoreDataService {
   readonly userTransitionAudits = new FirestoreEntityService<'userTransitionAudits'>('userTransitionAudits', this);
   readonly reviewModerationAudits = new FirestoreEntityService<'reviewModerationAudits'>('reviewModerationAudits', this);
   readonly adverts = new FirestoreEntityService<'adverts'>('adverts', this);
+  readonly events = new FirestoreEntityService<'events'>('events', this);
+
+  /** Lists only records that Firestore rules permit an unauthenticated visitor to see. */
+  async listPublishedEvents(): Promise<CollectionModelMap['events'][]> {
+    if (this.mockMode) {
+      return Array.from(this.mockStore.events.values()).filter(event => event.status === 'published');
+    }
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
+      method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: FIRESTORE_COLLECTIONS.events }],
+          where: { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'published' } } }
+        }
+      })
+    });
+    if (!response.ok) throw new Error('Failed to list published events.');
+    const payload = await response.json() as FirestoreQueryResponse[];
+    return payload.map(item => item.document && fromFirestoreDocument<CollectionModelMap['events']>(item.document))
+      .filter((event): event is CollectionModelMap['events'] => !!event)
+      .sort((a, b) => a.startAt.localeCompare(b.startAt));
+  }
 
   /** Uses predicates that Firestore rules can prove before applying schedule checks client-side. */
   async listPublicAdverts(): Promise<CollectionModelMap['adverts'][]> {

@@ -1,62 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EventDocument } from '../../../core/firebase/models/firestore-data.models';
+import { PublicEventsService } from './public-events.service';
 
-type EventCategory = 'Community' | 'PNRA' | 'Meetings' | 'Environment' | 'Security';
-
-interface CommunityEvent {
-  slug: string;
-  title: string;
-  category: EventCategory;
-  month: string;
-  day: string;
-  date: string;
-  time: string;
-  location: string;
-  icon: string;
-  image: string;
-  description: string;
-}
-
-@Component({
-  selector: 'app-events-page',
-  standalone: true,
-  imports: [RouterLink],
-  templateUrl: './events-page.component.html',
-  styleUrl: './events-page.component.scss'
-})
-export class EventsPageComponent {
-  protected readonly filters = ['All', 'Community', 'PNRA', 'Meetings', 'Environment', 'Security'];
-  protected activeFilter = 'All';
-  protected view: 'grid' | 'calendar' = 'grid';
-
-  protected readonly featured: CommunityEvent = {
-    slug: 'spring-community-market-day', title: 'Spring Community Market Day', category: 'Community', month: 'Oct', day: '15', date: '2026-10-15',
-    time: '09:00 – 14:00', location: 'Parktown North Green Strip', icon: '⌖',
-    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1400&q=88',
-    description: 'Join us for our annual Spring Market! Enjoy local artisanal food, crafts from neighbourhood creators, live music, and activities for the kids.'
-  };
-
-  protected readonly events: CommunityEvent[] = [
-    { slug: 'pnra-annual-general-meeting', title: 'PNRA Annual General Meeting', category: 'Meetings', month: 'Nov', day: '02', date: '2026-11-02', time: '18:30 – 20:00', location: "St. Teresa's School Hall", icon: '⌖', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=85', description: 'Join the committee for our annual update and community discussion.' },
-    { slug: 'spring-neighbourhood-cleanup', title: 'Spring Neighbourhood Cleanup', category: 'Environment', month: 'Nov', day: '18', date: '2026-11-18', time: '08:00 – 11:00', location: 'Meet at the Corner Café', icon: '⌖', image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=85', description: 'Help make our streets cleaner, greener, and even more welcoming.' },
-    { slug: 'festive-season-security-briefing', title: 'Festive Season Security Briefing', category: 'Security', month: 'Dec', day: '05', date: '2026-12-05', time: '19:00 – 20:00', location: 'Online (Zoom link)', icon: '◉', image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=900&q=85', description: 'Practical security guidance and an update from our local partners.' }
-  ];
-
-  protected get filteredEvents(): CommunityEvent[] {
-    if (this.activeFilter === 'All') return this.events;
-    if (this.activeFilter === 'PNRA') return this.events.filter(({ title }) => title.startsWith('PNRA'));
-    return this.events.filter(({ category }) => category === this.activeFilter);
-  }
-
-  protected selectFilter(filter: string): void { this.activeFilter = filter; }
-
-  protected addToCalendar(event: CommunityEvent): void {
-    const date = event.date.replaceAll('-', '');
-    const content = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT', `DTSTART;VALUE=DATE:${date}`, `SUMMARY:${event.title}`, `LOCATION:${event.location}`, `DESCRIPTION:${event.description}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(new Blob([content], { type: 'text/calendar' }));
-    link.download = `${event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.ics`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }
+@Component({ selector:'app-events-page', standalone:true, imports:[RouterLink], templateUrl:'./events-page.component.html', styleUrl:'./events-page.component.scss' })
+export class EventsPageComponent implements OnInit {
+  readonly events=signal<EventDocument[]>([]); readonly loading=signal(true); readonly error=signal(''); activeFilter='All'; view:'grid'|'calendar'='grid';
+  constructor(private readonly repository:PublicEventsService){}
+  async ngOnInit():Promise<void>{try{this.events.set(await this.repository.list());}catch{this.error.set('Events could not be loaded. Please try again later.');}finally{this.loading.set(false);}}
+  get featured():EventDocument|null{return this.repository.featured(this.upcoming);}
+  get upcoming():EventDocument[]{const now=Date.now();return this.events().filter(e=>new Date(e.endAt).getTime()>=now);}
+  get past():EventDocument[]{const now=Date.now();return this.events().filter(e=>new Date(e.endAt).getTime()<now).sort((a,b)=>b.startAt.localeCompare(a.startAt));}
+  get filters():string[]{return ['All',...new Set(this.upcoming.map(e=>e.category))];}
+  get filteredEvents():EventDocument[]{const featured=this.featured;return this.upcoming.filter(e=>e.id!==featured?.id&&(this.activeFilter==='All'||e.category===this.activeFilter));}
+  selectFilter(filter:string):void{this.activeFilter=filter;}
+  month(e:EventDocument):string{return new Intl.DateTimeFormat('en-ZA',{month:'short'}).format(new Date(e.startAt));}
+  day(e:EventDocument):string{return new Intl.DateTimeFormat('en-ZA',{day:'2-digit'}).format(new Date(e.startAt));}
+  time(e:EventDocument):string{const f=new Intl.DateTimeFormat('en-ZA',{hour:'2-digit',minute:'2-digit'});return `${f.format(new Date(e.startAt))} – ${f.format(new Date(e.endAt))}`;}
+  addToCalendar(e:EventDocument):void{const stamp=(v:string)=>new Date(v).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');const esc=(v:string)=>v.replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');const content=['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT',`UID:${e.id}@parktownnorth.org`,`DTSTART:${stamp(e.startAt)}`,`DTEND:${stamp(e.endAt)}`,`SUMMARY:${esc(e.title)}`,`LOCATION:${esc(e.venue)}`,`DESCRIPTION:${esc(e.description)}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([content],{type:'text/calendar'}));link.download=`${e.slug}.ics`;link.click();URL.revokeObjectURL(link.href);}
 }
