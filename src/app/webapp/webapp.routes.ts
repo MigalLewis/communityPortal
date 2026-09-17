@@ -50,6 +50,12 @@ export const WEBAPP_PAGE_ROUTES: Routes = [
       { path: 'projects', loadComponent: () => import('./features/admin/projects/admin-projects-page.component').then((m) => m.AdminProjectsPageComponent) },
       { path: 'projects/new', loadComponent: () => import('./features/admin/projects/community-project-editor.component').then((m) => m.CommunityProjectEditorComponent) },
       { path: 'projects/:id/edit', loadComponent: () => import('./features/admin/projects/community-project-editor.component').then((m) => m.CommunityProjectEditorComponent) },
+      { path: 'committee', loadComponent: () => import('./features/admin/committee/admin-committee-page.component').then(m => m.AdminCommitteePageComponent) },
+      { path: 'committee/new', loadComponent: () => import('./features/admin/committee/committee-member-editor.component').then(m => m.CommitteeMemberEditorComponent) },
+      { path: 'committee/:id/edit', loadComponent: () => import('./features/admin/committee/committee-member-editor.component').then(m => m.CommitteeMemberEditorComponent) },
+      { path: 'portfolios', loadComponent: () => import('./features/admin/portfolios/admin-portfolios-page.component').then(m => m.AdminPortfoliosPageComponent) },
+      { path: 'portfolios/new', loadComponent: () => import('./features/admin/portfolios/portfolio-editor.component').then(m => m.PortfolioEditorComponent) },
+      { path: 'portfolios/:id/edit', loadComponent: () => import('./features/admin/portfolios/portfolio-editor.component').then(m => m.PortfolioEditorComponent) },
       { path: 'settings', loadComponent: () => import('./features/settings/settings-page.component').then((m) => m.SettingsPageComponent) }
     ]
   },

@@ -282,12 +282,39 @@ export interface CommunityProjectDocument extends FirestoreEntity {
   archivedAt?: ISODateString;
 }
 
-/** A committee member profile reserved for the forthcoming managed committee page. */
-export interface CommitteeDocument extends FirestoreEntity {
+export type WebsitePublicationState = 'draft' | 'published';
+
+export interface WebsiteImageMetadata {
+  url: string;
+  altText: string;
+  caption?: string;
+}
+
+/** A managed committee profile. The slug is stable so links survive name changes. */
+export interface CommitteeMemberDocument extends FirestoreEntity {
+  slug: string;
+  displayOrder: number;
   name: string;
   role: string;
   description: string;
-  initials: string;
+  image?: WebsiteImageMetadata;
+  publicationState: WebsitePublicationState;
+  publishedAt?: ISODateString;
+}
+
+/** A public area of responsibility, optionally owned by a committee member. */
+export interface CommunityPortfolioDocument extends FirestoreEntity {
+  slug: string;
+  displayOrder: number;
+  name: string;
+  title: string;
+  description: string;
+  details: string[];
+  icon: string;
+  image?: WebsiteImageMetadata;
+  publicationState: WebsitePublicationState;
+  committeeMemberId?: string;
+  publishedAt?: ISODateString;
 }
 
 export interface CollectionModelMap {
@@ -306,7 +333,8 @@ export interface CollectionModelMap {
   resourceCategories: ResourceCategoryDocument;
   resources: ResourceDocument;
   communityProjects: CommunityProjectDocument;
-  committee: CommitteeDocument;
+  committeeMembers: CommitteeMemberDocument;
+  communityPortfolios: CommunityPortfolioDocument;
 }
 
 export type CollectionName = keyof CollectionModelMap;

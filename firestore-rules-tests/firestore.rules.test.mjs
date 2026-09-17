@@ -61,6 +61,10 @@ async function seed() {
       setDoc(doc(db, 'resources/draft'), { id: 'draft', publicationState: 'draft', accessMode: 'download' }),
       setDoc(doc(db, 'communityProjects/published'), { id: 'published', publicationState: 'published', status: 'active' }),
       setDoc(doc(db, 'communityProjects/draft'), { id: 'draft', publicationState: 'draft', status: 'planned' }),
+      setDoc(doc(db, 'committeeMembers/published'), { id: 'published', publicationState: 'published', name: 'Public member' }),
+      setDoc(doc(db, 'committeeMembers/draft'), { id: 'draft', publicationState: 'draft', name: 'Draft member' }),
+      setDoc(doc(db, 'communityPortfolios/published'), { id: 'published', publicationState: 'published', title: 'Public portfolio' }),
+      setDoc(doc(db, 'communityPortfolios/draft'), { id: 'draft', publicationState: 'draft', title: 'Draft portfolio' }),
       setDoc(doc(db, 'jobs/job'), { id: 'job', residentId: 'resident', contractorId: 'contractor', status: 'completed', createdAt: '2026-01-01' }),
       setDoc(doc(db, 'jobs/incomplete'), { id: 'incomplete', residentId: 'resident', contractorId: 'contractor', status: 'in_progress', createdAt: '2026-01-01' }),
       setDoc(doc(db, 'reviews/review'), { id: 'review', jobId: 'job', residentId: 'resident', contractorId: 'contractor', rating: 5, moderationStatus: 'approved' }),
@@ -88,15 +92,13 @@ describe('public visibility is explicitly scoped', () => {
     await assertSucceeds(getDoc(doc(anon(), 'events/published')));
     await assertSucceeds(getDoc(doc(anon(), 'resourceCategories/public')));
     await assertSucceeds(getDoc(doc(anon(), 'resources/public')));
-  });
-  test('denies private/inactive directory records and sensitive collections', async () => {
-    for (const path of ['contractors/private', 'serviceProviders/unapproved', 'categories/inactive', 'adverts/draft',
-      'events/draft', 'resourceCategories/draft', 'resources/draft', 'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
     await assertSucceeds(getDoc(doc(anon(), 'communityProjects/published')));
+    await assertSucceeds(getDoc(doc(anon(), 'committeeMembers/published')));
+    await assertSucceeds(getDoc(doc(anon(), 'communityPortfolios/published')));
   });
   test('denies private/inactive directory records and sensitive collections', async () => {
     for (const path of ['contractors/private', 'serviceProviders/unapproved', 'categories/inactive', 'adverts/draft',
-      'events/draft', 'communityProjects/draft', 'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
+      'events/draft', 'resourceCategories/draft', 'resources/draft', 'communityProjects/draft', 'committeeMembers/draft', 'communityPortfolios/draft', 'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
       'payments/payment', 'userTransitionAudits/audit']) {
       await assertFails(getDoc(doc(anon(), path)));
     }
@@ -114,6 +116,10 @@ describe('public visibility is explicitly scoped', () => {
     await assertFails(getDocs(collection(anon(), 'resources')));
     await assertSucceeds(getDocs(query(collection(anon(), 'communityProjects'), where('publicationState', '==', 'published'))));
     await assertFails(getDocs(collection(anon(), 'communityProjects')));
+    await assertSucceeds(getDocs(query(collection(anon(), 'committeeMembers'), where('publicationState', '==', 'published'))));
+    await assertFails(getDocs(collection(anon(), 'committeeMembers')));
+    await assertSucceeds(getDocs(query(collection(anon(), 'communityPortfolios'), where('publicationState', '==', 'published'))));
+    await assertFails(getDocs(collection(anon(), 'communityPortfolios')));
   });
 });
 
@@ -162,7 +168,11 @@ describe('trusted administrators', () => {
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'events/new'), { id: 'new', status: 'draft' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'resources/new'), { id: 'new', publicationState: 'draft' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'communityProjects/new'), { id: 'new', publicationState: 'draft' }));
+    await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'committeeMembers/new'), { id: 'new', publicationState: 'draft' }));
+    await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'communityPortfolios/new'), { id: 'new', publicationState: 'draft' }));
     await assertFails(setDoc(doc(authed('resident'), 'communityProjects/forged'), { id: 'forged', publicationState: 'published' }));
+    await assertFails(setDoc(doc(authed('resident'), 'committeeMembers/forged'), { id: 'forged', publicationState: 'published' }));
+    await assertFails(setDoc(doc(authed('resident'), 'communityPortfolios/forged'), { id: 'forged', publicationState: 'published' }));
     await assertFails(updateDoc(doc(authed('admin'), 'users/resident'), { status: 'deactivated' }));
   });
 

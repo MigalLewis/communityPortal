@@ -7,7 +7,8 @@
   },
   "scripts": {
     "provision:admins": "node scripts/provision-administrators.js",
-    "test": "node --test *.test.js"
+    "migrate:community-content": "node scripts/import-community-content.js",
+    "test": "node --test *.test.js scripts/*.test.js"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",

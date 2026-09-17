@@ -9,5 +9,7 @@ export const ADMIN_NAVIGATION = [
   { label: 'Manage Events', route: '/admin/events', description: 'Create, publish, and feature community events.' },
   { label: 'Manage Resources', route: '/admin/resources', description: 'Publish and maintain the public resource library.' },
   { label: 'Manage Projects', route: '/admin/projects', description: 'Create, publish, and track PNRA community projects.' },
+  { label: 'Committee', route: '/admin/committee', description: 'Manage public committee profiles.' },
+  { label: 'Portfolios', route: '/admin/portfolios', description: 'Manage public community portfolios.' },
   { label: 'Account Settings', route: '/admin/settings', description: 'Manage your administrator profile, notifications, and sign-in security.' }
 ];

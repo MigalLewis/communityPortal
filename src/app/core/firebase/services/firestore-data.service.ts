@@ -52,7 +52,8 @@ export class FirestoreDataService {
     resourceCategories: new Map(),
     resources: new Map(),
     communityProjects: new Map(),
-    committee: new Map()
+    committeeMembers: new Map(),
+    communityPortfolios: new Map()
   };
 
   readonly users = new FirestoreEntityService<'users'>('users', this);
@@ -70,7 +71,16 @@ export class FirestoreDataService {
   readonly resourceCategories = new FirestoreEntityService<'resourceCategories'>('resourceCategories', this);
   readonly resources = new FirestoreEntityService<'resources'>('resources', this);
   readonly communityProjects = new FirestoreEntityService<'communityProjects'>('communityProjects', this);
-  readonly committee = new FirestoreEntityService<'committee'>('committee', this);
+  readonly committeeMembers = new FirestoreEntityService<'committeeMembers'>('committeeMembers', this);
+  readonly communityPortfolios = new FirestoreEntityService<'communityPortfolios'>('communityPortfolios', this);
+
+  async listPublishedCommitteeMembers(): Promise<CollectionModelMap['committeeMembers'][]> {
+    return (await this.listPublicByState('committeeMembers')).sort((a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name));
+  }
+
+  async listPublishedCommunityPortfolios(): Promise<CollectionModelMap['communityPortfolios'][]> {
+    return (await this.listPublicByState('communityPortfolios')).sort((a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name));
+  }
 
   async listPublishedResources(): Promise<CollectionModelMap['resources'][]> {
     return this.listPublicByState('resources');
@@ -227,7 +237,7 @@ export class FirestoreDataService {
     return `${firebaseClient.firestoreBaseUrl}/${FIRESTORE_COLLECTIONS[collection]}?key=${firebaseClient.apiKey}`;
   }
 
-  private async listPublicByState<K extends 'resources' | 'resourceCategories'>(collection: K): Promise<CollectionModelMap[K][]> {
+  private async listPublicByState<K extends 'resources' | 'resourceCategories' | 'committeeMembers' | 'communityPortfolios'>(collection: K): Promise<CollectionModelMap[K][]> {
     if (this.mockMode) return Array.from(this.mockStore[collection].values()).filter(item => item.publicationState === 'published');
     const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
       method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({ structuredQuery: {

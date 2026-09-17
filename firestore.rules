@@ -149,7 +149,21 @@ service cloud.firestore {
     }
 
     match /resources/{resourceId} {
+      allow read: if resource.data.publicationState == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /communityProjects/{projectId} {
+      allow read: if resource.data.publicationState == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /committeeMembers/{memberId} {
+      allow read: if resource.data.publicationState == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /communityPortfolios/{portfolioId} {
       allow read: if resource.data.publicationState == 'published' || isAdmin();
       allow write: if isAdmin();
     }
