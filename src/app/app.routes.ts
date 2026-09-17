@@ -4,8 +4,10 @@ const websitePageMatcher = (segments: UrlSegment[]) => {
   const isLandingPage = segments.length === 0;
   const isStaticPage =
     segments.length === 1 && ['help', 'membership', 'our-community', 'projects', 'resident-services', 'resources', 'events', 'security', 'contact', 'privacy', 'terms'].includes(segments[0].path);
+  const isPublicDetail = segments.length === 2 && ['projects', 'events'].includes(segments[0].path);
+  const isCommunityDetail = segments.length === 3 && segments[0].path === 'our-community';
 
-  return isLandingPage || isStaticPage ? { consumed: [] } : null;
+  return isLandingPage || isStaticPage || isPublicDetail || isCommunityDetail ? { consumed: [] } : null;
 };
 
 export const routes: Routes = [

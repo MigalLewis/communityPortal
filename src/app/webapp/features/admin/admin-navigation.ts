@@ -7,5 +7,6 @@ export const ADMIN_NAVIGATION = [
   { label: 'Municipal reports', route: '/admin/municipal-reports', description: 'Manage reports about municipal issues.' },
   { label: 'Adverts', route: '/admin/adverts', description: 'Create and manage community advertising.' },
   { label: 'Manage Events', route: '/admin/events', description: 'Create, publish, and feature community events.' },
+  { label: 'Manage Projects', route: '/admin/projects', description: 'Create, publish, and track PNRA community projects.' },
   { label: 'Account Settings', route: '/admin/settings', description: 'Manage your administrator profile, notifications, and sign-in security.' }
 ];

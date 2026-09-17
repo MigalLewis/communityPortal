@@ -143,6 +143,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /communityProjects/{projectId} {
+      allow read: if resource.data.publicationState == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /jobs/{jobId} {
       allow read: if isAdmin()
         || (activeUser() && (resource.data.residentId == request.auth.uid
