@@ -49,6 +49,8 @@ export class FirestoreDataService {
     reviewModerationAudits: new Map(),
     adverts: new Map(),
     events: new Map(),
+    resourceCategories: new Map(),
+    resources: new Map()
     communityProjects: new Map()
   };
 
@@ -64,6 +66,15 @@ export class FirestoreDataService {
   readonly reviewModerationAudits = new FirestoreEntityService<'reviewModerationAudits'>('reviewModerationAudits', this);
   readonly adverts = new FirestoreEntityService<'adverts'>('adverts', this);
   readonly events = new FirestoreEntityService<'events'>('events', this);
+  readonly resourceCategories = new FirestoreEntityService<'resourceCategories'>('resourceCategories', this);
+  readonly resources = new FirestoreEntityService<'resources'>('resources', this);
+
+  async listPublishedResources(): Promise<CollectionModelMap['resources'][]> {
+    return this.listPublicByState('resources');
+  }
+
+  async listPublishedResourceCategories(): Promise<CollectionModelMap['resourceCategories'][]> {
+    return this.listPublicByState('resourceCategories');
   readonly communityProjects = new FirestoreEntityService<'communityProjects'>('communityProjects', this);
 
   /** Lists public PNRA projects using the publication predicate required by Firestore rules. */
@@ -211,6 +222,20 @@ export class FirestoreDataService {
 
   private collectionUrl(collection: CollectionName): string {
     return `${firebaseClient.firestoreBaseUrl}/${FIRESTORE_COLLECTIONS[collection]}?key=${firebaseClient.apiKey}`;
+  }
+
+  private async listPublicByState<K extends 'resources' | 'resourceCategories'>(collection: K): Promise<CollectionModelMap[K][]> {
+    if (this.mockMode) return Array.from(this.mockStore[collection].values()).filter(item => item.publicationState === 'published');
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
+      method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({ structuredQuery: {
+        from: [{ collectionId: FIRESTORE_COLLECTIONS[collection] }],
+        where: { fieldFilter: { field: { fieldPath: 'publicationState' }, op: 'EQUAL', value: { stringValue: 'published' } } }
+      } })
+    });
+    if (!response.ok) throw new Error(`Failed to list published ${collection}.`);
+    const payload = await response.json() as FirestoreQueryResponse[];
+    return payload.map(item => item.document && fromFirestoreDocument<CollectionModelMap[K]>(item.document))
+      .filter((item): item is CollectionModelMap[K] => !!item);
   }
 
   private documentUrl(collection: CollectionName, id: string): string {

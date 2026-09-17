@@ -219,6 +219,42 @@ export interface EventDocument extends FirestoreEntity {
   archivedAt?: ISODateString;
 }
 
+export type ResourcePublicationState = 'draft' | 'published' | 'archived';
+export type ResourceAccessMode = 'download' | 'request';
+
+export interface ResourceFileMetadata {
+  storagePath: string;
+  fileName: string;
+  mimeType: string;
+  extension: string;
+  sizeBytes: number;
+  downloadUrl: string;
+  previewUrl?: string;
+}
+
+/** A public-library category. Slugs are stable and suitable for URLs. */
+export interface ResourceCategoryDocument extends FirestoreEntity {
+  title: string;
+  slug: string;
+  description: string;
+  icon: string;
+  sortOrder: number;
+  publicationState: ResourcePublicationState;
+}
+
+/** Metadata for either a downloadable object or a request-only record. */
+export interface ResourceDocument extends FirestoreEntity {
+  title: string;
+  slug: string;
+  categoryId: string;
+  description: string;
+  publicationDate: ISODateString;
+  publicationState: ResourcePublicationState;
+  accessMode: ResourceAccessMode;
+  file?: ResourceFileMetadata;
+  requestReason?: string;
+  featured: boolean;
+  quickLink: boolean;
 export type CommunityProjectStatus = 'planned' | 'active' | 'on_hold' | 'completed' | 'archived';
 export type CommunityProjectPublicationState = 'draft' | 'published';
 
@@ -257,6 +293,8 @@ export interface CollectionModelMap {
   reviewModerationAudits: ReviewModerationAuditDocument;
   adverts: AdvertDocument;
   events: EventDocument;
+  resourceCategories: ResourceCategoryDocument;
+  resources: ResourceDocument;
   communityProjects: CommunityProjectDocument;
 }
 

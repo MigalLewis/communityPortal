@@ -55,6 +55,10 @@ async function seed() {
       setDoc(doc(db, 'adverts/draft'), { id: 'draft', status: 'draft', isPublic: true }),
       setDoc(doc(db, 'events/published'), { id: 'published', status: 'published' }),
       setDoc(doc(db, 'events/draft'), { id: 'draft', status: 'draft' }),
+      setDoc(doc(db, 'resourceCategories/public'), { id: 'public', publicationState: 'published' }),
+      setDoc(doc(db, 'resourceCategories/draft'), { id: 'draft', publicationState: 'draft' }),
+      setDoc(doc(db, 'resources/public'), { id: 'public', publicationState: 'published', accessMode: 'download' }),
+      setDoc(doc(db, 'resources/draft'), { id: 'draft', publicationState: 'draft', accessMode: 'download' }),
       setDoc(doc(db, 'communityProjects/published'), { id: 'published', publicationState: 'published', status: 'active' }),
       setDoc(doc(db, 'communityProjects/draft'), { id: 'draft', publicationState: 'draft', status: 'planned' }),
       setDoc(doc(db, 'jobs/job'), { id: 'job', residentId: 'resident', contractorId: 'contractor', status: 'completed', createdAt: '2026-01-01' }),
@@ -82,6 +86,12 @@ describe('public visibility is explicitly scoped', () => {
     await assertSucceeds(getDoc(doc(anon(), 'categories/active')));
     await assertSucceeds(getDoc(doc(anon(), 'adverts/public')));
     await assertSucceeds(getDoc(doc(anon(), 'events/published')));
+    await assertSucceeds(getDoc(doc(anon(), 'resourceCategories/public')));
+    await assertSucceeds(getDoc(doc(anon(), 'resources/public')));
+  });
+  test('denies private/inactive directory records and sensitive collections', async () => {
+    for (const path of ['contractors/private', 'serviceProviders/unapproved', 'categories/inactive', 'adverts/draft',
+      'events/draft', 'resourceCategories/draft', 'resources/draft', 'users/resident', 'jobs/job', 'reviews/pending', 'messageThreads/thread', 'applications/application',
     await assertSucceeds(getDoc(doc(anon(), 'communityProjects/published')));
   });
   test('denies private/inactive directory records and sensitive collections', async () => {
@@ -100,6 +110,8 @@ describe('public visibility is explicitly scoped', () => {
     await assertFails(getDocs(query(collection(anon(), 'adverts'), where('status', '==', 'active'))));
     await assertSucceeds(getDocs(query(collection(anon(), 'events'), where('status', '==', 'published'))));
     await assertFails(getDocs(collection(anon(), 'events')));
+    await assertSucceeds(getDocs(query(collection(anon(), 'resources'), where('publicationState', '==', 'published'))));
+    await assertFails(getDocs(collection(anon(), 'resources')));
     await assertSucceeds(getDocs(query(collection(anon(), 'communityProjects'), where('publicationState', '==', 'published'))));
     await assertFails(getDocs(collection(anon(), 'communityProjects')));
   });
@@ -148,6 +160,7 @@ describe('trusted administrators', () => {
     await assertSucceeds(updateDoc(doc(authed('admin', { admin: true }), 'users/resident'), { status: 'deactivated' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'adverts/new'), { id: 'new', status: 'active', isPublic: true }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'events/new'), { id: 'new', status: 'draft' }));
+    await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'resources/new'), { id: 'new', publicationState: 'draft' }));
     await assertSucceeds(setDoc(doc(authed('admin', { admin: true }), 'communityProjects/new'), { id: 'new', publicationState: 'draft' }));
     await assertFails(setDoc(doc(authed('resident'), 'communityProjects/forged'), { id: 'forged', publicationState: 'published' }));
     await assertFails(updateDoc(doc(authed('admin'), 'users/resident'), { status: 'deactivated' }));

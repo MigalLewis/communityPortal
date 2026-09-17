@@ -1,0 +1,19 @@
+<section class="admin-resources"><header><div><p class="eyebrow">Content</p><h1>Manage Resources</h1><p>Create, publish, replace, feature, and archive public-library records.</p></div><button type="button" (click)="create()">New resource</button></header>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  <label class="search">Search resources <input type="search" [(ngModel)]="query" placeholder="Title or description"></label>
+  <div class="layout"><div class="list">
+    @for (item of filtered; track item.id) { <article><div><small>{{ item.publicationState }} · {{ item.accessMode }}</small><h2>{{ item.title }}</h2><p>{{ item.description }}</p></div><nav>
+      <button type="button" (click)="edit(item)">Edit / replace</button>@if (item.publicationState !== 'published') { <button type="button" (click)="publish(item)">Publish</button> }@else { <button type="button" (click)="archive(item)">Archive</button> }
+      <button type="button" (click)="quick(item)">{{ item.quickLink ? 'Remove quick link' : 'Make quick link' }}</button><button type="button" (click)="remove(item)" [disabled]="item.publicationState === 'published'">Delete</button>
+    </nav></article> } @empty { <p>No resources found.</p> }
+  </div><form (ngSubmit)="save()"><h2>{{ editing ? 'Edit resource' : 'New resource' }}</h2>
+    <label>Title<input required name="title" [(ngModel)]="form.title"></label><label>Stable slug<input required name="slug" pattern="[a-z0-9-]+" [(ngModel)]="form.slug"></label>
+    <label>Category<select required name="category" [(ngModel)]="form.categoryId"><option value="">Choose…</option>@for (category of categories(); track category.id) { <option [value]="category.id">{{ category.title }}</option> }</select></label>
+    <label>Description<textarea required name="description" [(ngModel)]="form.description"></textarea></label><label>Publication date<input required type="date" name="date" [(ngModel)]="form.publicationDate"></label>
+    <label>Access<select name="access" [(ngModel)]="form.accessMode"><option value="download">Download</option><option value="request">Request only</option></select></label>
+    @if (form.accessMode === 'request') { <label>Request reason<textarea required name="reason" [(ngModel)]="form.requestReason"></textarea></label> }
+    @if (form.accessMode === 'download') { <label>{{ editing?.file ? 'Replace file (optional)' : 'File' }}<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" (change)="choose($event)"></label> }
+    <label class="check"><input type="checkbox" name="featured" [(ngModel)]="form.featured"> Featured</label><label class="check"><input type="checkbox" name="quick" [(ngModel)]="form.quickLink"> Quick link</label>
+    <button type="submit" [disabled]="busy()">{{ busy() ? 'Saving…' : 'Save resource' }}</button>
+  </form></div>
+</section>
