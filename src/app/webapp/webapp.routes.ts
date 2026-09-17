@@ -34,9 +34,9 @@ const WEBAPP_PAGE_ROUTES: Routes = [
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./features/admin/admin-page.component').then((m) => m.AdminPageComponent) },
       { path: 'users', loadComponent: () => import('./features/admin/admin-users-page.component').then((m) => m.AdminUsersPageComponent) },
-      { path: 'providers', pathMatch: 'full', redirectTo: 'providers/import' },
-      { path: 'providers/import', loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
-      { path: 'providers/new', loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
+      { path: 'providers', loadComponent: () => import('./features/admin/admin-providers-page.component').then((m) => m.AdminProvidersPageComponent) },
+      { path: 'providers/import', pathMatch: 'full', redirectTo: 'providers' },
+      { path: 'providers/new', pathMatch: 'full', redirectTo: 'providers' },
       { path: 'categories', loadComponent: () => import('./features/admin/admin-categories-page.component').then((m) => m.AdminCategoriesPageComponent) },
       { path: 'reviews', loadComponent: () => import('./features/admin/admin-reviews-page.component').then((m) => m.AdminReviewsPageComponent) },
       { path: 'municipal-reports', loadComponent: () => import('./features/admin/admin-municipal-reports-page.component').then((m) => m.AdminMunicipalReportsPageComponent) },
