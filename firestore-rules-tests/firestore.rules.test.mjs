@@ -90,6 +90,8 @@ describe('public visibility is explicitly scoped', () => {
     await assertSucceeds(getDocs(query(collection(anon(), 'contractors'), where('status', '==', 'active'), where('approvalStatus', '==', 'approved'), where('profileVisibility', '==', 'public'))));
     await assertFails(getDocs(query(collection(anon(), 'contractors'), where('status', '==', 'active'))));
     await assertFails(getDocs(collection(anon(), 'categories')));
+    await assertSucceeds(getDocs(query(collection(anon(), 'adverts'), where('isPublic', '==', true), where('status', '==', 'active'))));
+    await assertFails(getDocs(query(collection(anon(), 'adverts'), where('status', '==', 'active'))));
   });
 });
 

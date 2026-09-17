@@ -6,10 +6,11 @@ export function filterPublicAdverts(adverts: AdvertDocument[], now = new Date(),
   const instant = now.getTime();
   return adverts
     .filter((advert) => advert.status === 'active'
+      && advert.isPublic === true
       && Date.parse(advert.startAt) <= instant
       && instant <= Date.parse(advert.endAt)
       && (!placement || advert.placement === placement))
-    .sort((a, b) => b.sortPriority - a.sortPriority || a.startAt.localeCompare(b.startAt));
+    .sort((a, b) => b.sortPriority - a.sortPriority || a.startAt.localeCompare(b.startAt) || a.id.localeCompare(b.id));
 }
 
 /** Public read-only advert API; marketplace entities must never be introduced here. */
@@ -18,6 +19,6 @@ export class PublicAdvertsService {
   constructor(private readonly data: FirestoreDataService) {}
 
   async listActive(placement?: AdvertPlacement, now = new Date()): Promise<AdvertDocument[]> {
-    return filterPublicAdverts(await this.data.adverts.list(), now, placement);
+    return filterPublicAdverts(await this.data.listPublicAdverts(), now, placement);
   }
 }

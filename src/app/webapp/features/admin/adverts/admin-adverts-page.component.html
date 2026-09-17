@@ -10,7 +10,8 @@
           <td class="actions"><a [routerLink]="['/admin/adverts', advert.id, 'edit']">Edit</a>
             <button type="button" (click)="changeStatus(advert, 'scheduled')" [disabled]="busyId() === advert.id">Schedule</button>
             <button type="button" (click)="changeStatus(advert, 'active')" [disabled]="busyId() === advert.id">Activate</button>
-            <button type="button" (click)="changeStatus(advert, 'inactive')" [disabled]="busyId() === advert.id">Deactivate</button></td></tr>
+            <button type="button" (click)="changeStatus(advert, 'inactive')" [disabled]="busyId() === advert.id">Deactivate</button>
+            <button class="danger" type="button" (click)="deleteAdvert(advert)" [disabled]="busyId() === advert.id">Delete</button></td></tr>
       } @empty { <tr><td colspan="6">No adverts have been created.</td></tr> }
     </tbody>
   </table></div>

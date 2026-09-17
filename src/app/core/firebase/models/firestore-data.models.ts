@@ -182,6 +182,8 @@ export interface AdvertDocument extends FirestoreEntity {
   };
   placement: AdvertPlacement;
   status: AdvertStatus;
+  /** Denormalized visibility flag used by Firestore rules; derived from status. */
+  isPublic: boolean;
   startAt: ISODateString;
   endAt: ISODateString;
   sortPriority: number;

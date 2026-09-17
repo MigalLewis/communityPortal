@@ -4,13 +4,15 @@ import { FirestoreDataService } from '../../../../core/firebase/services/firesto
 import { AuthService } from '../../auth/services/auth.service';
 import { UserProfileService } from '../../auth/services/user-profile.service';
 import { AdvertInput, validateAdvert } from './advert-validation';
+import { AdvertMediaService } from './advert-media.service';
 
 @Injectable({ providedIn: 'root' })
 export class AdvertAdminService {
   constructor(
     private readonly data: FirestoreDataService,
     private readonly auth: AuthService,
-    private readonly profiles: UserProfileService
+    private readonly profiles: UserProfileService,
+    private readonly media: AdvertMediaService
   ) {}
 
   async list(): Promise<AdvertDocument[]> {
@@ -28,6 +30,7 @@ export class AdvertAdminService {
     const now = new Date().toISOString();
     return this.data.adverts.upsert({
       ...input,
+      isPublic: input.status === 'active',
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -43,6 +46,9 @@ export class AdvertAdminService {
     return this.data.adverts.upsert({
       ...existing,
       ...input,
+      // Status changes are centralized below so audit fields cannot be bypassed.
+      status: existing.status,
+      isPublic: existing.status === 'active',
       id: existing.id,
       createdAt: existing.createdAt,
       ownerAdminId: existing.ownerAdminId,
@@ -54,16 +60,27 @@ export class AdvertAdminService {
   async setStatus(advert: AdvertDocument, status: Extract<AdvertStatus, 'scheduled' | 'active' | 'inactive'>): Promise<AdvertDocument> {
     const admin = this.admin();
     const now = new Date().toISOString();
-    if (status !== 'inactive' && Date.parse(advert.startAt) >= Date.parse(advert.endAt)) {
-      throw new Error('End date must be after start date.');
-    }
+    this.assertValid({ ...advert, status });
+    const activating = status === 'active' && advert.status !== 'active';
+    const deactivating = advert.status === 'active' && status !== 'active';
     return this.data.adverts.upsert({
       ...advert,
       status,
+      isPublic: status === 'active',
+      updatedAt: now,
       updatedByAdminId: admin.id,
-      ...(status === 'active' ? { activatedAt: now, activatedByAdminId: admin.id } : {}),
-      ...(status === 'inactive' ? { deactivatedAt: now, deactivatedByAdminId: admin.id } : {})
+      ...(activating ? { activatedAt: now, activatedByAdminId: admin.id } : {}),
+      ...(deactivating ? { deactivatedAt: now, deactivatedByAdminId: admin.id } : {})
     }, admin.idToken);
+  }
+
+  async delete(advert: AdvertDocument): Promise<void> {
+    const admin = this.admin();
+    await this.data.adverts.remove(advert.id, admin.idToken);
+  }
+
+  async uploadMedia(file: File): Promise<string> {
+    return this.media.upload(file, this.admin().idToken);
   }
 
   private admin() {
