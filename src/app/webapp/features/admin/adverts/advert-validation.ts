@@ -2,9 +2,9 @@ import { AdvertDocument } from '../../../../core/firebase/models/firestore-data.
 
 export type AdvertInput = Omit<AdvertDocument, 'id' | 'createdAt' | 'updatedAt' | 'ownerAdminId' |
   'createdByAdminId' | 'updatedByAdminId' | 'activatedAt' | 'activatedByAdminId' |
-  'deactivatedAt' | 'deactivatedByAdminId'>;
+  'deactivatedAt' | 'deactivatedByAdminId' | 'isPublic'>;
 
-export function validateAdvert(input: AdvertInput): string[] {
+export function validateAdvert(input: AdvertInput, now = new Date()): string[] {
   const errors: string[] = [];
   if (!input.advertiserName.trim()) errors.push('Advertiser name is required.');
   if (!input.title.trim()) errors.push('Title is required.');
@@ -19,7 +19,13 @@ export function validateAdvert(input: AdvertInput): string[] {
   if (Number.isFinite(start) && Number.isFinite(end) && start >= end) {
     errors.push('End date must be after start date.');
   }
-  if (input.media && (!isHttpUrl(input.media.url) || !input.media.altText.trim())) {
+  if ((input.status === 'scheduled' || input.status === 'active') && Number.isFinite(end) && end < now.getTime()) {
+    errors.push('The activation window has already expired.');
+  }
+  if (!['dashboard_hero', 'dashboard_sidebar', 'directory', 'sitewide_banner'].includes(input.placement)) {
+    errors.push('Placement is not supported.');
+  }
+  if (input.media && (!isHttpUrl(input.media.url) || input.media.altText.trim().length < 3)) {
     errors.push('Media requires a valid URL and alternative text.');
   }
   if (input.link && (!isHttpUrl(input.link.url) || !input.link.label.trim())) {

@@ -8,6 +8,8 @@ interface FirestoreListResponse {
   documents?: FirestoreDocumentResponse[];
 }
 
+interface FirestoreQueryResponse { document?: FirestoreDocumentResponse; }
+
 class FirestoreEntityService<K extends CollectionName> {
   constructor(
     private readonly collection: K,
@@ -59,6 +61,28 @@ export class FirestoreDataService {
   readonly userTransitionAudits = new FirestoreEntityService<'userTransitionAudits'>('userTransitionAudits', this);
   readonly reviewModerationAudits = new FirestoreEntityService<'reviewModerationAudits'>('reviewModerationAudits', this);
   readonly adverts = new FirestoreEntityService<'adverts'>('adverts', this);
+
+  /** Uses predicates that Firestore rules can prove before applying schedule checks client-side. */
+  async listPublicAdverts(): Promise<CollectionModelMap['adverts'][]> {
+    if (this.mockMode) {
+      return Array.from(this.mockStore.adverts.values()).filter(advert => advert.isPublic && advert.status === 'active');
+    }
+    const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
+      method: 'POST',
+      headers: this.buildHeaders(undefined, true),
+      body: JSON.stringify({ structuredQuery: {
+        from: [{ collectionId: FIRESTORE_COLLECTIONS.adverts }],
+        where: { compositeFilter: { op: 'AND', filters: [
+          { fieldFilter: { field: { fieldPath: 'isPublic' }, op: 'EQUAL', value: { booleanValue: true } } },
+          { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'active' } } }
+        ] } }
+      } })
+    });
+    if (!response.ok) throw new Error('Failed to list public adverts.');
+    const payload = await response.json() as FirestoreQueryResponse[];
+    return payload.map(item => item.document && fromFirestoreDocument<CollectionModelMap['adverts']>(item.document))
+      .filter((advert): advert is CollectionModelMap['adverts'] => !!advert);
+  }
 
   async list<K extends CollectionName>(collection: K, idToken?: string): Promise<CollectionModelMap[K][]> {
     if (this.mockMode) {

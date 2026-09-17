@@ -21,6 +21,8 @@ export class AdminAdvertsPageComponent implements OnInit {
   async ngOnInit(): Promise<void> { await this.refresh(); }
 
   async changeStatus(advert: AdvertDocument, status: 'scheduled' | 'active' | 'inactive'): Promise<void> {
+    if (advert.status === 'active' && status !== 'active'
+      && !window.confirm(`Stop showing “${advert.title}”? It will no longer be public.`)) return;
     this.busyId.set(advert.id);
     this.error.set('');
     try {
@@ -28,6 +30,20 @@ export class AdminAdvertsPageComponent implements OnInit {
       await this.refresh();
     } catch (error) {
       this.error.set(error instanceof Error ? error.message : 'The advert could not be updated.');
+    } finally {
+      this.busyId.set('');
+    }
+  }
+
+  async deleteAdvert(advert: AdvertDocument): Promise<void> {
+    if (!window.confirm(`Permanently delete “${advert.title}”? This cannot be undone.`)) return;
+    this.busyId.set(advert.id);
+    this.error.set('');
+    try {
+      await this.advertsAdmin.delete(advert);
+      await this.refresh();
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'The advert could not be deleted.');
     } finally {
       this.busyId.set('');
     }
