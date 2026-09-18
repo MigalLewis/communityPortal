@@ -94,13 +94,16 @@ export class FirestoreDataService {
   async listPublishedCommunityProjects(): Promise<CollectionModelMap['communityProjects'][]> {
     if (this.mockMode) {
       return Array.from(this.mockStore.communityProjects.values())
-        .filter(project => project.publicationState === 'published');
+        .filter(project => project.publicationState === 'published' && project.isPublic === true);
     }
     const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
       method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({
         structuredQuery: {
           from: [{ collectionId: FIRESTORE_COLLECTIONS.communityProjects }],
-          where: { fieldFilter: { field: { fieldPath: 'publicationState' }, op: 'EQUAL', value: { stringValue: 'published' } } }
+          where: { compositeFilter: { op: 'AND', filters: [
+            { fieldFilter: { field: { fieldPath: 'publicationState' }, op: 'EQUAL', value: { stringValue: 'published' } } },
+            { fieldFilter: { field: { fieldPath: 'isPublic' }, op: 'EQUAL', value: { booleanValue: true } } }
+          ] } }
         }
       })
     });
@@ -114,13 +117,16 @@ export class FirestoreDataService {
   /** Lists only records that Firestore rules permit an unauthenticated visitor to see. */
   async listPublishedEvents(): Promise<CollectionModelMap['events'][]> {
     if (this.mockMode) {
-      return Array.from(this.mockStore.events.values()).filter(event => event.status === 'published');
+      return Array.from(this.mockStore.events.values()).filter(event => event.status === 'published' && event.isPublic === true);
     }
     const response = await fetch(`${firebaseClient.firestoreBaseUrl}:runQuery?key=${firebaseClient.apiKey}`, {
       method: 'POST', headers: this.buildHeaders(undefined, true), body: JSON.stringify({
         structuredQuery: {
           from: [{ collectionId: FIRESTORE_COLLECTIONS.events }],
-          where: { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'published' } } }
+          where: { compositeFilter: { op: 'AND', filters: [
+            { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'published' } } },
+            { fieldFilter: { field: { fieldPath: 'isPublic' }, op: 'EQUAL', value: { booleanValue: true } } }
+          ] } }
         }
       })
     });

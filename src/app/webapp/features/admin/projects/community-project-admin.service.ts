@@ -24,23 +24,28 @@ export class CommunityProjectAdminService {
     if ((await this.list()).some(project => project.slug === input.slug && project.id !== existing?.id)) errors.push('Slug is already in use.');
     if (errors.length) throw new Error(errors.join(' '));
     const now = new Date().toISOString();
+    const scheduled = input.publicationMode === 'scheduled';
     return this.data.communityProjects.upsert({
-      ...input, id: existing?.id ?? crypto.randomUUID(), publicationState: existing?.publicationState ?? 'draft',
+      ...input, id: existing?.id ?? crypto.randomUUID(), publicationState: scheduled ? 'draft' : (existing?.publicationState ?? 'draft'),
+      schedulingState: scheduled ? 'pending' : 'manual', isPublic: scheduled ? false : existing?.publicationState === 'published',
       createdAt: existing?.createdAt ?? now, updatedAt: now, publishedAt: existing?.publishedAt,
-      archivedAt: existing?.archivedAt
+      archivedAt: existing?.archivedAt, scheduleStateChangedAt: now,
+      scheduleStateChangeReason: scheduled ? 'schedule_configured' : 'manual_publication_selected'
     }, this.adminToken());
   }
 
   setPublication(project: CommunityProjectDocument, publicationState: CommunityProjectPublicationState): Promise<CommunityProjectDocument> {
     const now = new Date().toISOString();
-    return this.data.communityProjects.upsert({ ...project, publicationState, updatedAt: now,
+    return this.data.communityProjects.upsert({ ...project, publicationState, publicationMode: 'manual', schedulingState: 'manual',
+      isPublic: publicationState === 'published', visibleFrom: undefined, visibleUntil: undefined, updatedAt: now,
+      scheduleStateChangedAt: now, scheduleStateChangeReason: `manual_${publicationState}`,
       ...(publicationState === 'published' && !project.publishedAt ? { publishedAt: now } : {}) }, this.adminToken());
   }
 
   setStatus(project: CommunityProjectDocument, status: CommunityProjectStatus): Promise<CommunityProjectDocument> {
     const now = new Date().toISOString();
     return this.data.communityProjects.upsert({ ...project, status, updatedAt: now,
-      ...(status === 'archived' ? { archivedAt: now, publicationState: 'draft' as const } : {}) }, this.adminToken());
+      ...(status === 'archived' ? { archivedAt: now, publicationState: 'draft' as const, isPublic: false } : {}) }, this.adminToken());
   }
 
   setFeatured(project: CommunityProjectDocument, featured: boolean): Promise<CommunityProjectDocument> {

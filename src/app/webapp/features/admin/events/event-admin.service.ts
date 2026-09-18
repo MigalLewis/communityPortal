@@ -18,13 +18,17 @@ export class EventAdminService {
     if (duplicate) errors.push('Slug is already in use.');
     if (errors.length) throw new Error(errors.join(' '));
     const now = new Date().toISOString();
-    return this.data.events.upsert({ ...input, id: existing?.id ?? crypto.randomUUID(), status: existing?.status ?? 'draft',
-      createdAt: existing?.createdAt ?? now, updatedAt: now, publishedAt: existing?.publishedAt, archivedAt: existing?.archivedAt }, this.adminToken());
+    const scheduled = input.publicationMode === 'scheduled';
+    return this.data.events.upsert({ ...input, id: existing?.id ?? crypto.randomUUID(), status: scheduled ? 'draft' : (existing?.status ?? 'draft'),
+      schedulingState: scheduled ? 'pending' : 'manual', isPublic: scheduled ? false : existing?.status === 'published',
+      createdAt: existing?.createdAt ?? now, updatedAt: now, publishedAt: existing?.publishedAt, archivedAt: existing?.archivedAt,
+      scheduleStateChangedAt: now, scheduleStateChangeReason: scheduled ? 'schedule_configured' : 'manual_publication_selected' }, this.adminToken());
   }
 
   async setStatus(event: EventDocument, status: EventPublicationStatus): Promise<EventDocument> {
     const now = new Date().toISOString();
-    return this.data.events.upsert({ ...event, status, updatedAt: now,
+    return this.data.events.upsert({ ...event, status, publicationMode: 'manual', schedulingState: 'manual', isPublic: status === 'published',
+      visibleFrom: undefined, visibleUntil: undefined, updatedAt: now, scheduleStateChangedAt: now, scheduleStateChangeReason: `manual_${status}`,
       ...(status === 'published' && !event.publishedAt ? { publishedAt: now } : {}),
       ...(status === 'archived' ? { archivedAt: now } : {}) }, this.adminToken());
   }
